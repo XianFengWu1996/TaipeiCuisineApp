@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "369761240989",
+    "firebase_url": "https://foodorder-43af7.firebaseio.com",
+    "project_id": "foodorder-43af7",
+    "storage_bucket": "foodorder-43af7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369761240989:android:6cce6249435f741a6fd174",
+        "android_client_info": {
+          "package_name": "xianwu.food_ordering_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "369761240989-qk8nb2723njc5hjbeobpcs0m2fsdevk0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJoxRncDLGHe1YC7FH3XQJhRDUhLCn9wk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "369761240989-qk8nb2723njc5hjbeobpcs0m2fsdevk0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

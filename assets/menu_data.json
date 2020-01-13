@@ -1,0 +1,68 @@
+
+[
+  {
+    "category" : "seafood",
+    "dishes" : [
+      {
+        "id": "1",
+        "food_id" : "C1",
+        "food_name": "Duck w. Beer Sauce",
+        "food_name_chinese": "海鲜",
+        "price": "18.95",
+        "spicy": "true"
+      },
+      {
+        "id": "2",
+        "food_id" : "C2",
+        "food_name": "Deep-fried Chicken w. Peppers, Peanuts, and Scallions",
+        "food_name_chinese": "黄飞鸿鸡丁",
+        "price": "19.95",
+        "spicy": "true"
+      },
+      {
+        "id": "3",
+        "food_id" : "C3",
+        "food_name": "Three Cup Chicken",
+        "food_name_chinese": "三杯鸡",
+        "price": "19.95",
+        "spicy": "true"
+      },
+      {
+        "id": "4",
+        "food_id" : "C4",
+        "food_name": "Shanghai Style Chicken (Half)",
+        "food_name_chinese": "上海三黄鸡",
+        "price": "17.95",
+        "spicy": "false"
+      }
+    ]
+  },
+
+  {
+    "category" : "chicken",
+    "dishes" : [
+       {
+        "id": "2",
+        "food_id" : "C2",
+        "food_name": "Deep-fried Chicken w. Peppers, Peanuts, and Scallions",
+        "food_name_chinese": "黄飞鸿鸡丁",
+        "price": "19.95",
+        "spicy": "true"
+      }
+    ]
+  },
+
+  {
+    "category" : "beef",
+    "dishes" : [
+      {
+        "id": "2",
+        "food_id" : "C2",
+        "food_name": "Deep-fried Chicken w. Peppers, Peanuts, and Scallions",
+        "food_name_chinese": "牛肉",
+        "price": "19.95",
+        "spicy": "true"
+      }
+    ]
+  }
+]
