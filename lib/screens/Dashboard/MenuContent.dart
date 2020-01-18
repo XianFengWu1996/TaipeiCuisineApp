@@ -1,5 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:food_ordering_app/screens/Menu/MenuData.dart';
+import 'package:food_ordering_app/screens/Menu/MenuItem.dart';
 
 class MenuContent extends StatefulWidget {
   @override
@@ -7,46 +8,96 @@ class MenuContent extends StatefulWidget {
 }
 
 class _MenuContentState extends State<MenuContent> {
-  List category = [];
-  List dishes = [];
+
+  List<String> category = [];
+  List<String> chineseCategory = [];
+  bool chinese = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getMenu();
+
+    getCategory();
+    getChineseCategory();
   }
 
-  getMenu() async {
-    String data = await DefaultAssetBundle.of(context)
-        .loadString("assets/menu_data.json");
-    final json = await jsonDecode(data);
-
-    for (int i = 0; i < json.length; i++) {
+  void getCategory() async {
+    var data = await MenuData().retrieveCategory();
+    for(var item in data[0]['category']){
       setState(() {
-        category.add(json[i]['category']);
-        dishes.add(json[i]['dishes']);
+        category.add(item);
+      });
+    }
+  }
+
+  void getChineseCategory() async {
+    var data = await MenuData().retrieveChineseCategory();
+    for(var item in data[0]['category_chinese']){
+      setState(() {
+        chineseCategory.add(item);
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: category.length,
-      itemBuilder: (BuildContext context, int index) {
-        return FlatButton(
-          onPressed: () {
-            Navigator.pushNamed(context, category[index]);
-          },
-          child: ListTile(
-            title: (Text(
-              '${category[index]}',
-              style: TextStyle(color: Colors.black),
-            )),
+    return Column(
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('EN'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Transform.scale(
+                scale: 1.5,
+                child: Switch(
+                  value: chinese,
+                  onChanged: (value){
+                    setState(() {
+                      chinese = value;
+                    });
+                  },
+                  inactiveThumbImage: AssetImage('images/united-states.png'),
+                  activeThumbImage: AssetImage('images/china.png'),
+                ),
+              ),
+            ),
+            Text('中'),
+          ],
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: category.length,
+              itemBuilder: (context, index){
+                return FlatButton(
+                  onPressed: (){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MenuItem(
+                              index: index,
+                              title: chinese ? chineseCategory[index] : category[index],
+                              displayChinese: chinese
+                            ),
+                        ),
+                    );
+                  },
+                  child: Card(
+                    child: ListTile(
+                      trailing: Icon(Icons.arrow_forward_ios),
+                      title: Text(
+                        chinese ? '${chineseCategory[index]}' : '${category[index]}'
+                      ),),
+                  ),
+                );
+              }
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 }
+
+//"Icon made by Freepik from www.flaticon.com"

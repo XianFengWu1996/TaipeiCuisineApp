@@ -19,7 +19,6 @@ class AccountContent extends StatelessWidget {
             title: 'History', icon: Icons.history, onPressed: () {}),
         AccountItems(
             title: 'Deal', icon: Icons.attach_money, onPressed: () {}),
-
         RectangularLogin(
           onPressed: () {
             _auth.signOut();

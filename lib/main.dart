@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:food_ordering_app/screens/Auth/Login.dart';
 import 'package:food_ordering_app/screens/Auth/Signup.dart';
 import 'package:food_ordering_app/screens/Dashboard/Home.dart';
-import 'package:food_ordering_app/screens/menu/chicken.dart';
 import 'package:food_ordering_app/components/FormComponents/PhoneVerification.dart';
 import 'package:provider/provider.dart';
 
@@ -25,11 +24,14 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: Login.id,
         routes: {
+          // Dashboard page after users are verified
+          Home.id : (context) => Home(),
+
+          // Authenication pages
           Login.id : (context) => Login(),
           Signup.id : (context) => Signup(),
-          Home.id : (context) => Home(),
           PhoneVerification.id : (context) => PhoneVerification(),
-          Chicken.id : (context) => Chicken(),
+
         },
       ),
     );

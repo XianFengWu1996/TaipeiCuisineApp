@@ -9,7 +9,6 @@ import 'package:food_ordering_app/components/FormComponents/ShowToggle.dart';
 import 'package:food_ordering_app/components/FormComponents/TextWithLink.dart';
 import 'package:food_ordering_app/screens/Auth/Signup.dart';
 import 'package:food_ordering_app/screens/Dashboard/Home.dart';
-import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
   static const id = 'login_screen';
@@ -26,9 +25,6 @@ class _LoginState extends State<Login> {
   String email;
   String password;
   String resetEmail;
-
-
-
 
   @override
   Widget build(BuildContext context) {
