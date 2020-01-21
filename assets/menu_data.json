@@ -118,9 +118,9 @@
   {
     "dishes" : [
        {
-        "id": "2",
-        "food_id" : "C2",
-        "food_name": "Deep-fried Chicken w. Peppers, Peanuts, and Scallions",
+        "id": "5",
+        "food_id" : "S1",
+        "food_name": "Shrimp in Garlic sauce",
         "food_name_chinese": "海鲜",
         "price": "19.95",
         "spicy": "true"
@@ -131,9 +131,9 @@
   {
     "dishes" : [
       {
-        "id": "2",
-        "food_id" : "C2",
-        "food_name": "Deep-fried Chicken w. Peppers, Peanuts, and Scallions",
+        "id": "8",
+        "food_id" : "Y1",
+        "food_name": "Beef in black pepper sauce",
         "food_name_chinese": "牛肉",
         "price": "19.95",
         "spicy": "true"

@@ -5,7 +5,7 @@ import 'package:food_ordering_app/components/Buttons/RoundIconLogin.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:food_ordering_app/screens/Dashboard/Home.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:food_ordering_app/components/FormComponents/PhoneVerification.dart';
+import 'package:food_ordering_app/screens/Auth/OtherSigninMethods/PhoneVerification.dart';
 
 class SocialMediaLogin extends StatefulWidget {
   @override
@@ -28,16 +28,20 @@ class _SocialMediaLoginState extends State<SocialMediaLogin> {
 
             switch (result.status) {
               case FacebookLoginStatus.loggedIn:
-                final token = result.accessToken.token;
-                print('token' + token);
-                AuthCredential credential =
-                    FacebookAuthProvider.getCredential(accessToken: token);
+               try{
+                 final token = result.accessToken.token;
+                 AuthCredential credential =
+                 FacebookAuthProvider.getCredential(accessToken: token);
 
-                FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
-                print(user);
+                 FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
 
-                Navigator.pushReplacementNamed(context, Home.id);
+                 if(user != null){
+                   Navigator.pushReplacementNamed(context, Home.id);
+                 }
 
+               } catch(e){
+                 print(e);
+               }
                 break;
               case FacebookLoginStatus.cancelledByUser:
                 print('cancelled');
@@ -63,7 +67,6 @@ class _SocialMediaLoginState extends State<SocialMediaLogin> {
                 accessToken: googleAuth.accessToken);
 
             user = (await _auth.signInWithCredential(credential)).user;
-            print(user);
             Navigator.pushReplacementNamed(context, Home.id);
           },
         ),
@@ -78,62 +81,3 @@ class _SocialMediaLoginState extends State<SocialMediaLogin> {
     );
   }
 }
-
-//class PhoneVerification extends StatefulWidget {
-//  @override
-//  _PhoneVerificationState createState() => _PhoneVerificationState();
-//}
-//
-//class _PhoneVerificationState extends State<PhoneVerification> {
-//  String phoneNumber;
-//  bool verification = false;
-//  final _formKey = GlobalKey<FormState>();
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    return verification
-//        ?  Column(
-//          children: <Widget>[
-//
-//          ],
-//        )
-//        : PhoneContent(
-//          formkey: _formKey,
-//          onChanged: (value){
-//            phoneNumber = value;
-//            },
-//          onPressed: (){
-//            setState(() {
-//              _formKey.currentState.validate();
-//              verification = true;
-//              print(phoneNumber);
-//            });
-//          },
-//        );
-//  }
-//}
-//
-//class PhoneContent extends StatelessWidget {
-//  final Function onChanged;
-//  final Function onPressed;
-//  final GlobalKey formkey;
-//
-//  PhoneContent({this.onChanged, this.onPressed, this.formkey});
-//
-//  @override
-//  Widget build(BuildContext context) {
-//
-//    return Column(
-//      children: <Widget>[
-//        Form(
-//          key: formkey,
-//          child: TextFormField(
-//
-//          ),
-//        ),
-//
-//      ],
-//    );
-//  }
-//}
-//

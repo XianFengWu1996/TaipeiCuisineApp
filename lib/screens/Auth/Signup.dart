@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:food_ordering_app/components/Buttons/RectangularLogin.dart';
-import 'package:food_ordering_app/components/FormComponents/DividerWithText.dart';
-import 'package:food_ordering_app/components/FormComponents/EmailInputField.dart';
-import 'package:food_ordering_app/components/FormComponents/PasswordInputField.dart';
-import 'package:food_ordering_app/components/FormComponents/ShowToggle.dart';
-import 'package:food_ordering_app/components/FormComponents/SocialMediaLogin.dart';
-import 'package:food_ordering_app/components/FormComponents/TextWithLink.dart';
+import 'package:food_ordering_app/screens/Auth/EmailPassword/Validation.dart';
+import 'package:food_ordering_app/components/FormComponents/StylingComponents/DividerWithText.dart';
+import 'package:food_ordering_app/screens/Auth/EmailPassword/TextFieldInput.dart';
+import 'package:food_ordering_app/screens/Auth/OtherSigninMethods/SocialMediaLogin.dart';
+import 'package:food_ordering_app/components/FormComponents/StylingComponents/TextWithLink.dart';
 import 'package:food_ordering_app/screens/Auth/Login.dart';
 
 class Signup extends StatefulWidget {
@@ -24,9 +24,11 @@ class _SignupState extends State<Signup> {
   String email;
   String password;
   String passwordConfirmation;
+  bool match;
 
   @override
   Widget build(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
     return Scaffold(
       body: SafeArea(
         //TODO add error handling for sign up
@@ -45,57 +47,73 @@ class _SignupState extends State<Signup> {
               SizedBox(
                 height: 20,
               ),
-              Column(
-                children: <Widget>[],
-              ),
-              EmailInput(
-                onChanged: (value) {
-                  email = value;
-                },
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              PasswordInput(
-                showPassword: showPassword,
-                onChanged: (value) {
-                  password = value;
-                },
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              PasswordInput(
-                showPassword: showPassword,
-                onChanged: (value){
-                  passwordConfirmation = value;
-                },
-                labelText: "Confirm your Password",
-              ),
-              ShowToggle(
-                  showText: showPassword,
-                  onChanged: (value) {
-                    setState(() {
-                      showPassword = value;
-                    });
-                  }),
-              RectangularLogin(
-                onPressed: () async {
-                  if(password == passwordConfirmation){
-                    try{
-                      AuthResult result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+              Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    TextFieldInput(
+                      onChanged: (value) {
+                        email = value;
+                      },
+                      labelText: 'Enter email',
+                      isEmail: true,
+                      validator: Validation.emailValidation,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    TextFieldInput(
+                      onChanged: (value) {
+                        password = value;
+                      },
+                      labelText: "Enter password",
+                      isEmail: false,
+                      validator: Validation.passwordValidation,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    TextFieldInput(
+                      onChanged: (value) {
+                        passwordConfirmation = value;
+                      },
+                      labelText: "Confirm password",
+                      isEmail: false,
+                      validator: Validation.passwordValidation,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    RectangularLogin(
+                      onPressed: () async {
+                        if (_formKey.currentState.validate()) {
+                          if (password == passwordConfirmation) {
+                            try {
+                              (await _auth.createUserWithEmailAndPassword(
+                                      email: email, password: password)).user.sendEmailVerification();
 
-                      await result.user.sendEmailVerification();
-                      Navigator.pushNamed(context, Login.id);
-                    }catch(e){
-                      print(e);
-                    }
-                  } else {
-                    print('The password does not match');
-                  }
-                },
-                color: Colors.red[400],
-                title: 'Sign Up',
+                              Navigator.pushNamed(context, Login.id);
+                            } catch (e) {
+                              print(e);
+                            }
+                          } else {
+                              Flushbar(
+                              title: "Something went wrong...",
+                              message: 'Password does not match',
+                              duration: Duration(seconds: 3),
+                              backgroundColor: Colors.red[400],
+                              flushbarStyle: FlushbarStyle.GROUNDED,
+                              flushbarPosition: FlushbarPosition.TOP,
+                              )..show(context);
+                          }
+                        }
+                      },
+                      color: Colors.red[400],
+                      title: 'Sign Up',
+                    ),
+                  ],
+                ),
               ),
               SizedBox(
                 height: 10,

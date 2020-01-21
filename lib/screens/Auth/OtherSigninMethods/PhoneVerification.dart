@@ -146,6 +146,7 @@ class PhoneContent extends StatelessWidget {
               if (value.length < 10) {
                 return "Enter a valid phone number";
               }
+              return null;
             },
           ),
         ),

@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 
-class PasswordInput extends StatelessWidget {
+class TextFieldInput extends StatelessWidget {
+  final bool isEmail;
 
-  final bool showPassword;
+  final Function validator;
   final Function onChanged;
   final String labelText;
 
-  PasswordInput({@required this.showPassword, @required this.onChanged, this.labelText = "Enter Password"});
+  TextFieldInput({
+    @required this.onChanged,
+    @required this.labelText,
+    @required this.isEmail,
+    this.validator,
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      obscureText: !showPassword,
+      validator: validator,
+      obscureText: isEmail ? false : true,
       decoration: InputDecoration(
         labelText: labelText,
         fillColor: Colors.white,
@@ -21,6 +28,7 @@ class PasswordInput extends StatelessWidget {
         ),
       ),
       onChanged: onChanged,
+      keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/screens/Menu/MenuData.dart';
+import 'package:food_ordering_app/Database/Database.dart';
+import 'package:food_ordering_app/components/Cart/CartItem.dart';
+import 'package:food_ordering_app/components//Menu/MenuData.dart';
 
 class MenuItem extends StatefulWidget {
   final int index;
@@ -44,17 +46,27 @@ class _MenuItemState extends State<MenuItem> {
             child: ListView.builder(
                 itemCount: menuItem.length,
                 itemBuilder: (context, index){
+                  var item = menuItem[index];
                   return Column(
                     children: <Widget>[
                       Card(
                         child: ListTile(
-                          leading: Text('${menuItem[index]['food_id']}'),
-                          title: Text(widget.displayChinese ? '${menuItem[index]['food_name_chinese']}' : '${menuItem[index]['food_name']}'),
-                          subtitle: Text('\$ ${menuItem[index]['price']}'),
+                          leading: Text('${item['food_id']}'),
+                          title: Text(widget.displayChinese ? '${item['food_name_chinese']}' : '${item['food_name']}'),
+                          subtitle: Text('\$ ${item['price']}'),
                           trailing: FlatButton(
                               child: Icon(Icons.add, size: 30,),
-                              onPressed:(){
-                                print('add to cart');
+                              onPressed:() {
+                                DatabaseProvider.db.insertData(
+                                  CartItem(
+                                    id: int.parse(item['id']),
+                                    foodId: item['food_id'] ,
+                                    foodName: item['food_name'],
+                                    foodChineseName: item['food_name_chinese'],
+                                    price: double.parse(item['price']) ,
+                                    quantity: 1
+                                  ),
+                                );
                               },
                           ),
                         ),

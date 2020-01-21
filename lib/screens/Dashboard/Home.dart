@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/screens/Dashboard/AccountContent.dart';
-import 'package:food_ordering_app/screens/Dashboard/CartContent.dart';
-import 'package:food_ordering_app/screens/Dashboard/HomeContent.dart';
-import 'package:food_ordering_app/screens/Dashboard/MenuContent.dart';
+import 'package:food_ordering_app/screens/Dashboard/ScreenContents/AccountContent.dart';
+import 'package:food_ordering_app/screens/Dashboard/ScreenContents/CartContent.dart';
+import 'package:food_ordering_app/screens/Dashboard/ScreenContents/HomeContent.dart';
+import 'package:food_ordering_app/screens/Dashboard/ScreenContents/MenuContent.dart';
 
 class Home extends StatefulWidget {
   static const id = 'home_screen';
