@@ -37,16 +37,6 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    ProgressDialog pr = ProgressDialog(
-      context,
-      type: ProgressDialogType.Normal,
-      isDismissible: true,
-    );
-    pr.style(
-      message: 'Logging in...',
-      elevation: 10.0,
-    );
-
     final _formKey = GlobalKey<FormState>();
 
     return Scaffold(

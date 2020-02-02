@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:food_ordering_app/components//Menu/MenuData.dart';
-import 'package:food_ordering_app/components//Menu/MenuItem.dart';
+import 'package:food_ordering_app/components/Menu/MenuItems.dart';
 
 class MenuContent extends StatefulWidget {
   @override
@@ -76,7 +76,7 @@ class _MenuContentState extends State<MenuContent> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => MenuItem(
+                            builder: (context) => MenuItems(
                               index: index,
                               title: chinese ? chineseCategory[index] : category[index],
                               displayChinese: chinese

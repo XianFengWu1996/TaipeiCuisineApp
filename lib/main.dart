@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:food_ordering_app/BloC/AuthBloc.dart';
+import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:food_ordering_app/screens/Auth/Login.dart';
 import 'package:food_ordering_app/screens/Auth/Signup.dart';
 import 'package:food_ordering_app/screens/Dashboard/Home.dart';
@@ -13,6 +15,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => CartBloc()),
+        ChangeNotifierProvider(create: (context)  => AuthBloc()),
         StreamProvider.value(value: (FirebaseAuth.instance.onAuthStateChanged)),
       ],
       child: MaterialApp(
