@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/InputField.dart';
-import 'package:food_ordering_app/screens/Auth/EmailPassword/Validation.dart';
+import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
+import 'package:food_ordering_app/components/InputField.dart';
+import 'package:food_ordering_app/components/Validation.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:food_ordering_app/BloC/AuthBloc.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
@@ -34,9 +36,10 @@ class _PaymentFormState extends State<PaymentForm> {
 
   @override
   Widget build(BuildContext context) {
-    var cartBloc = Provider.of<CartBloc>(context);
-    var authBloc = Provider.of<AuthBloc>(context);
-    var paymentBloc = Provider.of<PaymentBloc>(context);
+    CartBloc cartBloc = Provider.of<CartBloc>(context);
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
+    AuthBloc authBloc = Provider.of<AuthBloc>(context);
+    PaymentBloc paymentBloc = Provider.of<PaymentBloc>(context);
 
     final _formKey = GlobalKey<FormState>();
     return Scaffold(
@@ -44,100 +47,112 @@ class _PaymentFormState extends State<PaymentForm> {
           title: Text('Billing Information'),
         ),
         resizeToAvoidBottomPadding: false,
-        body: Form(
-          key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 20,
-            ),
-            child: ListView(
-              shrinkWrap: true,
-              children: <Widget>[
-                Input(
-                  label: 'First Name',
-                  controller: first,
-                  useNumKeyboard: false,
-                  validate: Validation.firstNameValidation,
+        body: ListView(
+          children: <Widget>[
+            Form(
+              key: _formKey,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 20,
                 ),
-                Input(
-                  label: 'Last Name',
-                  controller: last,
-                  useNumKeyboard: false,
-                  validate: Validation.lastNameValidation,
-                ),
-                Input(
-                  label: 'Phone Number',
-                  useNumKeyboard: true,
-                  controller: phone,
-                  validate: Validation.phoneValidation,
-                  inputFormatter: [
-                    WhitelistingTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(10),
-                  ],
-                ),
-                cartBloc.isDelivery
-                    ? CheckboxListTile(
-                  title: Text('Same as Delivery Address'),
-                  value: paymentBloc.sameAsDelivery,
-                  onChanged: (bool value) {
-                    paymentBloc.showAddressInput(value);
-                  },
-                )
-                    : Container(),
-                !paymentBloc.sameAsDelivery
-                    ? Column(
+                child: ListView(
+                  shrinkWrap: true,
                   children: <Widget>[
                     Input(
-                      label: 'Street',
+                      label: 'First Name',
+                      controller: first,
                       useNumKeyboard: false,
-                      controller: street,
-                      validate: !paymentBloc.sameAsDelivery ? Validation.streetValidation : null,
+                      validate: Validation.firstNameValidation,
                     ),
                     Input(
-                      label: 'City',
+                      label: 'Last Name',
+                      controller: last,
                       useNumKeyboard: false,
-                      controller: city,
-                      validate: !paymentBloc.sameAsDelivery ? Validation.cityValidation : null,
+                      validate: Validation.lastNameValidation,
                     ),
                     Input(
-                      label: 'Zip Code',
+                      label: 'Phone Number',
                       useNumKeyboard: true,
-                      controller: zip,
-                      validate: !paymentBloc.sameAsDelivery ? Validation.zipValidation : null,
+                      controller: phone,
+                      validate: Validation.phoneValidation,
+                      inputFormatter: [
+                        WhitelistingTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
+                    ),
+                    cartBloc.isDelivery
+                        ? CheckboxListTile(
+                            title: Text('Same as Delivery Address'),
+                            value: paymentBloc.sameAsDelivery,
+                            onChanged: (bool value) {
+                              paymentBloc.showAddressInput(value);
+                            },
+                          )
+                        : Container(),
+                    !paymentBloc.sameAsDelivery
+                        ? Column(
+                            children: <Widget>[
+                              Input(
+                                label: 'Zip Code',
+                                useNumKeyboard: true,
+                                controller: zip,
+                                validate: !paymentBloc.sameAsDelivery
+                                    ? Validation.zipValidation
+                                    : null,
+                              ),
+                              Input(
+                                label: 'Street',
+                                useNumKeyboard: false,
+                                controller: street,
+                                validate: !paymentBloc.sameAsDelivery
+                                    ? Validation.streetValidation
+                                    : null,
+                              ),
+                              Input(
+                                label: 'City',
+                                useNumKeyboard: false,
+                                controller: city,
+                                validate: !paymentBloc.sameAsDelivery
+                                    ? Validation.cityValidation
+                                    : null,
+                              ),
+
+                            ],
+                          )
+                        : Container(),
+                    CheckboxListTile(
+                        title: Text('Save card to wallet'),
+                        value: paymentBloc.saveCard,
+                        onChanged: (value) {
+                          paymentBloc.checkSaveCard(value);
+                        }),
+                    FlatButton(
+                      onPressed: () {
+                        if (_formKey.currentState.validate()) {
+                          paymentBloc.saveBillingInfo(
+                            first: first.text,
+                            last: last.text,
+                            phone: phone.text,
+                            email: authBloc.user.email,
+                            street: street.text == ''
+                                ? cartBloc.street
+                                : street.text,
+                            city: city.text == '' ? cartBloc.city : city.text,
+                            zip: zip.text == '' ? cartBloc.zipCode : zip.text,
+                          );
+
+                          paymentBloc.payment(cartBloc, functionalBloc, double.parse(cartBloc.total));
+                        }
+                      },
+                      child: Text('Proceed to Square Payment'),
+                      color: Colors.red[400],
                     ),
                   ],
-                )
-                    : Container(),
-                CheckboxListTile(
-                    title: Text('Save card to wallet'),
-                    value: paymentBloc.saveCard,
-                    onChanged: (value) {
-                      paymentBloc.checkSaveCard(value);
-                    }),
-                FlatButton(
-                  onPressed: () {
-                    if(_formKey.currentState.validate()){
-
-                      paymentBloc.saveBillingInfo(
-                        first: first.text,
-                        last: last.text,
-                        phone: phone.text,
-                        email: authBloc.user.email,
-                        street: street.text == '' ? cartBloc.street : street.text,
-                        city: city.text == '' ? cartBloc.city : city.text,
-                        zip: zip.text == '' ? cartBloc.zipCode : zip.text,
-                      );
-
-                      paymentBloc.payment(cartBloc, double.parse(cartBloc.total));
-                    }
-                  },
-                  child: Text('Proceed to Square Payment'),
-                  color: Colors.red[400],
                 ),
-              ],
-            ),
-          ),
+              ),
+            )
+          ],
         ));
   }
 }

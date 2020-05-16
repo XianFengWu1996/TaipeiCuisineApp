@@ -3,7 +3,7 @@ import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/screens/Account/AccountContent.dart';
 import 'package:food_ordering_app/screens/Cart/Content/CartContent.dart';
 import 'package:food_ordering_app/screens/Order/MainContent/OrderContent.dart';
-import 'package:food_ordering_app/screens/Dashboard/ScreenContents/MenuContent.dart';
+import 'package:food_ordering_app/screens/Menu/MenuContent.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatelessWidget {

@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:food_ordering_app/BloC/AuthBloc.dart';
-import 'package:food_ordering_app/components/CheckoutComponents/Parts/CheckoutDivider.dart';
-import 'package:food_ordering_app/screens/Reward/components/RewardCard.dart';
-import 'package:intl/intl.dart';
+import 'package:food_ordering_app/components/Divider.dart';
+import 'package:food_ordering_app/screens/Account/Reward/components/RewardCard.dart';
 import 'package:provider/provider.dart';
 
 class Reward extends StatelessWidget {
@@ -36,7 +34,7 @@ class Reward extends StatelessWidget {
                               Text('${data['point']}',
                                 style: TextStyle(fontSize: 50, color: Colors.red[400]),
                               ),
-                              CheckoutDivider(),
+                              LineDivider(),
                           Container(
                             height: 570,
                             child: ListView.builder(

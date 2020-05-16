@@ -7,13 +7,14 @@ class Button extends StatelessWidget {
   final Color textColor;
   final EdgeInsetsGeometry padding;
   final String title;
+  final double textSize;
 
-  Button({this.color, @required this.onPressed,this.textColor, this.padding, this.title});
+  Button({this.color, @required this.onPressed,this.textColor, this.padding, this.title, this.textSize});
 
   @override
   Widget build(BuildContext context) {
     return FlatButton(
-      child: Text('$title', style: TextStyle(color: textColor),),
+      child: Text('$title', style: TextStyle(color: textColor, fontSize: textSize),),
       onPressed: onPressed,
       color: color,
       padding: padding,

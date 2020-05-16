@@ -6,7 +6,8 @@ import 'package:food_ordering_app/components/Buttons/Rectangular.dart';
 import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/CheckoutSummary.dart';
 import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/OrderList.dart';
 import 'package:food_ordering_app/components/Divider.dart';
-import 'package:food_ordering_app/screens/Dashboard/Home.dart';
+import 'package:food_ordering_app/screens/Home.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class Confirmation extends StatelessWidget {
@@ -55,7 +56,7 @@ class Confirmation extends StatelessWidget {
                         funcBloc.changeTab(2);
                         paymentBloc.clearAfterCheckout();
                         cartBloc.clearValueUponCheckout();
-                        Navigator.popUntil(context, ModalRoute.withName(Home.id));
+                        Get.offAll(Home());
                       },
                       title: 'Return to Home',
                       color: Colors.red[400],

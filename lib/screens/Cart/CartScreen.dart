@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/screens/Dashboard/Home.dart';
-import 'package:food_ordering_app/screens/Dashboard/ScreenContents/CartContent.dart';
+import 'package:food_ordering_app/screens/Home.dart';
+import 'package:food_ordering_app/screens/Cart/Content/CartContent.dart';
 
 class CartScreen extends StatelessWidget {
   static const id = 'cart_screen';

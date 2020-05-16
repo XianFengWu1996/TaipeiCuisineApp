@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:food_ordering_app/BloC/AuthBloc.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/components/CheckoutComponents/Parts/Chips.dart';
+import 'package:food_ordering_app/components/Chips.dart';
 import 'package:provider/provider.dart';
 
 class CheckoutChoice extends StatelessWidget {
@@ -19,35 +19,32 @@ class CheckoutChoice extends StatelessWidget {
           icon: FontAwesome.shopping_bag,
           choice: !cartBloc.isDelivery,
           onSelected: (value) {
-            if(value){
+            if (value) {
               cartBloc.checkChoice('pickup');
             }
-
           },
         ),
         CheckoutChip(
-          title: 'Delivery',
-          icon: FontAwesome.car,
-          choice: cartBloc.isDelivery,
-          onSelected: (value) {
-            if(double.parse(cartBloc.subtotal) >= 15){
-              if(value){
-                cartBloc.checkChoice('delivery');
+            title: 'Delivery',
+            icon: FontAwesome.car,
+            choice: cartBloc.isDelivery,
+            onSelected: (value) async {
+              if (double.parse(cartBloc.subtotal) >= 15) {
+                if (cartBloc.address == '') {
+                  await cartBloc.getAddress(authBloc.user.uid);
+                }
 
-                if(cartBloc.address == ''){
-                  cartBloc.getAddress(authBloc.user.uid);
+                if (value) {
+                  cartBloc.checkChoice('delivery');
+                } else {
+                  cartBloc.checkChoice('pickup');
                 }
               } else {
-                cartBloc.checkChoice('pickup');
-              }
-            } else {
-              Scaffold.of(context).showSnackBar(
+                Scaffold.of(context).showSnackBar(
                   SnackBar(content: Text('Minimum for delivery is \$15')),
-              );
-            }
-
-          },
-        ),
+                );
+              }
+            }),
       ],
     );
   }

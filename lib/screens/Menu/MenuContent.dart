@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/components//Menu/MenuData.dart';
-import 'package:food_ordering_app/components/Menu/MenuItems.dart';
+import 'package:food_ordering_app/screens/Menu/MenuData.dart';
+import 'package:food_ordering_app/screens/Menu/MenuItems.dart';
 
 class MenuContent extends StatefulWidget {
   @override

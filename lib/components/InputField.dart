@@ -11,7 +11,9 @@ class Input extends StatelessWidget {
     this.inputFormatter,
     this.useNumKeyboard = false,
     this.obscureText = false,
-    this.icon
+    this.icon,
+    this.autoFocus = false,
+    this.textCap  = TextCapitalization.words,
   });
 
   final String initialValue;
@@ -23,16 +25,19 @@ class Input extends StatelessWidget {
   final inputFormatter;
   final bool obscureText;
   final Widget icon;
+  final bool autoFocus;
+  final TextCapitalization textCap;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: TextFormField(
+        autofocus: autoFocus,
         validator: validate,
         initialValue: initialValue,
         controller: controller,
-        textCapitalization: useNumKeyboard ? TextCapitalization.none : TextCapitalization.words,
+        textCapitalization: textCap,
         enableSuggestions: false,
         decoration: InputDecoration(
           suffixIcon: icon,

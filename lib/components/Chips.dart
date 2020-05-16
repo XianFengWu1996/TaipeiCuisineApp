@@ -161,9 +161,9 @@ class CheckoutChip extends StatelessWidget {
 }
 
 // Chips to select type of payment
-class PaymentSelectionChip extends StatelessWidget {
+class SelectionChip extends StatelessWidget {
 
-  PaymentSelectionChip({
+  SelectionChip({
     @required this.title,
     this.icon,
     @required this.selected,

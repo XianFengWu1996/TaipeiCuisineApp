@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:food_ordering_app/BloC/AuthBloc.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/components/CheckoutComponents/Parts/InputField.dart';
-import 'package:food_ordering_app/components/CheckoutComponents/Parts/CheckoutComponents.dart';
-import 'package:food_ordering_app/screens/Auth/EmailPassword/Validation.dart';
+import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
+import 'package:food_ordering_app/components/InputField.dart';
+import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/CheckoutComponents.dart';
+import 'package:food_ordering_app/components/Validation.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 
 class AddressCard extends StatelessWidget {
@@ -60,80 +62,87 @@ class _AddressDetailsState extends State<AddressDetails> {
   final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
-    var cartBloc = Provider.of<CartBloc>(context);
-    var authBloc = Provider.of<AuthBloc>(context);
+    CartBloc cartBloc = Provider.of<CartBloc>(context);
+    AuthBloc authBloc = Provider.of<AuthBloc>(context);
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Address'),
       ),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: ListView(
-            children: <Widget>[
+      body: ModalProgressHUD(
+        inAsyncCall: functionalBloc.loading,
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: ListView(
+              children: <Widget>[
 
-              Input(
-                initialValue: widget.initStreet,
-                label: 'Street',
-                validate: Validation.streetValidation,
-                onSaved: (value){
-                  street = value;
-                },
-              ),
+                Input(
+                  initialValue: widget.initStreet,
+                  label: 'Street',
+                  validate: Validation.streetValidation,
+                  onSaved: (value){
+                    street = value;
+                  },
+                ),
 
-              Input(
-                initialValue: widget.initCity,
-                label: 'City',
-                validate: Validation.cityValidation,
-                onSaved: (value){
-                  city = value;
-                },
-              ),
+                Input(
+                  initialValue: widget.initCity,
+                  label: 'City',
+                  validate: Validation.cityValidation,
+                  onSaved: (value){
+                    city = value;
+                  },
+                ),
 
-              Input(
-                initialValue: widget.initZip,
-                label: 'Zip Code',
-                validate: Validation.zipValidation,
-                useNumKeyboard: true,
-                inputFormatter: [
-                  LengthLimitingTextInputFormatter(5),
-                ],
-                onSaved: (value){
-                  zipCode = value;
-                },
-              ),
+                Input(
+                  initialValue: widget.initZip,
+                  label: 'Zip Code',
+                  validate: Validation.zipValidation,
+                  useNumKeyboard: true,
+                  inputFormatter: [
+                    LengthLimitingTextInputFormatter(5),
+                  ],
+                  onSaved: (value){
+                    zipCode = value;
+                  },
+                ),
 
-              Input(
-                initialValue: widget.initApt,
-                label: 'Apt / Suite / Floor',
-                validate: null,
-                onSaved: (value){
-                  apt = value;
-                },
-              ),
+                Input(
+                  initialValue: widget.initApt,
+                  label: 'Apt / Suite / Floor',
+                  validate: null,
+                  onSaved: (value){
+                    apt = value;
+                  },
+                ),
 
-              Input(
-                initialValue: widget.initBusiness,
-                label: 'Business or building name',
-                validate: null,
-                onSaved: (value){
-                  businessName = value;
-                },
-              ),
+                Input(
+                  initialValue: widget.initBusiness,
+                  label: 'Business or building name',
+                  validate: null,
+                  onSaved: (value){
+                    businessName = value;
+                  },
+                ),
 
-              FlatButton(
-                onPressed: () {
-                  if (_formKey.currentState.validate()) {
-                    _formKey.currentState.save();
-                    cartBloc.saveAddress(authBloc.user.uid, street, city, zipCode, apt, businessName);
-                    Navigator.pop(context);
-                  }
-                },
-                child: cartBloc.address == '' ? Text('Save') : Text('Update'),
-                color: Colors.red[400],
-              )
-            ],
+                FlatButton(
+                  onPressed: () async {
+                    if (_formKey.currentState.validate()) {
+                      functionalBloc.toggleLoading();
+                      _formKey.currentState.save();
+                      await cartBloc.saveAddress(authBloc.user.uid, street, city, zipCode, apt, businessName);
+                      Navigator.pop(context);
+                      functionalBloc.toggleLoading();
+                    }
+                  },
+                  child: cartBloc.address == '' ? Text('Save') : Text('Update'),
+                  color: Colors.red[400],
+                )
+              ],
+            ),
           ),
         ),
       ),

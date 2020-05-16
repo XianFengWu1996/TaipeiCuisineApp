@@ -4,8 +4,8 @@ import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:food_ordering_app/Model/Product.dart';
 import 'package:provider/provider.dart';
 
-class CartItem extends StatelessWidget {
-  CartItem({this.index, this.item});
+class CartCard extends StatelessWidget {
+  CartCard({this.index, this.item});
 
   final Product item;
   final int index;

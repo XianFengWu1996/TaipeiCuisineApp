@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:food_ordering_app/components//Menu/MenuData.dart';
 import 'package:food_ordering_app/screens/Cart/CartScreen.dart';
+import 'package:food_ordering_app/screens/Menu/MenuData.dart';
 import 'package:provider/provider.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:food_ordering_app/Model/Product.dart';

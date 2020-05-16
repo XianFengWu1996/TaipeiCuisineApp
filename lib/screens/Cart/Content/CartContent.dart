@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:food_ordering_app/BloC/AuthBloc.dart';
 import 'package:food_ordering_app/BloC/PaymentBloc.dart';
-import 'package:food_ordering_app/Model/Product.dart';
-import 'package:food_ordering_app/screens/Dashboard/CheckoutScreen.dart';
+import 'package:food_ordering_app/screens/Cart/Content/components/CartCard.dart';
+import 'package:food_ordering_app/screens/Cart/Content/Checkout/CheckoutScreen.dart';
 import 'package:provider/provider.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -36,7 +36,7 @@ class CartContent extends StatelessWidget {
                           },
                         ),
                       ],
-                      child: CartItem(item: item, cart: bloc, index: index),
+                      child: CartCard(index: index, item: item,),
                     );
                   })
               : Center(child: Text('Empty Cart')),
@@ -83,37 +83,4 @@ class CartContent extends StatelessWidget {
   }
 }
 
-class CartItem extends StatelessWidget {
-  const CartItem({
-    Key key,
-    @required this.cart,
-    @required this.item,
-    @required this.index,
-  }) : super(key: key);
 
-  final Product item;
-  final cart;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        title: Text('${item.foodName}'),
-        subtitle: FlatButton(
-          child: Icon(FontAwesome.minus_circle),
-          onPressed: () {
-            cart.updateQuantity('remove', item.foodId);
-          },
-        ),
-        trailing: Text('${cart.items[index].count}'),
-        leading: FlatButton(
-          child: Icon(FontAwesome.plus_circle),
-          onPressed: () {
-            cart.updateQuantity('add', item.foodId);
-          },
-        ),
-      ),
-    );
-  }
-}

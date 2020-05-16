@@ -1,24 +1,17 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:food_ordering_app/BloC/AuthBloc.dart';
+import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/components/Buttons/RoundIconLogin.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:food_ordering_app/screens/Home.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-class SocialMediaLogin extends StatefulWidget {
-  @override
-  _SocialMediaLoginState createState() => _SocialMediaLoginState();
-}
-
-class _SocialMediaLoginState extends State<SocialMediaLogin> {
-  FirebaseAuth _auth = FirebaseAuth.instance;
-  FirebaseUser user;
+class SocialMediaLogin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var bloc = Provider.of<AuthBloc>(context);
+    AuthBloc authBloc = Provider.of<AuthBloc>(context);
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -26,34 +19,15 @@ class _SocialMediaLoginState extends State<SocialMediaLogin> {
           iconName: FontAwesome.facebook_f,
           iconColor: Color(0xff3b5998),
           onPressed: () async {
-            final facebookLogin = FacebookLogin();
-            final result = await facebookLogin.logIn(['email']);
+            await authBloc.loginWithFacebook(functionalBloc);
 
-            switch (result.status) {
-              case FacebookLoginStatus.loggedIn:
-               try{
-                 final token = result.accessToken.token;
-                 AuthCredential credential =
-                 FacebookAuthProvider.getCredential(accessToken: token);
-
-                 FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
-
-                 bloc.saveUser(user);
-
-                 if(user != null){
-                   Navigator.pushReplacementNamed(context, Home.id);
-                 }
-
-               } catch(e){
-                 print(e);
-               }
-                break;
-              case FacebookLoginStatus.cancelledByUser:
-                print('cancelled');
-                break;
-              case FacebookLoginStatus.error:
-                print('error');
-                break;
+            if(authBloc.errorMessage.isNotEmpty){
+              Get.snackbar('Warning',
+                authBloc.errorMessage[0],
+                backgroundColor: Colors.red[400],
+                colorText: Colors.white,
+              );
+              Future.delayed(Duration(seconds: 1), authBloc.resetErrorMessage());
             }
           },
         ),
@@ -61,20 +35,16 @@ class _SocialMediaLoginState extends State<SocialMediaLogin> {
           iconName: FontAwesome.google,
           iconColor: Color(0xffEA4335),
           onPressed: () async {
-            final GoogleSignIn _googleSignIn = GoogleSignIn();
+            await authBloc.loginWithGoogle();
 
-            final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-            final GoogleSignInAuthentication googleAuth =
-                await googleUser.authentication;
-
-            final AuthCredential credential = GoogleAuthProvider.getCredential(
-                idToken: googleAuth.idToken,
-                accessToken: googleAuth.accessToken);
-
-            user = (await _auth.signInWithCredential(credential)).user;
-
-            bloc.saveUser(user);
-            Navigator.pushReplacementNamed(context, Home.id);
+            if(authBloc.errorMessage.isNotEmpty){
+              Get.snackbar('Warning',
+                authBloc.errorMessage[0],
+                backgroundColor: Colors.red[400],
+                colorText: Colors.white,
+              );
+              Future.delayed(Duration(seconds: 2), authBloc.resetErrorMessage());
+            }
           },
         ),
 

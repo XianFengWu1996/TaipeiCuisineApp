@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:food_ordering_app/BloC/AuthBloc.dart';
 import 'package:food_ordering_app/BloC/OrderBloc.dart';
-import 'package:food_ordering_app/screens/Order/components/OrderCancelled.dart';
-import 'package:food_ordering_app/screens/Order/components/OrderCompleted.dart';
-import 'package:food_ordering_app/screens/Order/components/OrderInProgress.dart';
+import 'package:food_ordering_app/screens/Order/MainContent/Pages/OrderCancelled.dart';
+import 'package:food_ordering_app/screens/Order/MainContent/Pages/OrderCompleted.dart';
+import 'package:food_ordering_app/screens/Order/MainContent/Pages/OrderInProgress.dart';
 import 'package:food_ordering_app/screens/Order/components/ProgressChips.dart';
 import 'package:provider/provider.dart';
 

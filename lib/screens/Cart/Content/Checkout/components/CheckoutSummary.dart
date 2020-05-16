@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/components/CheckoutComponents/Parts/CheckoutComponents.dart';
+import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/CheckoutComponents.dart';
 import 'package:provider/provider.dart';
 
 class CheckoutSummary extends StatelessWidget {
