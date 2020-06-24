@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:food_ordering_app/BloC/AuthBloc.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/components/InputField.dart';
@@ -13,133 +12,124 @@ import 'package:provider/provider.dart';
 class AddressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var cartBloc = Provider.of<CartBloc>(context);
+    CartBloc cartBloc = Provider.of<CartBloc>(context);
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
+
     return cartBloc.isDelivery
         ? CheckoutCard(
-            title: 'Deliver to',
+            title: functionalBloc.selectedValue == 'english' ? 'Deliver to' : '送到：',
             icon: FontAwesome.home,
             action: FlatButton(
               onPressed: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => AddressDetails(
-                      initStreet: cartBloc.street,
-                      initCity: cartBloc.city,
-                      initZip: cartBloc.zipCode,
-                      initApt: cartBloc.apt,
-                      initBusiness: cartBloc.businessName,
-                    )));
+                    MaterialPageRoute(builder: (context) => AddressDetails()));
               },
-              child: cartBloc.address == '' ? Text('Add') : Text('Switch'),
+              child: cartBloc.address == ''
+                  ? Text('${functionalBloc.selectedValue == 'english' ? 'Add' : '添加'}')
+                  : Text('${functionalBloc.selectedValue == 'english' ? 'Switch' : '更改'}'),
             ),
             subtitle:
-                cartBloc.address == '' ? 'Add an address' : cartBloc.address,
+                cartBloc.address == ''
+                    ? functionalBloc.selectedValue == 'english'
+                    ? 'Add An Address'
+                    : '添加你的送餐地址'
+                    : cartBloc.address,
           )
         : Container();
   }
 }
 
 class AddressDetails extends StatefulWidget {
-  final initStreet;
-  final initCity;
-  final initZip;
-  final initBusiness;
-  final initApt;
-
-  AddressDetails({this.initStreet, this.initCity, this.initZip, this.initBusiness, this.initApt});
-
   @override
   _AddressDetailsState createState() => _AddressDetailsState();
 }
 
 class _AddressDetailsState extends State<AddressDetails> {
 
-  String street;
-  String city;
-  String zipCode;
-  String apt;
-  String businessName;
-
   final _formKey = GlobalKey<FormState>();
+
+  TextEditingController _street = TextEditingController();
+  TextEditingController _city= TextEditingController();
+  TextEditingController _zipCode = TextEditingController();
+  TextEditingController _apt = TextEditingController();
+  TextEditingController _businessName = TextEditingController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    _street.dispose();
+    _city.dispose();
+    _zipCode.dispose();
+    _apt.dispose();
+    _businessName.dispose();
+
+  }
+
   @override
   Widget build(BuildContext context) {
     CartBloc cartBloc = Provider.of<CartBloc>(context);
-    AuthBloc authBloc = Provider.of<AuthBloc>(context);
     FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Address'),
+        title: Text('${functionalBloc.selectedValue == 'english' ? 'Address' : '送餐地址'}'),
       ),
       body: ModalProgressHUD(
         inAsyncCall: functionalBloc.loading,
         child: Form(
           key: _formKey,
           child: Padding(
-            padding: EdgeInsets.all(20.0),
+            padding: EdgeInsets.only(top: 20, left: 20, right: 20),
             child: ListView(
               children: <Widget>[
 
                 Input(
-                  initialValue: widget.initStreet,
-                  label: 'Street',
+                  label: '${functionalBloc.selectedValue == 'english' ? 'Street' : '门牌号和街名'}',
                   validate: Validation.streetValidation,
-                  onSaved: (value){
-                    street = value;
-                  },
+                  controller: _street,
                 ),
 
                 Input(
-                  initialValue: widget.initCity,
-                  label: 'City',
+                  label: '${functionalBloc.selectedValue == 'english' ? 'City' : '城市'}',
                   validate: Validation.cityValidation,
-                  onSaved: (value){
-                    city = value;
-                  },
+                  controller: _city,
                 ),
 
                 Input(
-                  initialValue: widget.initZip,
-                  label: 'Zip Code',
+                  label: '${functionalBloc.selectedValue == 'english' ? 'Zip Code' : '邮政编码'}',
                   validate: Validation.zipValidation,
                   useNumKeyboard: true,
                   inputFormatter: [
                     LengthLimitingTextInputFormatter(5),
                   ],
-                  onSaved: (value){
-                    zipCode = value;
-                  },
+                  controller: _zipCode,
                 ),
 
                 Input(
-                  initialValue: widget.initApt,
-                  label: 'Apt / Suite / Floor',
+                  label: '${functionalBloc.selectedValue == 'english' ? 'Apt / Suite / Floor' : '公寓号 / 楼层'}',
                   validate: null,
-                  onSaved: (value){
-                    apt = value;
-                  },
+                  controller: _apt,
                 ),
 
                 Input(
-                  initialValue: widget.initBusiness,
-                  label: 'Business or building name',
+                  label: '${functionalBloc.selectedValue == 'english' ? 'Businesses or Building Name' : '公司地址 / 建筑名称'}',
                   validate: null,
-                  onSaved: (value){
-                    businessName = value;
-                  },
+                  controller: _businessName,
                 ),
 
                 FlatButton(
                   onPressed: () async {
                     if (_formKey.currentState.validate()) {
-                      functionalBloc.toggleLoading();
-                      _formKey.currentState.save();
-                      await cartBloc.saveAddress(authBloc.user.uid, street, city, zipCode, apt, businessName);
+                      functionalBloc.toggleLoading('start');
+                      await cartBloc.saveAddress(_street.text, _city.text, _zipCode.text, _apt.text, _businessName.text);
+                      _formKey.currentState.reset();
                       Navigator.pop(context);
-                      functionalBloc.toggleLoading();
+
+                      functionalBloc.toggleLoading('reset');
                     }
                   },
-                  child: cartBloc.address == '' ? Text('Save') : Text('Update'),
-                  color: Colors.red[400],
+                  child: Text('${functionalBloc.selectedValue == 'english' ? 'Save' : '保存'}'),
+                  color: Colors.red[400], textColor: Colors.white,
                 )
               ],
             ),

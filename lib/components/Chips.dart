@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
+import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/CheckoutComponents.dart';
 import 'package:food_ordering_app/components/Helper/helper.dart';
 import 'package:provider/provider.dart';
@@ -15,31 +16,27 @@ class _TipSelectionState extends State<TipSelection> {
   void checkTip({bool selected, CartBloc bloc, double percent}){
     // Check to see if the chip is selected
     if(selected){
-      // check if the custom tip is 0,
-      if(bloc.customTip != 0){
-        //if not, clear the tip
-        bloc.clearCustomTip();
-      }
       // if it is 0, get the tip percentage
       bloc.getTipPercent(percent);
     } else {
       // if it is not selected, clear the tip
-      bloc.clearTip();
+      bloc.resetTipPercent();
     }
   }
 
   @override
   Widget build(BuildContext context) {
 
-    var cartBloc = Provider.of<CartBloc>(context);
+    CartBloc cartBloc = Provider.of<CartBloc>(context);
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
 
     String tipValue;
 
     return Column(
       children: <Widget>[
         cartBloc.isDelivery
-            ? Text('Select tips for your driver')
-            : Text('Select tip amount (optional)'),
+            ? Text('${functionalBloc.selectedValue == 'english' ? 'Select tips for your driver' : '请选择给予司机的小费'}')
+            : Text('${functionalBloc.selectedValue == 'english' ? 'Select tip amount (optional)' : '请选择给予的小费(可不选)'}'),
         Wrap(
           spacing: 10,
           children: <Widget>[
@@ -48,6 +45,7 @@ class _TipSelectionState extends State<TipSelection> {
               labelText: '10%',
               tipAmount: cartBloc.tipPercent == .1,
               onSelected: (bool selected) {
+                cartBloc.resetTipPercent();
                 checkTip(selected: selected, bloc: cartBloc, percent: .1);
               },
             ),
@@ -55,6 +53,7 @@ class _TipSelectionState extends State<TipSelection> {
               labelText: '15%',
               tipAmount: cartBloc.tipPercent == .15,
               onSelected: (selected) {
+                cartBloc.resetTipPercent();
                 checkTip(selected: selected, bloc: cartBloc, percent: .15);
               },
             ),
@@ -62,11 +61,19 @@ class _TipSelectionState extends State<TipSelection> {
               labelText: '20%',
               tipAmount: cartBloc.tipPercent == .2,
               onSelected: (selected) {
+                cartBloc.resetTipPercent();
                 checkTip(selected: selected, bloc: cartBloc, percent: .2);
               },
             ),
             CheckoutTip(
-              labelText: 'Custom',
+              labelText: '${functionalBloc.selectedValue == 'english' ? 'Cash' : '现金'}',
+              tipAmount: cartBloc.tipPercent == .0000000001,
+              onSelected: (selected) {
+                checkTip(selected: selected, bloc: cartBloc, percent: .0000000001);
+              },
+            ),
+            CheckoutTip(
+              labelText: '${functionalBloc.selectedValue == 'english' ? 'Custom' : '自订'}',
               tipAmount: cartBloc.tipPercent == 0.0000001,
               onSelected: (selected) {
                 if(selected){
@@ -76,7 +83,7 @@ class _TipSelectionState extends State<TipSelection> {
                       barrierDismissible: false,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text('Enter the desired tip amount'),
+                          title: Text('${functionalBloc.selectedValue == 'english' ? 'Enter the desired tip amount' : '请输入你想给予的小费'}'),
                           content: TextField(
                             style: TextStyle(fontSize: 30),
                             decoration: InputDecoration(
@@ -97,7 +104,7 @@ class _TipSelectionState extends State<TipSelection> {
                           ),
                           actions: <Widget>[
                             FlatButton(
-                              child: Text('Confirm'),
+                              child: Text('${functionalBloc.selectedValue == 'english' ? 'Confirm' : '确认'}'),
                               onPressed: () {
                                 if(tipValue != null) {
                                   cartBloc.isCustomTip(true, tipValue);
@@ -108,10 +115,10 @@ class _TipSelectionState extends State<TipSelection> {
                             ),
 
                             FlatButton(
-                              child: Text('Cancel'),
+                              child: Text('${functionalBloc.selectedValue == 'english' ? 'Cancel' : '取消'}'),
                               onPressed: () {
                                 Navigator.pop(context);
-                                cartBloc.clearTip();
+                                cartBloc.resetTipPercent();
                               },
                             ),
                           ],
@@ -119,7 +126,7 @@ class _TipSelectionState extends State<TipSelection> {
                       });
                 } else {
                   cartBloc.isCustomTip(false, '0.00');
-                  cartBloc.clearTip();
+                  cartBloc.resetTipPercent();
                 }
               },
             ),

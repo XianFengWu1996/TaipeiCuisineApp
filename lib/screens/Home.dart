@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/screens/Account/AccountContent.dart';
-import 'package:food_ordering_app/screens/Cart/Content/CartContent.dart';
+import 'package:food_ordering_app/screens/Cart/Content/components/CartContent.dart';
 import 'package:food_ordering_app/screens/Order/MainContent/OrderContent.dart';
 import 'package:food_ordering_app/screens/Menu/MenuContent.dart';
 import 'package:provider/provider.dart';
@@ -23,12 +23,22 @@ class Home extends StatelessWidget {
     'Account'
   ];
 
+  final List<String> _titleChinese = [
+    '菜单',
+    '购物车',
+    '订单',
+    '账号'
+  ];
+
   @override
   Widget build(BuildContext context) {
     FunctionalBloc funcBloc = Provider.of<FunctionalBloc>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('${_title[funcBloc.homePageIndex]}'),
+        title: Text('${funcBloc.selectedValue == 'english' ?
+            _title[funcBloc.homePageIndex] :
+            _titleChinese[funcBloc.homePageIndex]
+            }'),
         leading: Text(''),
       ),
       body: _tab[funcBloc.homePageIndex],
@@ -40,19 +50,19 @@ class Home extends StatelessWidget {
         onTap: funcBloc.changeTab,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-              title: Text('Menu'),
+              title: Text('${funcBloc.selectedValue == 'english' ? 'Menu': '菜单'}'),
               icon: Icon(Icons.fastfood),
           ),
           BottomNavigationBarItem(
-            title: Text('Cart'),
+            title: Text('${funcBloc.selectedValue == 'english' ? 'Cart': '购物车'}'),
             icon:Icon(Icons.shopping_cart),
           ),
           BottomNavigationBarItem(
-            title: Text('Order'),
+            title: Text('${funcBloc.selectedValue == 'english' ? 'Order': '订单'}'),
             icon: Icon(Icons.receipt),
           ),
           BottomNavigationBarItem(
-            title: Text('Account'),
+            title: Text('${funcBloc.selectedValue == 'english' ? 'Account': '账号'}'),
             icon: Icon(Icons.person)
           ),
         ],

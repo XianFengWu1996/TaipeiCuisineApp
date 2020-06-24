@@ -1,22 +1,26 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:food_ordering_app/BloC/AuthBloc.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/BloC/OrderBloc.dart';
 import 'package:food_ordering_app/BloC/PaymentBloc.dart';
+import 'package:food_ordering_app/BloC/StoreBloc.dart';
 import 'package:food_ordering_app/screens/Account/Reward/Rewards.dart';
 import 'package:food_ordering_app/screens/Account/Screen/Address.dart';
 import 'package:food_ordering_app/screens/Account/Screen/Setting.dart';
 import 'package:food_ordering_app/screens/Account/Screen/User.dart';
-import 'package:food_ordering_app/screens/Auth/Login.dart';
+import 'package:food_ordering_app/screens/Auth/Login/Login.dart';
 import 'package:food_ordering_app/screens/Auth/Signup.dart';
 import 'package:food_ordering_app/screens/Cart/Content/Checkout/CheckoutScreen.dart';
 import 'package:food_ordering_app/screens/Home.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-void main() => runApp(MyApp());
+Future main() async {
+  await DotEnv().load('.env');
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -27,7 +31,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => AuthBloc(),),
         ChangeNotifierProvider(create: (context) => PaymentBloc(),),
         ChangeNotifierProvider(create: (context) => FunctionalBloc(),),
-        ChangeNotifierProvider(create: (context) => OrderBloc(),),
+        ChangeNotifierProvider(create: (context) => StoreBloc()),
         StreamProvider.value(value: (FirebaseAuth.instance.onAuthStateChanged)),
       ],
       child: MaterialApp(

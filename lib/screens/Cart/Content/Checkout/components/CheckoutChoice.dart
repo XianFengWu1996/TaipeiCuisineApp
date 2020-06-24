@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:food_ordering_app/BloC/AuthBloc.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
+import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/components/Chips.dart';
 import 'package:provider/provider.dart';
 
 class CheckoutChoice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var cartBloc = Provider.of<CartBloc>(context);
-    var authBloc = Provider.of<AuthBloc>(context);
+    CartBloc cartBloc = Provider.of<CartBloc>(context);
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
 
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
       children: <Widget>[
         CheckoutChip(
-          title: 'Pickup',
+          title: functionalBloc.selectedValue == 'english' ? 'Pickup' : '自取',
           icon: FontAwesome.shopping_bag,
           choice: !cartBloc.isDelivery,
           onSelected: (value) {
@@ -25,15 +25,14 @@ class CheckoutChoice extends StatelessWidget {
           },
         ),
         CheckoutChip(
-            title: 'Delivery',
+            title: functionalBloc.selectedValue == 'english' ? 'Delivery' : '送餐',
             icon: FontAwesome.car,
             choice: cartBloc.isDelivery,
             onSelected: (value) async {
-              if (double.parse(cartBloc.subtotal) >= 15) {
+              if (cartBloc.subtotal >= 15) {
                 if (cartBloc.address == '') {
-                  await cartBloc.getAddress(authBloc.user.uid);
+                  await cartBloc.getAddress();
                 }
-
                 if (value) {
                   cartBloc.checkChoice('delivery');
                 } else {

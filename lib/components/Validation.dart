@@ -37,8 +37,8 @@ class Validation{
   }
 
   static String phoneValidation(value){
-    if(value.isEmpty){
-      return 'Phone number cannot be empty';
+    if(value.length < 10){
+      return 'Enter a valid 10 digit phone number';
     }
     return null;
   }

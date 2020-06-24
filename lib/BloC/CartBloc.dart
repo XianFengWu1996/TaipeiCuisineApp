@@ -1,16 +1,29 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:food_ordering_app/Model/CartItem.dart';
 import 'package:food_ordering_app/Model/Product.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 class CartBloc with ChangeNotifier {
 
+  //Get user information from firebase once logged in
+  FirebaseUser _user;
+
+  saveLocalUser(FirebaseUser user){
+    _user = user;
+    notifyListeners();
+  }
+
   List<CartItem> _items = [];
 
   int _cartItemTotal = 0;
+
+  int _lunchCount = 0;
 
   int get cartItemTotal => _cartItemTotal;
 
@@ -20,19 +33,22 @@ class CartBloc with ChangeNotifier {
   //Cart Functionality
   // ----------------------------------------------------------------
 
-  void addToCart(Product product, [int count = 1]) {
+  void addToCart(Product product,[int count = 1]) {
+
+    if(product.lunch != null && product.lunch){
+      _lunchCount++;
+    }
+
     for (CartItem item in _items) {
       if (product.foodId == item.product.foodId) {
         _cartItemTotal += 1;
-        notifyListeners();
-      }
-
-      if (product.foodId == item.product.foodId) {
         calculateTotal('add', product.price);
         item.count += 1;
+        notifyListeners();
         return;
       }
     }
+
     _items.add(CartItem(product: product, count: count));
     calculateTotal('add', product.price);
     _cartItemTotal += 1;
@@ -52,12 +68,19 @@ class CartBloc with ChangeNotifier {
     for (CartItem item in _items) {
       if (item.product.foodId == foodId) {
         if (action == 'add') {
+          if(item.product.lunch != null && item.product.lunch){
+            _lunchCount++;
+          }
           item.count += 1;
           calculateTotal('add', item.product.price);
           _cartItemTotal += 1;
         }
 
         if (action == 'remove') {
+          if(item.product.lunch != null && item.product.lunch){
+            _lunchCount--;
+
+          }
           if (item.count > 1) {
             item.count -= 1;
             _cartItemTotal -= 1;
@@ -95,15 +118,20 @@ class CartBloc with ChangeNotifier {
   double _customTip = 0;
   double _deliveryFee = 0;
   int _rewardPoint = 0;
+  double _lunchDiscount = 0.00;
+  double _calcSubtotal = 0.00;
 
 
-  String get subtotal => _subtotal > 0 ? _subtotal.toStringAsFixed(2) : 0.00.toStringAsFixed(2);
 
-  String get tax => _tax > 0 ? _tax.toStringAsFixed(2) : 0.00.toStringAsFixed(2);
+  double get subtotal => _subtotal > 0 ? _subtotal : 0;
 
-  String get tip => _tip.toStringAsFixed(2);
+  double get calcSubtotal => _calcSubtotal;
 
-  String get total => _total > 0 ? _total.toStringAsFixed(2) : 0.00.toStringAsFixed(2);
+  double get tax => _tax > 0 ? _tax : 0;
+
+  double get tip => _tip;
+
+  double get total => _total > 0 ? _total : 0;
 
   double get tipPercent => _tipPercent;
 
@@ -112,6 +140,9 @@ class CartBloc with ChangeNotifier {
   double get deliveryFee => _deliveryFee;
 
   int get rewardPoint => _rewardPoint;
+
+  double get lunchDiscount => _lunchDiscount;
+
 
   void isCustomTip(bool isCustom, String tip) {
     _isCustomTip = isCustom;
@@ -122,25 +153,19 @@ class CartBloc with ChangeNotifier {
   }
 
   void calculateTotal(action, price, [count = 1]) {
-    action == 'add' ? _subtotal += (price * count) : _subtotal -=
-    (price * count);
-    _tax = double.parse((_subtotal * 0.07).toStringAsFixed(2));
-    _tip = !_isCustomTip ? double.parse(((_subtotal + _tax) * _tipPercent).toStringAsFixed(2)) : _customTip;
-    _total = double.parse((_subtotal + _tax + _tip + (_isDelivery ? deliveryFee : 0.00) - (_rewardPoint != 0 ? (_rewardPoint/100) : 0.00)).toStringAsFixed(2));
+    action == 'add' ? _subtotal += ((price * count)) : _subtotal -= (price * count);
+    _calcSubtotal = (_subtotal - (_rewardPoint != 0 ? (_rewardPoint/100) : 0.00) - _lunchDiscount);
+    _tax = (_calcSubtotal * 0.07);
+    _tip = !_isCustomTip ? ((_calcSubtotal + _tax) * _tipPercent) : _customTip;
+    _total = ((_calcSubtotal + _tax + _tip + (_isDelivery ? deliveryFee : 0.00)));
   }
 
-  void clearTip() {
+  void resetTipPercent() {
     _tipPercent = 0.0;
-
-    calculateTotal('add', 0);
-    notifyListeners();
-  }
-
-  void clearCustomTip() {
     _customTip = 0.0;
     _isCustomTip = false;
-    calculateTotal('add', 0);
 
+    calculateTotal('add', 0);
     notifyListeners();
   }
 
@@ -155,6 +180,18 @@ class CartBloc with ChangeNotifier {
     _rewardPoint = point;
     calculateTotal('add', 0);
 
+    notifyListeners();
+  }
+
+  void calculateLunchDiscount(){
+    if(_lunchCount < 3){
+      _lunchDiscount = 0;
+    }
+
+    if(_lunchCount % 3 == 0){
+      _lunchDiscount = (_lunchCount / 3) * 3.9;
+      calculateTotal('add', 0);
+    }
     notifyListeners();
   }
 
@@ -196,9 +233,9 @@ class CartBloc with ChangeNotifier {
   int get distance => _distance;
 
 
-  getAddress(uid) async {
+  getAddress() async {
     QuerySnapshot querySnapshot = await Firestore.instance.collection(
-        'users/$uid/address').getDocuments();
+        'users/${_user.uid}/address').getDocuments();
 
     if (querySnapshot.documents.length > 0) {
       querySnapshot.documents.forEach((f) {
@@ -207,10 +244,9 @@ class CartBloc with ChangeNotifier {
         _zipCode = f.data['zipcode'];
         _apt = f.data['apt'];
         _businessName = f.data['business'];
-        _distance = f.data['distance'];
+        _deliveryFee = f.data['deliveryFee'];
         _address = '$_street, \n$_city, $zipCode ${apt != '' ? 'Apt ': ''}$apt';
       });
-      await calculateDeliveryFee(_distance);
     } else {
       _address = '';
     }
@@ -218,7 +254,7 @@ class CartBloc with ChangeNotifier {
     notifyListeners();
   }
 
-  saveAddress(uid, changeStreet, changeCity, changeZipCode, changeApt, changeBusiness) async {
+  saveAddress(changeStreet, changeCity, changeZipCode, changeApt, changeBusiness) async {
     if (_street != changeStreet ||
         _city != changeCity ||
         _zipCode != changeZipCode||
@@ -227,36 +263,47 @@ class CartBloc with ChangeNotifier {
     ) {
 
       // it will return the value of lat and long
-      // geolocation[0] = lat, geolocation[1] = long
+      // geolocation[0] = lat,
+      // geolocation[1] = long
+      // geolocation[2] = street number
+      // geolocation[3] = street name
+      // geolocation[4] = city
+      // geolocation[5] = zipcode
       var geolocation = await geoCoding(changeStreet, changeCity);
 
       var calcDistance = await calculateDistance(geolocation[0], geolocation[1]);
 
-      await Firestore.instance.collection('users/$uid/address').document(
-          'details').setData(
+      await calculateDeliveryFee(calcDistance);
+
+      if(_deliveryFee != 0.0){
+        await Firestore.instance.collection('users/${_user.uid}/address').document(
+            'details').setData(
           {
-            'street': changeStreet,
-            'city': changeCity,
-            'zipcode': changeZipCode,
+            'street': '${geolocation[2]} ' + '${geolocation[3]}' ,
+            'city': geolocation[4],
+            'zipcode':geolocation[5],
             'apt': changeApt,
             'business': changeBusiness,
-            'distance': calcDistance,
+            'deliveryFee': _deliveryFee,
           },
-        merge: true,
-      );
-      getAddress(uid);
+          merge: true,
+        );
+      }
+
+      getAddress();
     }
 
   }
 
   calculateDeliveryFee(int dis){
-    double mile = dis / 1609.34;
+    double mile = (dis / 1609.34);
     if(mile < 2.1){
       _deliveryFee = 2.0;
-    } else if(mile >= 2.1 && mile <= 6.9){
+    } else if(mile >= 2.1 && mile <= 6.0){
       _deliveryFee = mile.ceilToDouble();
     } else {
-      print('Unable to deliver');
+      _deliveryFee = 0.0;
+      Get.snackbar('Unable to deliver to this address', 'Please double check address, we are only able to deliver within 6 miles', backgroundColor: Colors.orange[300], colorText: Colors.white);
     }
     calculateTotal('add', 0);
     notifyListeners();
@@ -266,22 +313,32 @@ class CartBloc with ChangeNotifier {
     String url = 'https://maps.googleapis.com/maps/api/geocode/json?'
         'address=$street,'
         '+$city,+MA&'
-        'key=AIzaSyBr8V73HvpVK27Uw7XkDT6Mdwz_wWHQ-ek';
+        'key=${DotEnv().env['GOOGLE_MAP_API_KEY']}';
 
     var result = await http.get(url);
-    var data = jsonDecode(result.body);
+    var data = jsonDecode(result.body)['results'][0];
 
-    var lat = data['results'][0]['geometry']['location']['lat'];
-    var long = data['results'][0]['geometry']['location']['lng'];
+    var lat, long, streetNumber, streetName, cityName, zipCode;
 
-    return [lat, long];
+    if(data['address_components'].last['types'][0] == 'postal_code_suffix'){
+      data['address_components'].removeLast();
+
+      lat = data['geometry']['location']['lat'];
+      long = data['geometry']['location']['lng'];
+      streetNumber =data['address_components'][0]['long_name'];
+      streetName =data['address_components'][1]['long_name'];
+      cityName = data['address_components'][2]['long_name'];
+      zipCode = data['address_components'].last['long_name'];
+    }
+
+    return [lat, long, streetNumber, streetName, cityName, zipCode];
   }
 
   Future<dynamic> calculateDistance(lat, long) async {
     String url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial'
         '&origins=42.274220,-71.024369'
         '&destinations=$lat, $long'
-        '&key=AIzaSyBr8V73HvpVK27Uw7XkDT6Mdwz_wWHQ-ek';
+        '&key=${DotEnv().env['GOOGLE_MAP_API_KEY']}';
     var result = await http.get(url);
     var data = jsonDecode(result.body);
 
@@ -297,6 +354,7 @@ class CartBloc with ChangeNotifier {
     _tip = 0;
     _total = 0;
     _tipPercent = 0;
+    _lunchCount = 0;
     _isCustomTip = false;
     _customTip = 0;
     _isDelivery = false;
@@ -306,6 +364,7 @@ class CartBloc with ChangeNotifier {
   }
 
   void clearValueUponLogout(){
+    _user = null;
     _address = '';
     _street = '';
     _city = '';
@@ -318,12 +377,17 @@ class CartBloc with ChangeNotifier {
     _tax = 0;
     _tip = 0;
     _total = 0;
+    _calcSubtotal = 0;
+    _lunchDiscount = 0;
+    _lunchCount = 0;
     _tipPercent = 0;
     _isCustomTip = false;
     _customTip = 0;
     _deliveryFee = 0;
     _cartItemTotal = 0;
     _items = [];
+    _choice = '';
+    _rewardPoint = 0;
     notifyListeners();
   }
 }

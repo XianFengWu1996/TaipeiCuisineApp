@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class RewardCard extends StatelessWidget {
   final String action;
@@ -13,6 +15,7 @@ class RewardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
     return Padding(
       padding: EdgeInsets.only(bottom: 10),
       child: Container(
@@ -26,8 +29,11 @@ class RewardCard extends StatelessWidget {
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              action == 'add' ? Text('Method: $method') : Container(),
-              Text('Order #: $orderId'),
+              action == 'add' ?
+              Text('${functionalBloc.selectedValue == 'english' ? 'Method' : '付款方式'} $method') :
+              Container(),
+
+              Text('${functionalBloc.selectedValue == 'english' ? 'Order #' : '订单号'}: $orderId'),
             ],
           ),
         ),

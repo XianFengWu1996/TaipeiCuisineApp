@@ -90,7 +90,7 @@ class BottomSheetHeader extends StatelessWidget {
                   height: 5,
                 ),
                 subtitle != '' ? Text(
-                  'Total: \$$subtitle',
+                  subtitle,
                   style: TextStyle(
                       fontSize: 25, fontWeight: FontWeight.w600),
                 ) : Container(),

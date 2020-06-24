@@ -5,7 +5,6 @@ import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/BloC/PaymentBloc.dart';
 import 'package:food_ordering_app/components/BottomSheet.dart';
 import 'package:food_ordering_app/components/Chips.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/CheckoutScreen.dart';
 import 'package:food_ordering_app/screens/Cart/Content/Checkout/Payment/ConfirmationPage.dart';
 import 'package:food_ordering_app/screens/Cart/Content/Checkout/Payment/PaymentForm.dart';
 import 'package:get/get.dart';
@@ -25,8 +24,8 @@ class PaymentModal extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             BottomSheetHeader(
-              title: 'Choose Payment Method',
-              subtitle: cartBloc.total,
+              title: functionalBloc.selectedValue == 'english' ? 'Choose Payment Method' : '选择付款方式',
+              subtitle: '${functionalBloc.selectedValue == 'english' ? 'Total: \$' : '总额：\$'} ${cartBloc.total.toStringAsFixed(2)}',
               onPressed: (){
                 Navigator.pop(context);
                 paymentBloc.resetPaymentMethod();
@@ -35,7 +34,7 @@ class PaymentModal extends StatelessWidget {
             Column(
               children: <Widget>[
                 SelectionChip(
-                  title: 'Cash',
+                  title: functionalBloc.selectedValue == 'english' ? 'Cash' : '现金',
                   icon: FontAwesome.money,
                   selected: paymentBloc.paymentMethod == 'cash',
                   onSelected: (value) {
@@ -44,7 +43,7 @@ class PaymentModal extends StatelessWidget {
                 ),
                 paymentBloc.cofId != ''
                     ? SelectionChip(
-                        title: 'xx-${paymentBloc.lastFourDigit}',
+                        title: functionalBloc.selectedValue == 'english' ? 'xx-${paymentBloc.lastFourDigit}' : '尾号 xx-${paymentBloc.lastFourDigit}',
                         icon: FontAwesome.credit_card,
                         selected: paymentBloc.paymentMethod == 'saved',
                         onSelected: (value) {
@@ -53,75 +52,77 @@ class PaymentModal extends StatelessWidget {
                       )
                     : Container(),
                 SelectionChip(
-                  title: 'Add card ',
+                  title: functionalBloc.selectedValue == 'english' ? 'Add Credit / Debit Card' : '添加新的信用卡',
                   icon: FontAwesome.plus,
                   selected: paymentBloc.paymentMethod == 'card',
                   onSelected: (value) {
                     paymentBloc.getPaymentMethod('card');
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return PaymentForm();
-                    }));
+                    Get.to(PaymentForm());
                   },
                 ),
               ],
             ),
             FlatButton(
               onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return SimpleDialog(
-                        backgroundColor: Color(0x00000000),
-                        children: <Widget>[
-                          ConfirmationSlider(
-                            onConfirmation: () async {
-                              if (paymentBloc.paymentMethod == 'saved') {
-                                Get.close(2);
-                                functionalBloc.toggleLoading();
-                                await paymentBloc.chargeCardOnFile(cartBloc);
-                                functionalBloc.toggleLoading();
+                if(paymentBloc.paymentMethod != ''){
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SimpleDialog(
+                          backgroundColor: Color(0x00000000),
+                          children: <Widget>[
+                            ConfirmationSlider(
+                              onConfirmation: () async {
+                                if (paymentBloc.paymentMethod == 'saved') {
+                                  Get.close(2);
+                                  functionalBloc.toggleLoading('start');
+                                  await paymentBloc.chargeCardOnFile(cartBloc);
+                                  functionalBloc.toggleLoading('reset');
 
-                                if(paymentBloc.errorMessage != ''){
-                                  Get.defaultDialog(
-                                    title: 'Unexpected Error',
-                                    content: Text(paymentBloc.errorMessage),
-                                    confirm: FlatButton(onPressed: (){
-                                      paymentBloc.clearErrorMessage();
-                                      Get.back();
-                                      print(paymentBloc.errorMessage);
-                                    }, child: Text('Okay'))
-                                  );
-                                } else {
-                                  Get.off(Confirmation());
-                                }
-                              }
-
-                              if (paymentBloc.paymentMethod == 'cash') {
-                                await paymentBloc.chargeCash(cartBloc);
-
-                                if(paymentBloc.errorMessage != ''){
-                                  Get.defaultDialog(
-                                    title: 'Unexpected Error',
-                                    content: Text(paymentBloc.errorMessage),
-                                    confirm: FlatButton(onPressed: (){},
-                                        child: Text('Okay'))
-                                  );
-                                } else {
-                                  Get.off(Confirmation());
+                                  if(paymentBloc.errorMessage != ''){
+                                    Get.defaultDialog(
+                                        title: 'Unexpected Error',
+                                        content: Text(paymentBloc.errorMessage),
+                                        confirm: FlatButton(onPressed: (){
+                                          paymentBloc.clearErrorMessage();
+                                          Get.back();
+                                          print(paymentBloc.errorMessage);
+                                        }, child: Text('Okay'))
+                                    );
+                                  } else {
+                                    Get.off(Confirmation());
+                                  }
                                 }
 
-                              }
-                            },
-                            foregroundColor: Colors.red[400],
-                            text: 'Send to Kitchen',
-                          )
-                        ],
-                      );
-                    });
+                                if (paymentBloc.paymentMethod == 'cash') {
+                                  await paymentBloc.chargeCash(cartBloc);
+
+                                  if(paymentBloc.errorMessage != ''){
+                                    Get.defaultDialog(
+                                        title: 'Unexpected Error',
+                                        content: Text(paymentBloc.errorMessage),
+                                        confirm: FlatButton(onPressed: (){},
+                                            child: Text('Okay'))
+                                    );
+                                  } else {
+                                    Get.off(Confirmation());
+                                  }
+                                }
+                              },
+                              foregroundColor: Colors.red[400],
+                              text: '${functionalBloc.selectedValue == 'english' ? 'Send to Kitchen': '发送订单到餐厅' }',
+                            )
+                          ],
+                        );
+                      });
+                } else {
+                  Get.snackbar('${functionalBloc.selectedValue == 'english' ? 'Select your payment method' : '选择您的付款方式'}','',
+                      backgroundColor: Colors.orange, colorText: Colors.white);
+                }
+
               },
               child: Text(
-                'Place Order',
+                '${functionalBloc.selectedValue == 'english' ? 'Place Order' : '下单'}',
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,

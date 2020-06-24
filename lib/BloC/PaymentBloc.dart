@@ -1,8 +1,8 @@
-import 'dart:io';
-
 import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/Model/Order.dart';
@@ -19,15 +19,24 @@ import 'package:uuid/uuid.dart';
 // ----------------------------------------------------------------
 
 class PaymentBloc with ChangeNotifier {
+
+  //Get user information from firebase once logged in
+  FirebaseUser _user;
+
+  saveLocalUser(FirebaseUser user){
+    _user = user;
+    notifyListeners();
+  }
+
   //options and general variables
   String _paymentMethod = '';
   String _idempotencyKey = Uuid().v4();
   String _orderNumber = '';
-  String _uid = '';
   int _total = 0;
   bool _sameAsDelivery = false;
   bool _saveCard = false;
   List<Order> _currentOrder = [];
+  String _comments = '';
 
   int get total => _total;
   String get orderNumber => _orderNumber;
@@ -35,12 +44,13 @@ class PaymentBloc with ChangeNotifier {
   bool get sameAsDelivery => _sameAsDelivery;
   bool get saveCard => _saveCard;
   List<Order> get currentOrder => _currentOrder;
+  String get comments => _comments;
 
   String _errorMessage = '';
   String get errorMessage => _errorMessage;
 
   // =======================================
-  //billing details
+  //Billing details
   // =======================================
   String _firstName = '';
   String _lastName = '';
@@ -65,9 +75,79 @@ class PaymentBloc with ChangeNotifier {
   String get customerId => _customerId;
   String get lastFourDigit => _lastFourDigit;
 
+  void saveBillingInfo({first, last, email, phone, street, city, zip}) async {
+    _firstName = first;
+    _lastName = last;
+    _email = email;
+    _phoneNumber = phone;
+    _street = street;
+    _city = city;
+    _zip = zip;
+
+    notifyListeners();
+  }
+
+  // retrieve billing info from database
+  retrieveBillingInfo() async {
+
+    await Firestore.instance
+        .collection('users/${_user.uid}/billings')
+        .document('details')
+        .get()
+        .then((value) {
+      var v = value.data;
+      if (value.data != null) {
+        _firstName = v['firstName'] == null ? '' : v['firstName'];
+        _lastName = v['lastName'] == null ? '' : v['lastName'];
+        _email = v['email'] == null ? '' : v['email'];
+        _phoneNumber = v['phone'] == null ? '' : v['phone'];
+        _street = v['street'] == null ? '' : v['street'];
+        _city = v['city'] == null ? '' : v['city'];
+        _zip = v['zip'] == null ? '' : v['zip'];
+        _brand = v['brand'] == null ? '' : v['brand'];
+        _lastFourDigit = v['lastFourDigit'] == null ? '' : v['lastFourDigit'];
+        _customerId = v['customerId'] == null ? '' : v['customerId'];
+        _cofId = v['cofId'] == null ? '' : v['cofId'];
+      }
+    });
+    return;
+  }
+
+
   // =======================================
-  // Methods
+  // Checkout Page Related Methods
   // =======================================
+
+  String _customerFirstName = '';
+  String _customerLastName = '';
+  String _customerPhoneNumber = '';
+
+  String get customerFirstName => _customerFirstName;
+  String get customerLastName => _customerLastName;
+  String get customerPhoneNumber => _customerPhoneNumber;
+
+  saveCustomerInfo({firstName, lastName, phone}) async {
+    await Firestore.instance.collection('users/${_user.uid}/customer').document('details').setData({
+      'firstName': firstName,
+      'lastName': lastName,
+      'phone': phone
+    });
+    _customerFirstName = firstName;
+    _customerLastName = lastName;
+    _customerPhoneNumber = phone;
+    notifyListeners();
+
+  }
+
+  retrieveCustomerInfo() async {
+    await Firestore.instance.collection('users/${_user.uid}/customer').document('details').get().then((value){
+      if(value.data != null){
+        _customerFirstName = value.data['firstName'] == null ? '': value.data['firstName'];
+        _customerLastName = value.data['lastName'] == null ? '' : value.data['lastName'];
+        _customerPhoneNumber = value.data['phone'] == null ? '' : value.data['phone'];
+      }
+    });
+  }
 
   void getPaymentMethod(String type) {
     _paymentMethod = type;
@@ -90,54 +170,16 @@ class PaymentBloc with ChangeNotifier {
     notifyListeners();
   }
 
-  // =======================================
-  // Billing related
-  // =======================================
+  //   get the total and format it to cents for square
+  void getTotal(double total) {
+    _total = (total * 100).toInt();
+  }
 
-  //get the values from the form and save it to the variables in the provider
-  void saveBillingInfo({first, last, email, phone, street, city, zip}) async {
-    _firstName = first;
-    _lastName = last;
-    _email = email;
-    _phoneNumber = phone;
-    _street = street;
-    _city = city;
-    _zip = zip;
-
+  void getComments(String comment){
+    _comments = comment;
     notifyListeners();
   }
 
-//   get the total and format it to cents for square
-  void getTotal(String total) {
-    _total = (double.parse(total) * 100).toInt();
-  }
-
-  // retrieve billing info from database
-  retrieveBillingInfo(uid) async {
-    _uid = uid;
-
-    await Firestore.instance
-        .collection('users/$uid/billings')
-        .document('details')
-        .get()
-        .then((value) {
-      var v = value.data;
-      if (value.data != null) {
-        _firstName = v['firstName'] == null ? '' : v['firstName'];
-        _lastName = v['lastName'] == null ? '' : v['lastName'];
-        _email = v['email'] == null ? '' : v['email'];
-        _phoneNumber = v['phone'] == null ? '' : v['phone'];
-        _street = v['street'] == null ? '' : v['street'];
-        _city = v['city'] == null ? '' : v['city'];
-        _zip = v['zip'] == null ? '' : v['zip'];
-        _brand = v['brand'] == null ? '' : v['brand'];
-        _lastFourDigit = v['lastFourDigit'] == null ? '' : v['lastFourDigit'];
-        _customerId = v['customerId'] == null ? '' : v['customerId'];
-        _cofId = v['cofId'] == null ? '' : v['cofId'];
-      }
-    });
-    return;
-  }
 
   // ===========================================
   //  Square Payment Methods
@@ -169,14 +211,14 @@ class PaymentBloc with ChangeNotifier {
       ..postalCode = "$_zip");
 
     await InAppPayments.setSquareApplicationId(
-        'sandbox-sq0idb-OaWeqv8Fp9so8TD1y_UmCA');
+        '${DotEnv().env['SQUARE_APPLICATION_ID']}');
 
     await InAppPayments.startCardEntryFlowWithBuyerVerification(
         onBuyerVerificationSuccess: (BuyerVerificationDetails result) async {
           Get.close(2);
-          functionalBloc.toggleLoading();
+          functionalBloc.toggleLoading('start');
           await chargeCard(result, cartBloc, functionalBloc);
-          functionalBloc.toggleLoading();
+          functionalBloc.toggleLoading('reset');
 
           Get.off(Confirmation());
         },
@@ -188,7 +230,7 @@ class PaymentBloc with ChangeNotifier {
           ..amount = amount
           ..currencyCode = 'USD'),
         contact: contact,
-        squareLocationId: 'XBKSBRXWASMMT',
+        squareLocationId: '${DotEnv().env['SQUARE_LOCATION_ID']}',
         collectPostalCode: true,
         onCardEntryCancel: () {});
   }
@@ -208,7 +250,6 @@ class PaymentBloc with ChangeNotifier {
               "address_line_1": '$_street',
               "address_line_2": '',
               'locality': '$_city',
-              'administrative_district_level_1': 'MA',
               'postal_code': '$_zip',
               'country': 'US'
             }
@@ -284,11 +325,13 @@ class PaymentBloc with ChangeNotifier {
      );
      String status = jsonDecode(response.body)['payment']['status'];
 
-     if(jsonDecode(response.body)['errors'] != null){
+     _orderNumber = jsonDecode(response.body)['payment']['order_id'];
+
+     if(jsonDecode(response.body)['errors'] == null){
        // savedCard allow the customer to save the card information for express checkout in the future
        if (saveCard && status == 'COMPLETED') {
          await Firestore.instance
-             .collection('users/$_uid/billings')
+             .collection('users/${_user.uid}/billings')
              .document('details')
              .setData({
            "firstName": _firstName,
@@ -309,18 +352,20 @@ class PaymentBloc with ChangeNotifier {
        if (status == 'COMPLETED') {
          manageRewardPoint(
              point: bloc.rewardPoint,
-             total: double.parse(bloc.total),
+             total: bloc.total,
              orderNumber: jsonDecode(response.body)['payment']['order_id'],
              percentage: 5,
              method: 'Card'
          );
 
          sendOrderToDb(
-             orderId: jsonDecode(response.body)['payment']['order_id'],
+             orderId: _orderNumber,
              items: bloc.items,
              deliveryAddress: bloc.isDelivery ? '$_street, $_city, MA, $_zip' : '',
              delivery: bloc.isDelivery,
              subtotal: bloc.subtotal,
+             calcSubtotal: bloc.calcSubtotal,
+             lunchDiscount: bloc.lunchDiscount,
              tax: bloc.tax,
              deliveryFee: bloc.deliveryFee,
              tip: bloc.tip,
@@ -329,16 +374,19 @@ class PaymentBloc with ChangeNotifier {
              idKey: _idempotencyKey,
              pointEarned: _pointEarned,
              pointUsed: bloc.rewardPoint,
+             customerName: _customerFirstName + ' ' + _customerLastName,
+             customerPhone: _customerPhoneNumber,
+             customerComment: _comments,
+             paymentId: jsonDecode(response.body)['payment']['id'],
              method: 'Card');
        }
 
-       _orderNumber = jsonDecode(response.body)['payment']['order_id'];
-       return jsonDecode(response.body)['payment']['order_id'];
      } else {
        _errorMessage = jsonDecode(response.body)['errors'][0]['category'];
        return _errorMessage;
      }
    } catch(error){
+     print(error);
      _errorMessage = 'Failed to charge card, try again later.';
    }
 
@@ -369,7 +417,7 @@ class PaymentBloc with ChangeNotifier {
       if(data['errors'] == null){
         manageRewardPoint(
             point: bloc.rewardPoint,
-            total: double.parse(bloc.total),
+            total: bloc.total,
             orderNumber: jsonDecode(response.body)['payment']['order_id'],
             percentage: 5,
             method: 'Card'
@@ -383,6 +431,8 @@ class PaymentBloc with ChangeNotifier {
             deliveryAddress: bloc.isDelivery ? '$_street, $_city, MA, $_zip' : '',
             delivery: bloc.isDelivery,
             subtotal: bloc.subtotal,
+            calcSubtotal: bloc.calcSubtotal,
+            lunchDiscount: bloc.lunchDiscount,
             tax: bloc.tax,
             deliveryFee: bloc.deliveryFee,
             tip: bloc.tip,
@@ -391,13 +441,17 @@ class PaymentBloc with ChangeNotifier {
             idKey: _idempotencyKey,
             pointEarned: _pointEarned,
             pointUsed: bloc.rewardPoint,
+            customerName: _customerFirstName + ' ' + _customerLastName,
+            customerPhone: _customerPhoneNumber,
+            customerComment: _comments,
+            paymentId: data['payment']['id'],
             method: 'Card');
 
-        return data['payment']['order_id'];
       } else {
         _errorMessage = data['errors'][0]['category'];
       }
     } catch(error){
+      print(error);
       _errorMessage = 'Failed to charge card on file. Try again later';}
   }
 
@@ -405,7 +459,7 @@ class PaymentBloc with ChangeNotifier {
     _orderNumber = Uuid().v4();
     manageRewardPoint(
       point: bloc.rewardPoint,
-      total: double.parse(bloc.total),
+      total: bloc.total,
       orderNumber: _orderNumber,
       percentage: 10,
       method: 'Cash'
@@ -418,6 +472,8 @@ class PaymentBloc with ChangeNotifier {
         deliveryAddress: bloc.isDelivery ? '$_street, $_city, MA, $_zip' : '',
         delivery: bloc.isDelivery,
         subtotal: bloc.subtotal,
+        calcSubtotal: bloc.calcSubtotal,
+        lunchDiscount: bloc.lunchDiscount,
         tax: bloc.tax,
         deliveryFee: bloc.deliveryFee,
         tip: bloc.tip,
@@ -426,14 +482,23 @@ class PaymentBloc with ChangeNotifier {
         method: 'Cash',
         pointEarned: _pointEarned,
         pointUsed: bloc.rewardPoint,
+        customerName: _customerFirstName + ' ' + _customerLastName,
+        customerPhone: _customerPhoneNumber,
+        customerComment: _comments,
+        paymentId: ''
       );
     } catch(e){
+      print(e);
       _errorMessage = 'Failed to send order to restaurant, try again later';
     }
 
 
   }
 
+
+  // ===========================================
+  //  Reward Point Related
+  // ===========================================
   void manageRewardPoint({int point, double total, String orderNumber, int percentage, method}){
     if(point > 0){
       calculateRewardPoint(
@@ -454,59 +519,6 @@ class PaymentBloc with ChangeNotifier {
     );
   }
 
-  //send the order to the database
-  void sendOrderToDb({
-    orderId,
-    items,
-    deliveryAddress,
-    delivery,
-    subtotal,
-    tax,
-    deliveryFee,
-    tip,
-    total,
-    method,
-    count,
-    idKey,
-    pointEarned,
-    pointUsed
-  }) async {
-    List<Map> listOfItems = [];
-
-    for (var item in items) {
-      var map = {
-        'foodId': item.product.foodId,
-        'foodName': item.product.foodName,
-        'price': item.product.price,
-        'count': item.count,
-      };
-      listOfItems.add(map);
-    }
-
-    await Firestore.instance
-        .collection('users/$_uid/order')
-        .document('$orderId')
-        .setData({
-      "orderId": orderId,
-      "items": listOfItems,
-      "deliveryAddress": deliveryAddress,
-      'delivery': delivery,
-      "subtotal": subtotal,
-      "tax": tax,
-      "deliveryFee": deliveryFee,
-      "tip": tip,
-      "total": total,
-      "method": method,
-      "status": 'Placed',
-      "totalCount": count,
-      "createdAt": DateTime.now().millisecondsSinceEpoch,
-      "idempodency_key": idKey,
-      "pointEarned": pointEarned,
-      "pointUsed": pointUsed,
-    }, merge: true);
-  }
-
-  //Rewards point
   int _rewardPoint = 0;
   int _pointEarned = 0;
   var _pointDetail = [];
@@ -515,9 +527,9 @@ class PaymentBloc with ChangeNotifier {
   int get pointEarned => _pointEarned;
 
 
-  retrieveRewardPoints(uid) async {
+  retrieveRewardPoints() async {
     await Firestore.instance
-        .collection('users/$uid/rewards')
+        .collection('users/${_user.uid}/rewards')
         .document('points')
         .get()
         .then((value) {
@@ -547,12 +559,92 @@ class PaymentBloc with ChangeNotifier {
 
     _pointDetail.insert(0, detail);
 
-    await Firestore.instance.collection('users/$_uid/rewards').document('points').setData({
+    await Firestore.instance.collection('users/${_user.uid}/rewards').document('points').setData({
       'point': _rewardPoint,
       'pointDetails': _pointDetail
     }, merge: true);
   }
 
+  // ===========================================
+  //  Other
+  // ===========================================
+  //send the order to the database
+  void sendOrderToDb({
+    orderId, items, deliveryAddress, delivery, subtotal, calcSubtotal, tax, deliveryFee, tip, total,
+    method, count, idKey, pointEarned, pointUsed, customerName, customerPhone, customerComment,
+    paymentId, lunchDiscount
+  }) async {
+    List<Map> listOfItems = [];
+
+    for (var item in items) {
+      var map = {
+        'foodId': item.product.foodId,
+        'foodName': item.product.foodName,
+        'foodChineseName': item.product.foodChineseName,
+        'price': item.product.price,
+        'count': item.count,
+      };
+      listOfItems.add(map);
+    }
+
+    await Firestore.instance
+        .collection('users/${_user.uid}/order')
+        .document('$orderId')
+        .setData({
+      "orderId": orderId,
+      "items": listOfItems,
+      'customerName': customerName,
+      'customerPhone': customerPhone,
+      'customerComments': customerComment,
+      "deliveryAddress": deliveryAddress,
+      'delivery': delivery,
+      "subtotal": subtotal,
+      "calcSubtotal": calcSubtotal,
+      "lunchDiscount": lunchDiscount,
+      "tax": tax,
+      "deliveryFee": deliveryFee,
+      "tip": tip,
+      "total": total,
+      "method": method,
+      "status": 'Placed',
+      "totalCount": count,
+      "createdAt": DateTime.now().millisecondsSinceEpoch,
+      "idempodency_key": idKey,
+      "pointEarned": pointEarned,
+      "pointUsed": pointUsed,
+    }, merge: true);
+
+    await Firestore.instance
+        .collection('order')
+        .document('$orderId')
+        .setData({
+      "orderId": orderId,
+      "items": listOfItems,
+      'customerName': customerName,
+      'customerPhone': customerPhone,
+      'customerComments': customerComment,
+      "deliveryAddress": deliveryAddress,
+      'delivery': delivery,
+      "subtotal": subtotal,
+      "calcSubtotal": calcSubtotal,
+      "lunchDiscount": lunchDiscount,
+      "tax": tax,
+      "deliveryFee": deliveryFee,
+      "tip": tip,
+      "total": total,
+      "method": method,
+      "status": 'Placed',
+      "totalCount": count,
+      "createdAt": DateTime.now().millisecondsSinceEpoch,
+      "idempodency_key": idKey,
+      "pointEarned": pointEarned,
+      "pointUsed": pointUsed,
+      'paymentId': paymentId,
+      'userId': _user.uid,
+    }, merge: true);
+
+
+  }
 
   void clearErrorMessage(){
     _errorMessage = '';
@@ -562,6 +654,7 @@ class PaymentBloc with ChangeNotifier {
   //clear value after checkout
   void clearAfterCheckout() {
     _paymentMethod = '';
+    _comments = '';
     _idempotencyKey = Uuid().v4();
     _orderNumber = '';
     _total = 0;
@@ -570,5 +663,36 @@ class PaymentBloc with ChangeNotifier {
     _pointEarned = 0;
     _rewardPoint = 0;
     _pointDetail = [];
+  }
+
+  void clearAllValueUponLogout(){
+    _user = null;
+    _paymentMethod = '';
+    _idempotencyKey = Uuid().v4();
+    _orderNumber = '';
+    _total = 0;
+    _sameAsDelivery = false;
+    _saveCard = false;
+    _currentOrder = [];
+    _comments = '';
+    _errorMessage = '';
+    _firstName = '';
+    _lastName = '';
+    _email = '';
+    _phoneNumber = '';
+    _street = '';
+    _city = '';
+    _zip = '';
+    _cofId = '';
+    _customerId = '';
+    _brand = '';
+    _lastFourDigit = '';
+    _customerFirstName = '';
+    _customerLastName = '';
+    _customerPhoneNumber = '';
+    _rewardPoint = 0;
+    _pointEarned = 0;
+    _pointDetail = [];
+    notifyListeners();
   }
 }

@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/components/BottomSheet.dart';
+import 'package:food_ordering_app/BloC/PaymentBloc.dart';
+import 'package:food_ordering_app/BloC/StoreBloc.dart';
 import 'package:food_ordering_app/components/Button.dart';
 import 'package:food_ordering_app/components/Validation.dart';
+import 'package:food_ordering_app/screens/Auth/Login/EmailResend.dart';
+import 'package:food_ordering_app/screens/Auth/Login/Reset.dart';
 import 'package:food_ordering_app/screens/Auth/SocialMediaLogin.dart';
 import 'package:food_ordering_app/components/InputField.dart';
 import 'package:food_ordering_app/components/FormComponents/StylingComponents/DividerWithText.dart';
@@ -42,6 +46,9 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     AuthBloc authBloc = Provider.of<AuthBloc>(context);
     FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
+    PaymentBloc paymentBloc = Provider.of<PaymentBloc>(context);
+    CartBloc cartBloc = Provider.of<CartBloc>(context);
+    StoreBloc storeBloc = Provider.of<StoreBloc>(context);
 
     final _formKey = GlobalKey<FormState>();
 
@@ -83,71 +90,21 @@ class _LoginState extends State<Login> {
                             }),
                       ),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          FlatButton(
-                            child: Text(
-                              'Reset Password',
-                              style: TextStyle(
-                                color: Colors.blue,
-                              ),
-                            ),
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (context) {
-                                  return BottomSheetContent(
-                                    label: 'Reset Password',
-                                    buttonText: 'Reset',
-                                    controller: _resetEmailController,
-                                    onPressed: () async {
-                                      await authBloc.resetPasswordWithEmail(
-                                          _resetEmailController.text);
-
-                                      Navigator.pop(context);
-
-                                      _resetEmailController.clear();
-
-                                      if (authBloc.noticeMessage.isNotEmpty) {
-                                        Get.snackbar(
-                                          'Check your Email',
-                                          authBloc.noticeMessage[0],
-                                          backgroundColor: Colors.green[400],
-                                          colorText: Colors.white,
-                                        );
-                                        Future.delayed(Duration(seconds: 1), () {
-                                          authBloc.resetErrorMessage();
-                                        });
-                                      }
-
-                                      if (authBloc.errorMessage.isNotEmpty) {
-                                        Get.snackbar(
-                                          'Error',
-                                          authBloc.errorMessage[0],
-                                          backgroundColor: Colors.red[400],
-                                          colorText: Colors.white,
-                                        );
-                                        Future.delayed(Duration(seconds: 1), () {
-                                          authBloc.resetErrorMessage();
-                                        });
-                                      }
-                                    },
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                      ResetPass(resetEmailController: _resetEmailController, authBloc: authBloc,),
                       // Login with Email and Password
                       Button(
                         onPressed: () async {
                           if (_formKey.currentState.validate()) {
-                            functionalBloc.toggleLoading();
+                            functionalBloc.toggleLoading('start');
 
                             await authBloc.loginWithEmailAndPassword(
-                                _emailController.text, _passwordController.text);
+                                _emailController.text,
+                                _passwordController.text,
+                                storeBloc,
+                                functionalBloc,
+                                paymentBloc,
+                                cartBloc
+                            );
 
                             if (authBloc.errorMessage.isNotEmpty) {
                               Get.snackbar(
@@ -158,7 +115,7 @@ class _LoginState extends State<Login> {
                               );
                               Future.delayed(Duration(seconds: 1), () {
                                 authBloc.resetErrorMessage();
-                                functionalBloc.toggleLoading();
+                                functionalBloc.toggleLoading('reset');
                               });
                             }
 
@@ -168,44 +125,11 @@ class _LoginState extends State<Login> {
                                     ? showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text('Resend Verification Email'),
-                                        content: Text('Do you want to receive a new verification email?'),
-                                        actions: <Widget>[
-                                          FlatButton(
-                                              onPressed: () async {
-                                                await authBloc.user.sendEmailVerification();
-
-                                                Navigator.pop(context);
-
-                                                Get.snackbar('Check your email',
-                                                  'Please check your email for further instructioon on email verification.',
-                                                  backgroundColor: Colors.green[400],
-                                                  colorText: Colors.white,
-                                                );
-
-                                                authBloc.enableDialog(false);
-                                                functionalBloc.toggleLoading();
-
-                                                Timer(Duration(minutes: 30), (){
-                                                  authBloc.enableDialog(true);
-                                                  functionalBloc.toggleLoading();
-                                                });
-                                              },
-                                              child: Text('Yes')),
-                                          FlatButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text('Cancel'))
-                                        ],
-                                      );
+                                      return Resend();
                                     })
                                     : Container();
                               }
                             }
-
-
                           }
                         },
                         title: 'Login',

@@ -1,8 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
+import 'package:food_ordering_app/BloC/PaymentBloc.dart';
+import 'package:food_ordering_app/BloC/StoreBloc.dart';
+import 'package:food_ordering_app/StoreDashboard/Orders.dart';
 import 'package:food_ordering_app/screens/Home.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -20,15 +25,27 @@ class AuthBloc with ChangeNotifier {
 
   // Methods for Signing in
 
-  loginWithEmailAndPassword(String email, String password) async {
+  loginWithEmailAndPassword(String email, String password, StoreBloc storeBloc, FunctionalBloc functionalBloc, paymentBloc, cartBloc) async {
     try {
       _loggedInUser = (await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       )).user;
 
-      if (_loggedInUser.isEmailVerified) {
-        Get.to(Home());
+      if(_loggedInUser.uid == '${DotEnv().env['ADMIN_UID']}'){
+        functionalBloc.toggleLoading('reset');
+        await storeBloc.saveLocalUser(_loggedInUser);
+        Get.offAll(Orders(status: 'Placed',));
+      } else if (_loggedInUser.isEmailVerified) {
+        functionalBloc.toggleLoading('reset');
+        await functionalBloc.saveLocalUser(_loggedInUser);
+        await paymentBloc.saveLocalUser(_loggedInUser);
+        await cartBloc.saveLocalUser(_loggedInUser);
+        await functionalBloc.retrieveFullDayMenu();
+        await functionalBloc.retrieveLunchMenu();
+        await functionalBloc.getLanguageChoice();
+
+        Get.offAll(Home());
       } else {
         _errorMessage.add(
             'Please verify your email. If you have recently requested a verification email, check your inbox or spam.');
@@ -76,24 +93,28 @@ class AuthBloc with ChangeNotifier {
     return;
   }
 
-  loginWithFacebook(FunctionalBloc bloc) async {
+  loginWithFacebook(FunctionalBloc functionalBloc, PaymentBloc paymentBloc, CartBloc cartBloc) async {
     final result = await FacebookLogin().logIn(['email']);
 
     switch (result.status) {
       case FacebookLoginStatus.loggedIn:
         try {
           final token = result.accessToken.token;
-          AuthCredential credential =
-              FacebookAuthProvider.getCredential(accessToken: token);
+          AuthCredential credential = FacebookAuthProvider.getCredential(accessToken: token);
 
-          _loggedInUser =
-              (await FirebaseAuth.instance.signInWithCredential(credential))
-                  .user;
+          _loggedInUser = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
 
           if (_loggedInUser != null) {
-            Get.to(Home());
+            await functionalBloc.saveLocalUser(_loggedInUser);
+            await paymentBloc.saveLocalUser(_loggedInUser);
+            await cartBloc.saveLocalUser(_loggedInUser);
+            await functionalBloc.getLanguageChoice();
+            await functionalBloc.retrieveFullDayMenu();
+            await functionalBloc.retrieveLunchMenu();
+            Get.offAll(Home());
           }
         } catch (error) {
+          print(error);
           _errorMessage.add('An error has occur. Try again later or use a different login method.');
         }
         break;
@@ -106,13 +127,12 @@ class AuthBloc with ChangeNotifier {
     }
   }
 
-  loginWithGoogle() async {
+  loginWithGoogle(functionalBloc, paymentBloc, cartBloc) async {
     try{
       final GoogleSignIn _googleSignIn = GoogleSignIn();
 
       final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-      final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.getCredential(
           idToken: googleAuth.idToken,
@@ -121,7 +141,13 @@ class AuthBloc with ChangeNotifier {
       _loggedInUser = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
 
       if(_loggedInUser != null){
-        Get.to(Home());
+        await functionalBloc.saveLocalUser(_loggedInUser);
+        await paymentBloc.saveLocalUser(_loggedInUser);
+        await cartBloc.saveLocalUser(_loggedInUser);
+        await functionalBloc.getLanguageChoice(_loggedInUser.uid);
+        await functionalBloc.retrieveFullDayMenu();
+        await functionalBloc.retrieveLunchMenu();
+        Get.offAll(Home());
       }
     } catch(error){
       _errorMessage.add('An error has occur during Google login, please try again later or use a different login method.');
@@ -169,5 +195,14 @@ class AuthBloc with ChangeNotifier {
       'point': 0,
       'pointDetails': [],
     }, merge: true);
+  }
+
+  void clearAllValueUponLogout(){
+    _obscureText = false;
+    _errorMessage = [];
+    _noticeMessage = [];
+    _loggedInUser = null;
+    _showDialogContent = true;
+    notifyListeners();
   }
 }

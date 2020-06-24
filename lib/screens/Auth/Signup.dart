@@ -8,7 +8,7 @@ import 'package:food_ordering_app/components/Validation.dart';
 import 'package:food_ordering_app/components/FormComponents/StylingComponents/DividerWithText.dart';
 import 'package:food_ordering_app/screens/Auth/SocialMediaLogin.dart';
 import 'package:food_ordering_app/components/FormComponents/StylingComponents/TextWithLink.dart';
-import 'package:food_ordering_app/screens/Auth/Login.dart';
+import 'package:food_ordering_app/screens/Auth/Login/Login.dart';
 import 'package:get/get.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
@@ -101,7 +101,7 @@ class _SignupState extends State<Signup> {
                           if (_formKey.currentState.validate()) {
                             if(_passwordController.text == _confirmController.text){
                               // loading here will be true
-                              functionalBloc.toggleLoading();
+                              functionalBloc.toggleLoading('start');
                               await authBloc.signUpWithEmailAndPassword(_emailController.text, _passwordController.text);
                             }
 
@@ -114,11 +114,11 @@ class _SignupState extends State<Signup> {
                               Future.delayed(Duration(seconds: 1), () {
                                 authBloc.resetErrorMessage();
                                 // when the error shows we stop the loading
-                                functionalBloc.toggleLoading();
+                                functionalBloc.toggleLoading('reset');
                               });
                             } else {
                               // when the sign up is successful, we stop loading
-                              functionalBloc.toggleLoading();
+                              functionalBloc.toggleLoading('reset');
                               Get.to(Login());
 
                               Get.snackbar('Notice',

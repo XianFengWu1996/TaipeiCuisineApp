@@ -1,103 +1,91 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/screens/Menu/MenuData.dart';
+import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/screens/Menu/MenuItems.dart';
+import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
-class MenuContent extends StatefulWidget {
-  @override
-  _MenuContentState createState() => _MenuContentState();
-}
-
-class _MenuContentState extends State<MenuContent> {
-
-  List<String> category = [];
-  List<String> chineseCategory = [];
-  bool chinese = false;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-
-    getCategory();
-    getChineseCategory();
-  }
-
-  void getCategory() async {
-    var data = await MenuData().retrieveCategory();
-    for(var item in data[0]['category']){
-      setState(() {
-        category.add(item);
-      });
-    }
-  }
-
-  void getChineseCategory() async {
-    var data = await MenuData().retrieveChineseCategory();
-    for(var item in data[0]['category_chinese']){
-      setState(() {
-        chineseCategory.add(item);
-      });
-    }
-  }
-
+class MenuContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
     return Column(
       children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
           children: <Widget>[
-            Text('EN'),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Transform.scale(
-                scale: 1.5,
-                child: Switch(
-                  value: chinese,
-                  onChanged: (value){
-                    setState(() {
-                      chinese = value;
-                    });
-                  },
-                  inactiveThumbImage: AssetImage('images/united-states.png'),
-                  activeThumbImage: AssetImage('images/china.png'),
-                ),
-              ),
+            ChoiceChip(
+              label: Text('Full-Day'),
+              selected: functionalBloc.menuChoice == 'fullday',
+              onSelected: (value) {
+                if (value) {
+                  functionalBloc.switchMenuChoice('fullday');
+                }
+              },
             ),
-            Text('中'),
+            ChoiceChip(
+              label: Text('Lunch'),
+              selected: functionalBloc.menuChoice == 'lunch',
+              onSelected: (value) {
+                if (value) {
+                  functionalBloc.switchMenuChoice('lunch');
+                }
+              },
+            )
           ],
         ),
+        functionalBloc.menuChoice == 'fullday' ?
         Expanded(
           child: ListView.builder(
-            itemCount: category.length,
-              itemBuilder: (context, index){
+              itemCount: functionalBloc.fullDayMenu.length,
+              itemBuilder: (context, index) {
                 return FlatButton(
-                  onPressed: (){
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => MenuItems(
-                              index: index,
-                              title: chinese ? chineseCategory[index] : category[index],
-                              displayChinese: chinese
-                            ),
-                        ),
-                    );
-                  },
                   child: Card(
-                    child: ListTile(
-                      trailing: Icon(Icons.arrow_forward_ios),
-                      title: Text(
-                        chinese ? '${chineseCategory[index]}' : '${category[index]}'
-                      ),),
-                  ),
+                      child: ListTile(
+                    trailing: Icon(Icons.arrow_forward_ios),
+                    title: Text('${functionalBloc.selectedValue == 'english'
+                        ? functionalBloc.fullDayMenu[index]['englishName']
+                        : functionalBloc.fullDayMenu[index]['chineseName']
+                    }'),
+                  )),
+                  onPressed: () {
+                    Get.to(MenuItems(
+                        count: index,
+                        title: functionalBloc.selectedValue == 'english'
+                            ? functionalBloc.fullDayMenu[index]['englishName']
+                            : functionalBloc.fullDayMenu[index]
+                                ['chineseName'],
+                      lunch: functionalBloc.menuChoice == 'lunch',
+                    ));
+                  },
                 );
-              }
-          ),
+              }),
+        ) : Expanded(
+          child: ListView.builder(
+              itemCount: functionalBloc.lunchMenu.length,
+              itemBuilder: (context, index) {
+                return FlatButton(
+                  child: Card(
+                      child: ListTile(
+                        trailing: Icon(Icons.arrow_forward_ios),
+                        title: Text('${functionalBloc.selectedValue == 'english'
+                            ? functionalBloc.lunchMenu[index]['englishName']
+                            : functionalBloc.lunchMenu[index]['chineseName']
+                        }'),
+                      )),
+                  onPressed: () {
+                    Get.to(MenuItems(
+                        count: index,
+                        title: functionalBloc.selectedValue == 'english'
+                            ? functionalBloc.lunchMenu[index]['englishName']
+                            : functionalBloc.lunchMenu[index]
+                        ['chineseName'],
+                      lunch: functionalBloc.menuChoice == 'lunch',
+                    ));
+                  },
+                );
+              }),
         ),
       ],
     );
   }
 }
-
-//"Icon made by Freepik from www.flaticon.com"

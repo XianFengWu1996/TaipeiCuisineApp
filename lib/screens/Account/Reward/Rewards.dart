@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:food_ordering_app/BloC/AuthBloc.dart';
+import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/components/Divider.dart';
 import 'package:food_ordering_app/screens/Account/Reward/components/RewardCard.dart';
 import 'package:provider/provider.dart';
@@ -10,9 +11,10 @@ class Reward extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AuthBloc authBloc = Provider.of<AuthBloc>(context);
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
     return Scaffold(
         appBar: AppBar(
-          title: Text('Rewards'),
+          title: Text('${functionalBloc.selectedValue == 'english' ? 'Rewards' : '积分回馈'}'),
         ),
         body: StreamBuilder(
             stream: Firestore.instance
@@ -30,7 +32,7 @@ class Reward extends StatelessWidget {
                         child: Center(
                           child: Column(
                             children: <Widget>[
-                              Text('Reward Points'),
+                              Text('${functionalBloc.selectedValue == 'english' ? 'Reward Points' : '获得积分'}'),
                               Text('${data['point']}',
                                 style: TextStyle(fontSize: 50, color: Colors.red[400]),
                               ),
@@ -59,12 +61,12 @@ class Reward extends StatelessWidget {
                   );
                 } else{
                   return Center(
-                    child: Text('No reward history'),
+                    child: Text('${functionalBloc.selectedValue == 'english' ? 'No Reward History' : '尚未获得积分'}'),
                   );
                 }
               } else {
                 return Center(
-                  child: Text('No reward history'),
+                  child: Text('${functionalBloc.selectedValue == 'english' ? 'No Reward History' : '尚未获得积分'}'),
                 );
               }
             }));

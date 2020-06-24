@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/components/InputField.dart';
 import 'package:food_ordering_app/components/Validation.dart';
-import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:food_ordering_app/BloC/AuthBloc.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
@@ -44,7 +43,7 @@ class _PaymentFormState extends State<PaymentForm> {
     final _formKey = GlobalKey<FormState>();
     return Scaffold(
         appBar: AppBar(
-          title: Text('Billing Information'),
+          title: Text('${functionalBloc.selectedValue == 'english' ? 'Billing Information' : '账单信息'}'),
         ),
         resizeToAvoidBottomPadding: false,
         body: ListView(
@@ -60,19 +59,19 @@ class _PaymentFormState extends State<PaymentForm> {
                   shrinkWrap: true,
                   children: <Widget>[
                     Input(
-                      label: 'First Name',
+                      label: '${functionalBloc.selectedValue == 'english' ? 'First Name' : '名字'}',
                       controller: first,
                       useNumKeyboard: false,
                       validate: Validation.firstNameValidation,
                     ),
                     Input(
-                      label: 'Last Name',
+                      label: '${functionalBloc.selectedValue == 'english' ? 'Last Name' : '姓'}',
                       controller: last,
                       useNumKeyboard: false,
                       validate: Validation.lastNameValidation,
                     ),
                     Input(
-                      label: 'Phone Number',
+                      label: '${functionalBloc.selectedValue == 'english' ? 'Billing Information' : '电话'}',
                       useNumKeyboard: true,
                       controller: phone,
                       validate: Validation.phoneValidation,
@@ -81,9 +80,9 @@ class _PaymentFormState extends State<PaymentForm> {
                         LengthLimitingTextInputFormatter(10),
                       ],
                     ),
-                    cartBloc.isDelivery
+                    cartBloc.isDelivery && cartBloc.address != ''
                         ? CheckboxListTile(
-                            title: Text('Same as Delivery Address'),
+                            title: Text('${functionalBloc.selectedValue == 'english' ? 'Same as Delivery Address' : '和送餐地址一样'}'),
                             value: paymentBloc.sameAsDelivery,
                             onChanged: (bool value) {
                               paymentBloc.showAddressInput(value);
@@ -94,7 +93,7 @@ class _PaymentFormState extends State<PaymentForm> {
                         ? Column(
                             children: <Widget>[
                               Input(
-                                label: 'Zip Code',
+                                label: '${functionalBloc.selectedValue == 'english' ? 'Zip Code' : '邮政编码'}',
                                 useNumKeyboard: true,
                                 controller: zip,
                                 validate: !paymentBloc.sameAsDelivery
@@ -102,7 +101,7 @@ class _PaymentFormState extends State<PaymentForm> {
                                     : null,
                               ),
                               Input(
-                                label: 'Street',
+                                label: '${functionalBloc.selectedValue == 'english' ? 'Street' : '街名'}',
                                 useNumKeyboard: false,
                                 controller: street,
                                 validate: !paymentBloc.sameAsDelivery
@@ -110,7 +109,7 @@ class _PaymentFormState extends State<PaymentForm> {
                                     : null,
                               ),
                               Input(
-                                label: 'City',
+                                label: '${functionalBloc.selectedValue == 'english' ? 'City' : '城市'}',
                                 useNumKeyboard: false,
                                 controller: city,
                                 validate: !paymentBloc.sameAsDelivery
@@ -122,7 +121,7 @@ class _PaymentFormState extends State<PaymentForm> {
                           )
                         : Container(),
                     CheckboxListTile(
-                        title: Text('Save card to wallet'),
+                        title: Text('${functionalBloc.selectedValue == 'english' ? 'Save to Wallet' : '保存卡信息，方便快速下单'}'),
                         value: paymentBloc.saveCard,
                         onChanged: (value) {
                           paymentBloc.checkSaveCard(value);
@@ -142,11 +141,11 @@ class _PaymentFormState extends State<PaymentForm> {
                             zip: zip.text == '' ? cartBloc.zipCode : zip.text,
                           );
 
-                          paymentBloc.payment(cartBloc, functionalBloc, double.parse(cartBloc.total));
+                          paymentBloc.payment(cartBloc, functionalBloc, cartBloc.total);
                         }
                       },
-                      child: Text('Proceed to Square Payment'),
-                      color: Colors.red[400],
+                      child: Text('${functionalBloc.selectedValue == 'english' ? 'Proceed to Square Payment' : '前往 Square Payment'}'),
+                      color: Colors.red[400],textColor: Colors.white,
                     ),
                   ],
                 ),
