@@ -17,8 +17,6 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 
 class CheckoutScreen extends StatelessWidget {
-  static const id = 'check_out';
-
   @override
   Widget build(BuildContext context) {
     CartBloc cartBloc = Provider.of<CartBloc>(context);
@@ -34,7 +32,7 @@ class CheckoutScreen extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.home),
             onPressed: () {
-              Navigator.pushReplacementNamed(context, Home.id);
+              Get.offAll(Home());
             },
           )
         ],

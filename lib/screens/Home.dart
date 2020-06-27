@@ -7,7 +7,6 @@ import 'package:food_ordering_app/screens/Menu/MenuContent.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatelessWidget {
-  static const id = 'home_screen';
 
   final List<Widget> _tab= [
     MenuContent(),

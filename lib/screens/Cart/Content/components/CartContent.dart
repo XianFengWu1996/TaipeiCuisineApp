@@ -49,22 +49,26 @@ class CartContent extends StatelessWidget {
           height: 200,
           child: Column(
             children: <Widget>[
-              Text('${functionalBloc.currentTime}'),
               functionalBloc.selectedValue == 'english' ? Text('Subtotal: \$${cartBloc.subtotal.toStringAsFixed(2)}') : Text('税前总额: \$${cartBloc.subtotal.toStringAsFixed(2)}'),
               FlatButton(
                 color: Colors.red[400],
                 onPressed: () async {
-                  if(functionalBloc.currentTime >= 660 && functionalBloc.currentTime <= 1310){
+                  if(TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >= 660 && TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <= 1310){
                     if (cartBloc.items.isNotEmpty) {
                       if (cartBloc.subtotal < 15) {
                         cartBloc.checkChoice('pickup');
                       }
-                      await paymentBloc.retrieveBillingInfo();
-                      await paymentBloc.retrieveRewardPoints();
-                      await paymentBloc.retrieveCustomerInfo();
+
+                      if(cartBloc.googleIos == ''){
+                        await paymentBloc.retrieveBillingInfo();
+                        await paymentBloc.retrieveRewardPoints();
+                        await paymentBloc.retrieveCustomerInfo();
+                        await cartBloc.retrieveKeys();
+                        await paymentBloc.retrieveKey();
+                      }
                       cartBloc.calculateLunchDiscount();
 
-                      Navigator.pushNamed(context, CheckoutScreen.id);
+                      Get.to(CheckoutScreen());
                     } else {
                       Scaffold.of(context).showSnackBar(
                           SnackBar(content: Text('Add items to the cart before checkout'),

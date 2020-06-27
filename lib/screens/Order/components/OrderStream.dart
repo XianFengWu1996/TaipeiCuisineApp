@@ -20,7 +20,7 @@ class OrderStream extends StatelessWidget {
           });
           if (ds.isNotEmpty) {
             return Container(
-              height: 650,
+              height: MediaQuery.of(context).size.height - 10,
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: ds.length,

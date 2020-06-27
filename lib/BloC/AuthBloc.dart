@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
@@ -32,7 +31,9 @@ class AuthBloc with ChangeNotifier {
         password: password,
       )).user;
 
-      if(_loggedInUser.uid == '${DotEnv().env['ADMIN_UID']}'){
+      var admin = await Firestore.instance.collection('admin').document('details').get();
+
+      if(_loggedInUser.uid == '${admin.data['uid']}'){
         functionalBloc.toggleLoading('reset');
         await storeBloc.saveLocalUser(_loggedInUser);
         Get.offAll(Orders(status: 'Placed',));
@@ -51,6 +52,7 @@ class AuthBloc with ChangeNotifier {
             'Please verify your email. If you have recently requested a verification email, check your inbox or spam.');
       }
     } catch (error) {
+      print(error);
       switch (error.code) {
         case 'ERROR_WRONG_PASSWORD':
           _errorMessage.add('Incorrect password, try again with a different password.');

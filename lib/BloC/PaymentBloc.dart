@@ -2,7 +2,6 @@ import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/Model/Order.dart';
@@ -89,28 +88,30 @@ class PaymentBloc with ChangeNotifier {
 
   // retrieve billing info from database
   retrieveBillingInfo() async {
-
-    await Firestore.instance
-        .collection('users/${_user.uid}/billings')
-        .document('details')
-        .get()
-        .then((value) {
-      var v = value.data;
-      if (value.data != null) {
-        _firstName = v['firstName'] == null ? '' : v['firstName'];
-        _lastName = v['lastName'] == null ? '' : v['lastName'];
-        _email = v['email'] == null ? '' : v['email'];
-        _phoneNumber = v['phone'] == null ? '' : v['phone'];
-        _street = v['street'] == null ? '' : v['street'];
-        _city = v['city'] == null ? '' : v['city'];
-        _zip = v['zip'] == null ? '' : v['zip'];
-        _brand = v['brand'] == null ? '' : v['brand'];
-        _lastFourDigit = v['lastFourDigit'] == null ? '' : v['lastFourDigit'];
-        _customerId = v['customerId'] == null ? '' : v['customerId'];
-        _cofId = v['cofId'] == null ? '' : v['cofId'];
-      }
-    });
-    return;
+    try{
+      await Firestore.instance
+          .collection('users/${_user.uid}/billings')
+          .document('details')
+          .get()
+          .then((value) {
+        var v = value.data;
+        if (value.data != null) {
+          _firstName = v['firstName'] == null ? '' : v['firstName'];
+          _lastName = v['lastName'] == null ? '' : v['lastName'];
+          _email = v['email'] == null ? '' : v['email'];
+          _phoneNumber = v['phone'] == null ? '' : v['phone'];
+          _street = v['street'] == null ? '' : v['street'];
+          _city = v['city'] == null ? '' : v['city'];
+          _zip = v['zip'] == null ? '' : v['zip'];
+          _brand = v['brand'] == null ? '' : v['brand'];
+          _lastFourDigit = v['lastFourDigit'] == null ? '' : v['lastFourDigit'];
+          _customerId = v['customerId'] == null ? '' : v['customerId'];
+          _cofId = v['cofId'] == null ? '' : v['cofId'];
+        }
+      });
+    } catch(e){
+      Get.snackbar('Error', 'An unexpected error has occured, try restarting the app.', colorText: Colors.white, backgroundColor: Colors.red);
+    }
   }
 
 
@@ -127,26 +128,35 @@ class PaymentBloc with ChangeNotifier {
   String get customerPhoneNumber => _customerPhoneNumber;
 
   saveCustomerInfo({firstName, lastName, phone}) async {
-    await Firestore.instance.collection('users/${_user.uid}/customer').document('details').setData({
-      'firstName': firstName,
-      'lastName': lastName,
-      'phone': phone
-    });
-    _customerFirstName = firstName;
-    _customerLastName = lastName;
-    _customerPhoneNumber = phone;
-    notifyListeners();
-
+    try{
+      await Firestore.instance.collection('users/${_user.uid}/customer').document('details').setData({
+        'firstName': firstName,
+        'lastName': lastName,
+        'phone': phone
+      });
+      _customerFirstName = firstName;
+      _customerLastName = lastName;
+      _customerPhoneNumber = phone;
+      notifyListeners();
+    } catch(e){
+      Get.snackbar('Error', 'An unexpected error has occured, try restarting the app.', colorText: Colors.white, backgroundColor: Colors.red);
+    }
   }
 
   retrieveCustomerInfo() async {
-    await Firestore.instance.collection('users/${_user.uid}/customer').document('details').get().then((value){
-      if(value.data != null){
-        _customerFirstName = value.data['firstName'] == null ? '': value.data['firstName'];
-        _customerLastName = value.data['lastName'] == null ? '' : value.data['lastName'];
-        _customerPhoneNumber = value.data['phone'] == null ? '' : value.data['phone'];
-      }
-    });
+
+    try{
+      await Firestore.instance.collection('users/${_user.uid}/customer').document('details').get().then((value){
+        if(value.data != null){
+          _customerFirstName = value.data['firstName'] == null ? '': value.data['firstName'];
+          _customerLastName = value.data['lastName'] == null ? '' : value.data['lastName'];
+          _customerPhoneNumber = value.data['phone'] == null ? '' : value.data['phone'];
+        }
+      });
+    } catch(e){
+      Get.snackbar('Error', 'An unexpected error has occured, try restarting the app.', colorText: Colors.white, backgroundColor: Colors.red);
+    }
+
   }
 
   void getPaymentMethod(String type) {
@@ -188,17 +198,26 @@ class PaymentBloc with ChangeNotifier {
   // if the customer wants to save the card on file make a request to Square endpoint
   // createCustomer() method will create the customer and return the customer_id upon completion
 
+  String _token = '';
+  String _appId = '';
+  String _locationId = '';
+
+  retrieveKey() async{
+    await Firestore.instance.collection('apikey').document('details').get().then((value) {
+      _token = value.data['square_access_token'];
+      _appId = value.data['square_application_id'];
+      _locationId = value.data['square_location_id'];
+    });
+    notifyListeners();
+  }
+
   String customerEndPoint = 'https://connect.squareupsandbox.com/v2/customers';
   String paymentEndPoint = 'https://connect.squareupsandbox.com/v2/payments';
-  Map<String, String> headers = {
-    "Accept": "application/json",
-    "Content-Type": "application/json",
-    "Authorization":
-        "Bearer EAAAECrURINgpXaOtJARN8yucdgjdZancyd3MhoMQQkqeFnICsnYtLIq_4kk8FOS",
-  };
 
   void payment(CartBloc cartBloc, FunctionalBloc functionalBloc, total) async {
     int amount = (total / 100).toInt();
+
+    print(_token);
 
     var contact = Contact((b) => b
       ..givenName = "$_firstName"
@@ -211,7 +230,7 @@ class PaymentBloc with ChangeNotifier {
       ..postalCode = "$_zip");
 
     await InAppPayments.setSquareApplicationId(
-        '${DotEnv().env['SQUARE_APPLICATION_ID']}');
+        '$_appId');
 
     await InAppPayments.startCardEntryFlowWithBuyerVerification(
         onBuyerVerificationSuccess: (BuyerVerificationDetails result) async {
@@ -223,14 +242,15 @@ class PaymentBloc with ChangeNotifier {
           Get.off(Confirmation());
         },
         onBuyerVerificationFailure: (ErrorInfo errorInfo) {
-          print('errorinfo $errorInfo');
+          print(errorInfo);
+//          Get.snackbar('${errorInfo.code}', '${errorInfo.message}', backgroundColor: Colors.red, colorText: Colors.white);
         },
         buyerAction: 'Charge',
         money: Money((b) => b
           ..amount = amount
           ..currencyCode = 'USD'),
         contact: contact,
-        squareLocationId: '${DotEnv().env['SQUARE_LOCATION_ID']}',
+        squareLocationId: '$_locationId',
         collectPostalCode: true,
         onCardEntryCancel: () {});
   }
@@ -239,7 +259,12 @@ class PaymentBloc with ChangeNotifier {
   Future<dynamic> createCustomer() async {
     try {
       var response = await http.post(customerEndPoint,
-          headers: headers,
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization":
+            "Bearer $_token",
+          },
           body: jsonEncode({
             "idempotency_key": '$_idempotencyKey',
             "given_name": _firstName,
@@ -272,7 +297,12 @@ class PaymentBloc with ChangeNotifier {
 
       try{
         var response = await http.post(url,
-            headers: headers,
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+              "Authorization":
+              "Bearer $_token",
+            },
             body: jsonEncode({
               'card_nonce': '${result.nonce}',
               'cardholder_name': '$firstName $lastName',
@@ -311,7 +341,12 @@ class PaymentBloc with ChangeNotifier {
    try{
      var response = await http.post(
        paymentEndPoint,
-       headers: headers,
+       headers: {
+         "Accept": "application/json",
+         "Content-Type": "application/json",
+         "Authorization":
+         "Bearer $_token",
+       },
        body: jsonEncode({
          "idempotency_key": _idempotencyKey,
          "autocomplete": true,
@@ -380,17 +415,13 @@ class PaymentBloc with ChangeNotifier {
              paymentId: jsonDecode(response.body)['payment']['id'],
              method: 'Card');
        }
-
      } else {
        _errorMessage = jsonDecode(response.body)['errors'][0]['category'];
        return _errorMessage;
      }
    } catch(error){
-     print(error);
      _errorMessage = 'Failed to charge card, try again later.';
    }
-
-
   }
 
   //charge the card on file with square
@@ -399,7 +430,12 @@ class PaymentBloc with ChangeNotifier {
       // make http request to Square payment for Card on file
       var response = await http.post(
         paymentEndPoint,
-        headers: headers,
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Authorization":
+          "Bearer $_token",
+        },
         body: jsonEncode({
           "idempotency_key": _idempotencyKey,
           "autocomplete": true,
@@ -451,7 +487,6 @@ class PaymentBloc with ChangeNotifier {
         _errorMessage = data['errors'][0]['category'];
       }
     } catch(error){
-      print(error);
       _errorMessage = 'Failed to charge card on file. Try again later';}
   }
 
@@ -488,13 +523,9 @@ class PaymentBloc with ChangeNotifier {
         paymentId: ''
       );
     } catch(e){
-      print(e);
       _errorMessage = 'Failed to send order to restaurant, try again later';
     }
-
-
   }
-
 
   // ===========================================
   //  Reward Point Related
@@ -538,7 +569,6 @@ class PaymentBloc with ChangeNotifier {
             _pointDetail = value.data['pointDetails'];
           }
     });
-
     return;
   }
 

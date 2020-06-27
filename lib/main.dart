@@ -1,26 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:food_ordering_app/BloC/AuthBloc.dart';
 import 'package:food_ordering_app/BloC/CartBloc.dart';
 import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
 import 'package:food_ordering_app/BloC/PaymentBloc.dart';
 import 'package:food_ordering_app/BloC/StoreBloc.dart';
-import 'package:food_ordering_app/screens/Account/Reward/Rewards.dart';
-import 'package:food_ordering_app/screens/Account/Screen/Address.dart';
-import 'package:food_ordering_app/screens/Account/Screen/Setting.dart';
-import 'package:food_ordering_app/screens/Account/Screen/User.dart';
 import 'package:food_ordering_app/screens/Auth/Login/Login.dart';
 import 'package:food_ordering_app/screens/Auth/Signup.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/CheckoutScreen.dart';
-import 'package:food_ordering_app/screens/Home.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-Future main() async {
-  await DotEnv().load('.env');
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
@@ -43,19 +33,9 @@ class MyApp extends StatelessWidget {
         initialRoute: Login.id,
         navigatorKey: Get.key,
         routes: {
-          // Dashboard page after users are verified
-          Home.id: (context) => Home(),
-
           // Authenication pages
           Login.id: (context) => Login(),
           Signup.id: (context) => Signup(),
-
-          CheckoutScreen.id: (context) => CheckoutScreen(),
-          // Account pages
-          User.id: (context) => User(),
-          Address.id: (context) => Address(),
-          Reward.id: (context) => Reward(),
-          Setting.id: (context) => Setting(),
         },
       ),
     );

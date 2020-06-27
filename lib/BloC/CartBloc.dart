@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:food_ordering_app/Model/CartItem.dart';
 import 'package:food_ordering_app/Model/Product.dart';
 import 'package:get/get.dart';
@@ -184,14 +183,20 @@ class CartBloc with ChangeNotifier {
   }
 
   void calculateLunchDiscount(){
-    if(_lunchCount < 3){
-      _lunchDiscount = 0;
-    }
+    if(TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >= 660 && TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <= 990){
+      if(_lunchCount < 3){
+        _lunchDiscount = 0;
+      }
 
-    if(_lunchCount % 3 == 0){
-      _lunchDiscount = (_lunchCount / 3) * 3.9;
+      if(_lunchCount % 3 == 0){
+        _lunchDiscount = (_lunchCount / 3) * 3.9;
+        calculateTotal('add', 0);
+      }
+    } else {
+      _lunchDiscount = 0;
       calculateTotal('add', 0);
     }
+
     notifyListeners();
   }
 
@@ -255,12 +260,7 @@ class CartBloc with ChangeNotifier {
   }
 
   saveAddress(changeStreet, changeCity, changeZipCode, changeApt, changeBusiness) async {
-    if (_street != changeStreet ||
-        _city != changeCity ||
-        _zipCode != changeZipCode||
-        _apt!= changeApt ||
-        _businessName != changeBusiness
-    ) {
+    if (_street != changeStreet || _city != changeCity || _zipCode != changeZipCode|| _apt!= changeApt || _businessName != changeBusiness) {
 
       // it will return the value of lat and long
       // geolocation[0] = lat,
@@ -311,12 +311,12 @@ class CartBloc with ChangeNotifier {
 
   Future<dynamic> geoCoding(street, city) async {
     String url = 'https://maps.googleapis.com/maps/api/geocode/json?'
-        'address=$street,'
-        '+$city,+MA&'
-        'key=${DotEnv().env['GOOGLE_MAP_API_KEY']}';
+        'address=$street,+$city,+MA&key=$_googleIos';
 
     var result = await http.get(url);
+    print(result.body);
     var data = jsonDecode(result.body)['results'][0];
+
 
     var lat, long, streetNumber, streetName, cityName, zipCode;
 
@@ -338,11 +338,28 @@ class CartBloc with ChangeNotifier {
     String url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial'
         '&origins=42.274220,-71.024369'
         '&destinations=$lat, $long'
-        '&key=${DotEnv().env['GOOGLE_MAP_API_KEY']}';
+        '&key=$_googleIos';
     var result = await http.get(url);
     var data = jsonDecode(result.body);
 
     return data['rows'][0]['elements'][0]['distance']['value'];
+  }
+
+  String _googleIos = '';
+  String _googleAndroid = '';
+
+  String get googleIos => _googleIos;
+  String get googleAndroid => _googleAndroid;
+
+  // retrieve keys
+  retrieveKeys()async{
+    try{
+      var result = await Firestore.instance.collection('apikey').document('details').get();
+      _googleIos = result.data['google_ios_key'];
+      _googleAndroid = result.data['google_android_key'];
+    } catch(e){
+      Get.snackbar('Error', 'An unexpected error has occurred, please try again later.');
+    }
   }
 
   // clear all the values in this provider
@@ -379,6 +396,8 @@ class CartBloc with ChangeNotifier {
     _total = 0;
     _calcSubtotal = 0;
     _lunchDiscount = 0;
+    _googleIos = '';
+    _googleAndroid = '';
     _lunchCount = 0;
     _tipPercent = 0;
     _isCustomTip = false;

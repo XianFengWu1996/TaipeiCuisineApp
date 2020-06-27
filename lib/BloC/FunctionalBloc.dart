@@ -54,16 +54,6 @@ class FunctionalBloc with ChangeNotifier{
     });
   }
 
-  // Time
-
-//  int _lunchTimeStart = 660 ;
-//  int _lunchTimeEnd = 960;
-//  int _fullDayStart = 660;
-//  int _fullDayEnd = 1310;
-
-  int _currentTime = TimeOfDay.now().hour * 60 + TimeOfDay.now().minute;
-  int get currentTime => _currentTime;
-
   // Address
 
   String _street = '';

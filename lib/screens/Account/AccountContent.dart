@@ -6,6 +6,7 @@ import 'package:food_ordering_app/screens/Account/Reward/Rewards.dart';
 import 'package:food_ordering_app/screens/Account/Screen/Address.dart';
 import 'package:food_ordering_app/screens/Account/Screen/Setting.dart';
 import 'package:food_ordering_app/screens/Account/Screen/User.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class AccountContent extends StatelessWidget {
@@ -24,7 +25,7 @@ class AccountContent extends StatelessWidget {
             icon: FontAwesome.user,
             title: functionalBloc.selectedValue == 'english' ? 'User' : '用户信息',
             onTap: () {
-              Navigator.pushNamed(context, User.id);
+              Get.to(User());
             },
           ),
           AccountItem(
@@ -33,21 +34,21 @@ class AccountContent extends StatelessWidget {
             onTap: () async {
               await functionalBloc.retrieveAddress();
 
-              Navigator.pushNamed(context, Address.id);
+              Get.to(Address());
             },
           ),
           AccountItem(
             icon: Icons.attach_money,
             title: functionalBloc.selectedValue == 'english' ? 'Reward' : '积分回馈',
             onTap: () {
-              Navigator.pushNamed(context, Reward.id);
+              Get.to(Reward());
             },
           ),
           AccountItem(
             icon: FontAwesome.gear,
             title: functionalBloc.selectedValue == 'english' ? 'Setting' : '设置',
             onTap: () {
-              Navigator.pushNamed(context, Setting.id);
+              Get.to(Setting());
             },
           ),
         ],

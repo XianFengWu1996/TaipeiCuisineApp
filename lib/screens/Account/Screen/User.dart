@@ -3,8 +3,6 @@ import 'package:food_ordering_app/BloC/AuthBloc.dart';
 import 'package:provider/provider.dart';
 
 class User extends StatelessWidget {
-  static const id = 'user';
-
   @override
   Widget build(BuildContext context) {
     AuthBloc authBloc = Provider.of<AuthBloc>(context);
