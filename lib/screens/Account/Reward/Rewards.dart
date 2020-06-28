@@ -1,13 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/AuthBloc.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/components/Divider.dart';
-import 'package:food_ordering_app/screens/Account/Reward/components/RewardCard.dart';
+import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/components/Divider.dart';
+import 'package:TaipeiCuisine/screens/Account/Reward/components/RewardCard.dart';
 import 'package:provider/provider.dart';
 
 class Reward extends StatelessWidget {
-  static const id = 'reward';
   @override
   Widget build(BuildContext context) {
     AuthBloc authBloc = Provider.of<AuthBloc>(context);
@@ -28,7 +27,7 @@ class Reward extends StatelessWidget {
                   return Column(
                     children: <Widget>[
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                        padding: EdgeInsets.only(top: 10, left: 10, right: 10),
                         child: Center(
                           child: Column(
                             children: <Widget>[
@@ -38,7 +37,7 @@ class Reward extends StatelessWidget {
                               ),
                               LineDivider(),
                           Container(
-                            height: 570,
+                            height: MediaQuery.of(context).size.height - 200,
                             child: ListView.builder(
                                 shrinkWrap: true,
                                 itemCount: data['pointDetails'].length,

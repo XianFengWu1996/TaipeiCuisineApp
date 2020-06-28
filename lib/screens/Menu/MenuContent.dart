@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/screens/Menu/MenuItems.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/screens/Menu/MenuItems.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -48,7 +48,8 @@ class MenuContent extends StatelessWidget {
                     }'),
                   )),
                   onPressed: () {
-                    Get.to(MenuItems(
+                    Get.to(
+                      MenuItems(
                         count: index,
                         title: functionalBloc.selectedValue == 'english'
                             ? functionalBloc.fullDayMenu[index]['englishName']

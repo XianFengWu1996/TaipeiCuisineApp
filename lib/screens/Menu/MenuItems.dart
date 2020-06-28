@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/screens/Cart/CartScreen.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/screens/Cart/CartScreen.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/Model/Product.dart';
+import 'package:TaipeiCuisine/BloC/CartBloc.dart';
+import 'package:TaipeiCuisine/Model/Product.dart';
 
 class MenuItems extends StatelessWidget {
   final int count;
@@ -13,7 +13,6 @@ class MenuItems extends StatelessWidget {
   final bool lunch;
 
   MenuItems({@required this.count, @required this.title, this.lunch});
-
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +43,7 @@ class MenuItems extends StatelessWidget {
                       title: functionalBloc.selectedValue == 'english'
                           ? Text('${currentDish[index]['food_name']}',style: currentDish[index]['spicy'] ? _spicyItem : TextStyle(),)
                           : Text('${currentDish[index]['food_name_chinese']}', style: currentDish[index]['spicy'] ? _spicyItem : TextStyle(),),
-                      subtitle: Text('\$${currentDish[index]['price']}'),
+                      subtitle: Text('\$${(currentDish[index]['price']).toStringAsFixed(2)}'),
                       trailing: IconButton(icon: Icon(Icons.add), iconSize: 30,
                         onPressed: (){
                           cartBloc.addToCart(

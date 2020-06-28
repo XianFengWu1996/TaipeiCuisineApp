@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/StoreBloc.dart';
-import 'package:food_ordering_app/StoreDashboard/Orders.dart';
-import 'package:food_ordering_app/components/Divider.dart';
-import 'package:food_ordering_app/screens/Auth/Login/Login.dart';
+import 'package:TaipeiCuisine/BloC/StoreBloc.dart';
+import 'package:TaipeiCuisine/StoreDashboard/Orders.dart';
+import 'package:TaipeiCuisine/components/Divider.dart';
+import 'package:TaipeiCuisine/screens/Auth/Login/Login.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 

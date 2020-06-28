@@ -1,13 +1,13 @@
+import 'package:TaipeiCuisine/BloC/StoreBloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/BloC/PaymentBloc.dart';
-import 'package:food_ordering_app/BloC/StoreBloc.dart';
-import 'package:food_ordering_app/StoreDashboard/Orders.dart';
-import 'package:food_ordering_app/screens/Home.dart';
+import 'package:TaipeiCuisine/BloC/CartBloc.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
+import 'package:TaipeiCuisine/StoreDashboard/Orders.dart';
+import 'package:TaipeiCuisine/screens/Home.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -116,7 +116,6 @@ class AuthBloc with ChangeNotifier {
             Get.offAll(Home());
           }
         } catch (error) {
-          print(error);
           _errorMessage.add('An error has occur. Try again later or use a different login method.');
         }
         break;
@@ -190,13 +189,17 @@ class AuthBloc with ChangeNotifier {
   }
 
   void initializeReward() async {
-    await Firestore.instance
-        .collection('users/${_loggedInUser.uid}/rewards')
-        .document('points')
-        .setData({
-      'point': 0,
-      'pointDetails': [],
-    }, merge: true);
+    try{
+      await Firestore.instance
+          .collection('users/${_loggedInUser.uid}/rewards')
+          .document('points')
+          .setData({
+        'point': 0,
+        'pointDetails': [],
+      }, merge: true);
+    } catch(e){
+      Get.snackbar('Error', 'An unexpected error has occurred, try again later.', backgroundColor: Colors.red, colorText: Colors.white);
+    }
   }
 
   void clearAllValueUponLogout(){

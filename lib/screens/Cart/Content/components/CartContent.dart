@@ -1,11 +1,11 @@
+import 'package:TaipeiCuisine/BloC/CartBloc.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/CheckoutScreen.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/components/CartCard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/BloC/PaymentBloc.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/CheckoutScreen.dart';
-import 'package:food_ordering_app/screens/Cart/Content/components/CartCard.dart';
 import 'package:get/get.dart';
 
 import 'package:provider/provider.dart';
@@ -53,13 +53,13 @@ class CartContent extends StatelessWidget {
               FlatButton(
                 color: Colors.red[400],
                 onPressed: () async {
-                  if(TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >= 660 && TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <= 1310){
+                  if(TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >= 0 && TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <= 1490){
                     if (cartBloc.items.isNotEmpty) {
                       if (cartBloc.subtotal < 15) {
                         cartBloc.checkChoice('pickup');
                       }
 
-                      if(cartBloc.googleIos == ''){
+                      if(paymentBloc.appId == ''){
                         await paymentBloc.retrieveBillingInfo();
                         await paymentBloc.retrieveRewardPoints();
                         await paymentBloc.retrieveCustomerInfo();

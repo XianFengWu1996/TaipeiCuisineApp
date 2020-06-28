@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/BloC/PaymentBloc.dart';
-import 'package:food_ordering_app/components/BottomSheet.dart';
-import 'package:food_ordering_app/components/Chips.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/Payment/ConfirmationPage.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/Payment/PaymentForm.dart';
+import 'package:TaipeiCuisine/BloC/CartBloc.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
+import 'package:TaipeiCuisine/components/BottomSheet.dart';
+import 'package:TaipeiCuisine/components/Chips.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/Payment/ConfirmationPage.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/Payment/PaymentForm.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:slide_to_confirm/slide_to_confirm.dart';
@@ -31,8 +31,9 @@ class PaymentModal extends StatelessWidget {
                 paymentBloc.resetPaymentMethod();
               },
             ),
-            Column(
-              children: <Widget>[
+            ListView(
+              shrinkWrap: true,
+              children: [
                 SelectionChip(
                   title: functionalBloc.selectedValue == 'english' ? 'Cash' : '现金',
                   icon: FontAwesome.money,
@@ -43,13 +44,13 @@ class PaymentModal extends StatelessWidget {
                 ),
                 paymentBloc.cofId != ''
                     ? SelectionChip(
-                        title: functionalBloc.selectedValue == 'english' ? 'xx-${paymentBloc.lastFourDigit}' : '尾号 xx-${paymentBloc.lastFourDigit}',
-                        icon: FontAwesome.credit_card,
-                        selected: paymentBloc.paymentMethod == 'saved',
-                        onSelected: (value) {
-                          paymentBloc.getPaymentMethod('saved');
-                        },
-                      )
+                  title: functionalBloc.selectedValue == 'english' ? 'xx-${paymentBloc.lastFourDigit}' : '尾号 xx-${paymentBloc.lastFourDigit}',
+                  icon: FontAwesome.credit_card,
+                  selected: paymentBloc.paymentMethod == 'saved',
+                  onSelected: (value) {
+                    paymentBloc.getPaymentMethod('saved');
+                  },
+                )
                     : Container(),
                 SelectionChip(
                   title: functionalBloc.selectedValue == 'english' ? 'Add Credit / Debit Card' : '添加新的信用卡',
@@ -131,6 +132,8 @@ class PaymentModal extends StatelessWidget {
               padding: EdgeInsets.only(top: 20, bottom: 20),
               color: Colors.red[400],
             )
+
+
           ]),
     );
   }

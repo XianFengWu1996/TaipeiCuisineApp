@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/AuthBloc.dart';
-import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/BloC/PaymentBloc.dart';
-import 'package:food_ordering_app/BloC/StoreBloc.dart';
-import 'package:food_ordering_app/screens/Auth/Login/Login.dart';
-import 'package:food_ordering_app/screens/Auth/Signup.dart';
+import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
+import 'package:TaipeiCuisine/BloC/CartBloc.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
+import 'package:TaipeiCuisine/BloC/StoreBloc.dart';
+import 'package:TaipeiCuisine/screens/Auth/Login/Login.dart';
+import 'package:TaipeiCuisine/screens/Auth/Signup.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 

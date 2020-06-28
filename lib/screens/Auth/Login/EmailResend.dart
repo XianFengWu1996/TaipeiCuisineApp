@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/AuthBloc.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:get/get.dart';
 
 class Resend extends StatelessWidget {

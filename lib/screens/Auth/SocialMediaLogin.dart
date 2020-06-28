@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/AuthBloc.dart';
-import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/BloC/PaymentBloc.dart';
-import 'package:food_ordering_app/components/Buttons/RoundIconLogin.dart';
+import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
+import 'package:TaipeiCuisine/BloC/CartBloc.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
+import 'package:TaipeiCuisine/components/Buttons/RoundIconLogin.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';

@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/AuthBloc.dart';
-import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/BloC/PaymentBloc.dart';
-import 'package:food_ordering_app/screens/Auth/Login/Login.dart';
+import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
+import 'package:TaipeiCuisine/BloC/CartBloc.dart';
+import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
+import 'package:TaipeiCuisine/screens/Auth/Login/Login.dart';
 import 'package:get/get.dart';
 
 class FunctionalBloc with ChangeNotifier{
@@ -43,15 +43,23 @@ class FunctionalBloc with ChangeNotifier{
 
   // Get Menu Data from Database
   retrieveFullDayMenu() async {
-   await Firestore.instance.collection('menu/fullday/details').getDocuments().then((v){
-     _fullDayMenu = v.documents;
-   });
+   try{
+     await Firestore.instance.collection('menu/fullday/details').getDocuments().then((v){
+       _fullDayMenu = v.documents;
+     });
+   } catch(e){
+     Get.snackbar('Error', 'Failed to retrieve full day menu..', backgroundColor: Colors.red, colorText: Colors.white);
+   }
   }
 
   retrieveLunchMenu() async {
-    await Firestore.instance.collection('menu/lunch/details').getDocuments().then((v){
-      _lunchMenu = v.documents;
-    });
+    try{
+      await Firestore.instance.collection('menu/lunch/details').getDocuments().then((v){
+        _lunchMenu = v.documents;
+      });
+    } catch(e){
+      Get.snackbar('Error', 'Failed to retrieve lunch menu', backgroundColor: Colors.red, colorText: Colors.white);
+    }
   }
 
   // Address
@@ -70,9 +78,10 @@ class FunctionalBloc with ChangeNotifier{
 
 
   retrieveAddress() async {
-      await Firestore.instance.collection('users/${_user.uid}/address')
-        .document('details').get()
-        .then((value){
+      try{
+        await Firestore.instance.collection('users/${_user.uid}/address')
+            .document('details').get()
+            .then((value){
 
           var data = value.data;
           if(data != null){
@@ -83,24 +92,32 @@ class FunctionalBloc with ChangeNotifier{
             _apt = data['apt'];
           }
         });
-      return;
+      }catch(e){
+        Get.snackbar('Error', 'Failed to retrieve address information...', backgroundColor: Colors.red, colorText: Colors.white);
+      }
+
   }
 
   saveAddress(changeStreet, changeCity, changeZipCode, changeApt, changeBusiness) async {
     if (_street != changeStreet || _city != changeCity || _zipCode != changeZipCode||
         _apt!= changeApt || _business != changeBusiness
     )
-    await Firestore.instance.collection('users/${_user.uid}/address').document(
-        'details').setData(
-      {
-        'street': changeStreet ,
-        'city': changeCity,
-        'zipcode':changeZipCode,
-        'apt': changeApt,
-        'business': changeBusiness,
-      },
-      merge: true,
-    );
+      try{
+        await Firestore.instance.collection('users/${_user.uid}/address').document(
+            'details').setData(
+          {
+            'street': changeStreet ,
+            'city': changeCity,
+            'zipcode':changeZipCode,
+            'apt': changeApt,
+            'business': changeBusiness,
+          },
+          merge: true,
+        );
+      }catch(e){
+        Get.snackbar('Error', 'Failed to save address...', backgroundColor: Colors.red, colorText: Colors.white);
+      }
+
   }
 
   // Loader
@@ -174,7 +191,6 @@ class FunctionalBloc with ChangeNotifier{
             }, child: Text('Okay'),)
         );
       });
-
     }catch(e){
       if(e.code == 'ERROR_REQUIRES_RECENT_LOGIN'){
         Get.snackbar('Require recent login', 'Password change require recent login, please logout and sign back in', colorText: Colors.white, backgroundColor: Colors.red[400]);

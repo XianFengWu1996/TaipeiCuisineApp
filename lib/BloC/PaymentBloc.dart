@@ -2,10 +2,10 @@ import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/Model/Order.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/Payment/ConfirmationPage.dart';
+import 'package:TaipeiCuisine/BloC/CartBloc.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/Model/Order.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/Payment/ConfirmationPage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:square_in_app_payments/in_app_payments.dart';
@@ -202,6 +202,8 @@ class PaymentBloc with ChangeNotifier {
   String _appId = '';
   String _locationId = '';
 
+  String get appId => _appId;
+
   retrieveKey() async{
     await Firestore.instance.collection('apikey').document('details').get().then((value) {
       _token = value.data['square_access_token'];
@@ -216,8 +218,6 @@ class PaymentBloc with ChangeNotifier {
 
   void payment(CartBloc cartBloc, FunctionalBloc functionalBloc, total) async {
     int amount = (total / 100).toInt();
-
-    print(_token);
 
     var contact = Contact((b) => b
       ..givenName = "$_firstName"
@@ -242,8 +242,7 @@ class PaymentBloc with ChangeNotifier {
           Get.off(Confirmation());
         },
         onBuyerVerificationFailure: (ErrorInfo errorInfo) {
-          print(errorInfo);
-//          Get.snackbar('${errorInfo.code}', '${errorInfo.message}', backgroundColor: Colors.red, colorText: Colors.white);
+          Get.snackbar('${errorInfo.code}', '${errorInfo.message}', backgroundColor: Colors.red, colorText: Colors.white);
         },
         buyerAction: 'Charge',
         money: Money((b) => b
@@ -559,17 +558,21 @@ class PaymentBloc with ChangeNotifier {
 
 
   retrieveRewardPoints() async {
-    await Firestore.instance
-        .collection('users/${_user.uid}/rewards')
-        .document('points')
-        .get()
-        .then((value) {
-          if(value.exists){
-            _rewardPoint = value.data['point'];
-            _pointDetail = value.data['pointDetails'];
-          }
-    });
-    return;
+    try{
+      await Firestore.instance
+          .collection('users/${_user.uid}/rewards')
+          .document('points')
+          .get()
+          .then((value) {
+        if(value.exists){
+          _rewardPoint = value.data['point'];
+          _pointDetail = value.data['pointDetails'];
+        }
+      });
+    }catch(e){
+      Get.snackbar('Error', 'Failed to retrieve reward points', backgroundColor: Colors.red, colorText: Colors.white);
+    }
+
   }
 
   void calculateRewardPoint({String action, int percentage, double total, String method, orderId, ptUsed}) async {
@@ -589,10 +592,15 @@ class PaymentBloc with ChangeNotifier {
 
     _pointDetail.insert(0, detail);
 
-    await Firestore.instance.collection('users/${_user.uid}/rewards').document('points').setData({
-      'point': _rewardPoint,
-      'pointDetails': _pointDetail
-    }, merge: true);
+    try{
+      await Firestore.instance.collection('users/${_user.uid}/rewards').document('points').setData({
+        'point': _rewardPoint,
+        'pointDetails': _pointDetail
+      }, merge: true);
+    } catch(e){
+      Get.snackbar('Error', 'Failed to save reward points', backgroundColor: Colors.red, colorText: Colors.white);
+    }
+
   }
 
   // ===========================================
@@ -723,6 +731,9 @@ class PaymentBloc with ChangeNotifier {
     _rewardPoint = 0;
     _pointEarned = 0;
     _pointDetail = [];
+    _appId = '';
+    _token = '';
+    _locationId = '';
     notifyListeners();
   }
 }

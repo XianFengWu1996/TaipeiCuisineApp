@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/components/Button.dart';
-import 'package:food_ordering_app/components/InputField.dart';
-import 'package:food_ordering_app/components/Validation.dart';
+import 'package:TaipeiCuisine/components/Button.dart';
+import 'package:TaipeiCuisine/components/InputField.dart';
+import 'package:TaipeiCuisine/components/Validation.dart';
+import 'package:get/get.dart';
 
 class BottomSheetContent extends StatelessWidget {
   final String label;
@@ -24,7 +25,7 @@ class BottomSheetContent extends StatelessWidget {
         BottomSheetHeader(title: label,
             height: 50,
             onPressed: (){
-              Navigator.pop(context);
+              Get.close(1);
             }),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),

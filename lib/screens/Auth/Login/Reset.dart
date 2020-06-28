@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/AuthBloc.dart';
-import 'package:food_ordering_app/components/BottomSheet.dart';
+import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
+import 'package:TaipeiCuisine/components/BottomSheet.dart';
 import 'package:get/get.dart';
 
 class ResetPass extends StatelessWidget {
@@ -22,7 +22,7 @@ class ResetPass extends StatelessWidget {
             ),
           ),
           onPressed: () {
-            showModalBottomSheet(
+            showBottomSheet(
               context: context,
               builder: (context) {
                 return BottomSheetContent(

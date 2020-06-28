@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:food_ordering_app/BloC/StoreBloc.dart';
-import 'package:food_ordering_app/StoreDashboard/Menubar.dart';
-import 'package:food_ordering_app/components/Divider.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/CheckoutComponents.dart';
+import 'package:TaipeiCuisine/BloC/StoreBloc.dart';
+import 'package:TaipeiCuisine/StoreDashboard/Menubar.dart';
+import 'package:TaipeiCuisine/components/Divider.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/CheckoutComponents.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';

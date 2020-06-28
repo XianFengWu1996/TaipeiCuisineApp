@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/screens/Cart/Content/components/CartContent.dart';
-import 'package:food_ordering_app/screens/Home.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/components/CartContent.dart';
+import 'package:TaipeiCuisine/screens/Home.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 

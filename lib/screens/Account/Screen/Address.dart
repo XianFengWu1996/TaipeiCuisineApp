@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/components/InputField.dart';
-import 'package:food_ordering_app/components/Validation.dart';
+import 'package:TaipeiCuisine/BloC/CartBloc.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/components/InputField.dart';
+import 'package:TaipeiCuisine/components/Validation.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
 
 class Address extends StatelessWidget {
-  static const id = 'address';
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -83,8 +82,10 @@ class Address extends StatelessWidget {
                       functionalBloc.toggleLoading('start');
                       _formKey.currentState.save();
                       var geoCodingAddress = await cartBloc.geoCoding(street, city);
-                      var formatStreet = geoCodingAddress[2] + ' ' + geoCodingAddress[3];
+                      print(geoCodingAddress);
+                      var formatStreet = '${geoCodingAddress[2]} ${geoCodingAddress[3]}';
 
+                      await cartBloc.saveAddress(formatStreet, geoCodingAddress[4], geoCodingAddress[5], apt, businessName);
                       await functionalBloc.saveAddress(formatStreet, geoCodingAddress[4], geoCodingAddress[5], apt, businessName);
                       Navigator.pop(context);
                       _formKey.currentState.reset();

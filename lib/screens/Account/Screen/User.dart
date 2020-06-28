@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/AuthBloc.dart';
+import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
 import 'package:provider/provider.dart';
 
 class User extends StatelessWidget {

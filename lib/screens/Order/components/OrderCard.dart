@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/screens/Order/components/OrderModalDetail.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/screens/Order/components/OrderModalDetail.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 

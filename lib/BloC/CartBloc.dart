@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/Model/CartItem.dart';
-import 'package:food_ordering_app/Model/Product.dart';
+import 'package:TaipeiCuisine/Model/CartItem.dart';
+import 'package:TaipeiCuisine/Model/Product.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -239,21 +239,25 @@ class CartBloc with ChangeNotifier {
 
 
   getAddress() async {
-    QuerySnapshot querySnapshot = await Firestore.instance.collection(
-        'users/${_user.uid}/address').getDocuments();
+    try{
+      QuerySnapshot querySnapshot = await Firestore.instance.collection(
+          'users/${_user.uid}/address').getDocuments();
 
-    if (querySnapshot.documents.length > 0) {
-      querySnapshot.documents.forEach((f) {
-        _street = f.data['street'];
-        _city = f.data['city'];
-        _zipCode = f.data['zipcode'];
-        _apt = f.data['apt'];
-        _businessName = f.data['business'];
-        _deliveryFee = f.data['deliveryFee'];
-        _address = '$_street, \n$_city, $zipCode ${apt != '' ? 'Apt ': ''}$apt';
-      });
-    } else {
-      _address = '';
+      if (querySnapshot.documents.length > 0) {
+        querySnapshot.documents.forEach((f) {
+          _street = f.data['street'];
+          _city = f.data['city'];
+          _zipCode = f.data['zipcode'];
+          _apt = f.data['apt'];
+          _businessName = f.data['business'];
+          _deliveryFee = f.data['deliveryFee'];
+          _address = '$_street, \n$_city, $zipCode ${apt != '' ? 'Apt ': ''}$apt';
+        });
+      } else {
+        _address = '';
+      }
+    } catch(e){
+      Get.snackbar('Error', 'Unable to retrieve address...', backgroundColor: Colors.red, colorText: Colors.white);
     }
 
     notifyListeners();
@@ -269,27 +273,32 @@ class CartBloc with ChangeNotifier {
       // geolocation[3] = street name
       // geolocation[4] = city
       // geolocation[5] = zipcode
-      var geolocation = await geoCoding(changeStreet, changeCity);
+      var geolocation = await geoCoding(changeStreet, changeCity, );
 
       var calcDistance = await calculateDistance(geolocation[0], geolocation[1]);
 
       await calculateDeliveryFee(calcDistance);
 
       if(_deliveryFee != 0.0){
-        await Firestore.instance.collection('users/${_user.uid}/address').document(
-            'details').setData(
-          {
-            'street': '${geolocation[2]} ' + '${geolocation[3]}' ,
-            'city': geolocation[4],
-            'zipcode':geolocation[5],
-            'apt': changeApt,
-            'business': changeBusiness,
-            'deliveryFee': _deliveryFee,
-          },
-          merge: true,
-        );
-      }
 
+
+        try{
+          await Firestore.instance.collection('users/${_user.uid}/address').document(
+              'details').setData(
+            {
+              'street': '${geolocation[2]} ' + '${geolocation[3]}' ,
+              'city': geolocation[4],
+              'zipcode':geolocation[5],
+              'apt': changeApt,
+              'business': changeBusiness,
+              'deliveryFee': _deliveryFee,
+            },
+            merge: true,
+          );
+        } catch(e){
+          Get.snackbar('Error', 'Unable to save address...', backgroundColor: Colors.red, colorText: Colors.white);
+        }
+      }
       getAddress();
     }
 
@@ -312,16 +321,15 @@ class CartBloc with ChangeNotifier {
   Future<dynamic> geoCoding(street, city) async {
     String url = 'https://maps.googleapis.com/maps/api/geocode/json?'
         'address=$street,+$city,+MA&key=$_googleIos';
+    try{
+      var result = await http.get(url);
+      var data = jsonDecode(result.body)['results'][0];
 
-    var result = await http.get(url);
-    print(result.body);
-    var data = jsonDecode(result.body)['results'][0];
+      var lat, long, streetNumber, streetName, cityName, zipCode;
 
-
-    var lat, long, streetNumber, streetName, cityName, zipCode;
-
-    if(data['address_components'].last['types'][0] == 'postal_code_suffix'){
-      data['address_components'].removeLast();
+      if(data['address_components'].last['types'][0] == 'postal_code_suffix'){
+        data['address_components'].removeLast();
+      }
 
       lat = data['geometry']['location']['lat'];
       long = data['geometry']['location']['lng'];
@@ -329,9 +337,16 @@ class CartBloc with ChangeNotifier {
       streetName =data['address_components'][1]['long_name'];
       cityName = data['address_components'][2]['long_name'];
       zipCode = data['address_components'].last['long_name'];
+
+      print(streetNumber);
+      print(streetName);
+
+      return [lat, long, streetNumber, streetName, cityName, zipCode];
+    } catch(e){
+      Get.snackbar('Error', 'An unexpected error has occurred, try again later..', backgroundColor: Colors.red, colorText: Colors.white);
     }
 
-    return [lat, long, streetNumber, streetName, cityName, zipCode];
+
   }
 
   Future<dynamic> calculateDistance(lat, long) async {
@@ -339,10 +354,15 @@ class CartBloc with ChangeNotifier {
         '&origins=42.274220,-71.024369'
         '&destinations=$lat, $long'
         '&key=$_googleIos';
-    var result = await http.get(url);
-    var data = jsonDecode(result.body);
 
-    return data['rows'][0]['elements'][0]['distance']['value'];
+    try{
+      var result = await http.get(url);
+      var data = jsonDecode(result.body);
+
+      return data['rows'][0]['elements'][0]['distance']['value'];
+    }catch(e){
+      Get.snackbar('Error', 'An unexpected error has occurred, try again later..', backgroundColor: Colors.red, colorText: Colors.white);
+    }
   }
 
   String _googleIos = '';

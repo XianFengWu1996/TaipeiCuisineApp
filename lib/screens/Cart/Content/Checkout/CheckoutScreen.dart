@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/BloC/PaymentBloc.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/CheckoutChoice.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/CheckoutSummary.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/OrderList.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/Address.dart';
-import 'package:food_ordering_app/components/Chips.dart';
-import 'package:food_ordering_app/components/Divider.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/Payment/PaymentModal.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/PersonInfo.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/Reward.dart';
-import 'package:food_ordering_app/screens/Home.dart';
+import 'package:TaipeiCuisine/BloC/CartBloc.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/CheckoutChoice.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/CheckoutSummary.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/OrderList.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/Address.dart';
+import 'package:TaipeiCuisine/components/Chips.dart';
+import 'package:TaipeiCuisine/components/Divider.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/Payment/PaymentModal.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/PersonInfo.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/Reward.dart';
+import 'package:TaipeiCuisine/screens/Home.dart';
 import 'package:get/get.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
@@ -145,12 +145,7 @@ class CheckoutScreen extends StatelessWidget {
                     // Check list for pick up
                     if(paymentBloc.customerLastName != '' || paymentBloc.customerFirstName != ''||paymentBloc.customerPhoneNumber != ''){
                       paymentBloc.getTotal(cartBloc.total);
-                      showModalBottomSheet(
-                          isDismissible: false,
-                          context: context,
-                          builder: (context) {
-                            return PaymentModal();
-                          });
+                      Get.bottomSheet(PaymentModal(), backgroundColor: Colors.white);
                     } else {
                       Get.snackbar(functionalBloc.selectedValue == 'english' ? 'Missing Information' : '未填写个人信息',
                           functionalBloc.selectedValue == 'english' ?

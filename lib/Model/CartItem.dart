@@ -1,4 +1,4 @@
-import 'package:food_ordering_app/Model/Product.dart';
+import 'package:TaipeiCuisine/Model/Product.dart';
 
 
 class CartItem {

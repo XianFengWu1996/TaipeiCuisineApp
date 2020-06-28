@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:food_ordering_app/BloC/CartBloc.dart';
-import 'package:food_ordering_app/BloC/FunctionalBloc.dart';
-import 'package:food_ordering_app/BloC/PaymentBloc.dart';
-import 'package:food_ordering_app/components/Buttons/Rectangular.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/CheckoutSummary.dart';
-import 'package:food_ordering_app/screens/Cart/Content/Checkout/components/OrderList.dart';
-import 'package:food_ordering_app/components/Divider.dart';
-import 'package:food_ordering_app/screens/Home.dart';
+import 'package:TaipeiCuisine/BloC/CartBloc.dart';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
+import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
+import 'package:TaipeiCuisine/components/Buttons/Rectangular.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/CheckoutSummary.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/OrderList.dart';
+import 'package:TaipeiCuisine/components/Divider.dart';
+import 'package:TaipeiCuisine/screens/Home.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
