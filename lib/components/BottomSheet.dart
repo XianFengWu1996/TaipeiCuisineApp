@@ -60,7 +60,7 @@ class BottomSheetHeader extends StatelessWidget {
   final String subtitle;
   final double height;
 
-  BottomSheetHeader({@required this.title, this.subtitle = '', @required this.onPressed, this.height = 85});
+  BottomSheetHeader({@required this.title, this.subtitle = '', @required this.onPressed, this.height = 70});
 
   @override
   Widget build(BuildContext context) {

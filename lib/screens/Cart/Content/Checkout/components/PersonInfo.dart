@@ -21,7 +21,7 @@ class PersonInfo extends StatelessWidget {
           paymentBloc.customerFirstName + ' ' + paymentBloc.customerLastName
       }',
       subtitle:
-      '${functionalBloc.selectedValue == 'enlgish' ? 'Phone' : '电话'}: '
+      '${functionalBloc.selectedValue == 'english' ? 'Phone' : '电话'}: '
           '${paymentBloc.customerPhoneNumber == '' ? 'Not Provided' : paymentBloc.customerPhoneNumber}' ,
       icon: Icons.contact_phone,
       action: FlatButton(onPressed: (){

@@ -1,3 +1,4 @@
+import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/Payment/PaymentPage.dart';
 import 'package:flutter/material.dart';
 import 'package:TaipeiCuisine/BloC/CartBloc.dart';
 import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
@@ -24,7 +25,6 @@ class CheckoutScreen extends StatelessWidget {
     FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
     String _comment = '';
 
-
     return Scaffold(
       appBar: AppBar(
         title: Text('${functionalBloc.selectedValue == 'english' ?  'Checkout' : '结账 / 付款'}'),
@@ -40,7 +40,7 @@ class CheckoutScreen extends StatelessWidget {
       body: ModalProgressHUD(
         inAsyncCall: functionalBloc.loading,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(5, 5, 5, 20),
+          padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
           child: ListView(
             shrinkWrap: true,
             children: <Widget>[
@@ -88,7 +88,7 @@ class CheckoutScreen extends StatelessWidget {
                   ),
                   confirm: FlatButton(onPressed: (){
                     paymentBloc.getComments(_comment);
-                    Get.off(CheckoutScreen());
+                    Get.close(1);
                   },
                 child: Text('${functionalBloc.selectedValue == 'english' ? 'Add' : '添加'}'),
                 ));
@@ -97,7 +97,6 @@ class CheckoutScreen extends StatelessWidget {
                   : Text('${functionalBloc.selectedValue == 'english' ? 'Edit Comments' : '修改特殊要求'}'),),
 
               LineDivider(),
-
               //Summary of the order
               CheckoutSummary(),
 
@@ -112,12 +111,9 @@ class CheckoutScreen extends StatelessWidget {
                       if(paymentBloc.customerLastName != '' || paymentBloc.customerFirstName != ''||paymentBloc.customerPhoneNumber != ''){
                         if(cartBloc.tipPercent != 0.0 || cartBloc.tipPercent == .0000000001 || cartBloc.tipPercent == 0.0000001){
                           paymentBloc.getTotal(cartBloc.total);
-                          showModalBottomSheet(
-                              isDismissible: false,
-                              context: context,
-                              builder: (context) {
-                                return PaymentModal();
-                              });
+                          MediaQuery.of(context).size.height > 812
+                              ? Get.bottomSheet(PaymentModal(), backgroundColor: Colors.white)
+                              : Get.to(PaymentPage());
                         } else {
                           Get.snackbar(functionalBloc.selectedValue == 'english'? 'Missing Tip for driver' : '未选择司机的小费',
                               functionalBloc.selectedValue == 'english' ?
@@ -145,7 +141,9 @@ class CheckoutScreen extends StatelessWidget {
                     // Check list for pick up
                     if(paymentBloc.customerLastName != '' || paymentBloc.customerFirstName != ''||paymentBloc.customerPhoneNumber != ''){
                       paymentBloc.getTotal(cartBloc.total);
-                      Get.bottomSheet(PaymentModal(), backgroundColor: Colors.white);
+                      MediaQuery.of(context).size.height > 812 
+                          ? Get.bottomSheet(PaymentModal(), backgroundColor: Colors.white) 
+                          : Get.to(PaymentPage());
                     } else {
                       Get.snackbar(functionalBloc.selectedValue == 'english' ? 'Missing Information' : '未填写个人信息',
                           functionalBloc.selectedValue == 'english' ?

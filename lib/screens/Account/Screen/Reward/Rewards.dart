@@ -1,9 +1,9 @@
+import 'package:TaipeiCuisine/screens/Account/Screen/Reward/components/RewardCard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
 import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:TaipeiCuisine/components/Divider.dart';
-import 'package:TaipeiCuisine/screens/Account/Reward/components/RewardCard.dart';
 import 'package:provider/provider.dart';
 
 class Reward extends StatelessWidget {

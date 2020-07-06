@@ -37,7 +37,7 @@ class MenuItems extends StatelessWidget {
                 itemCount: lunch ? functionalBloc.lunchMenu[count]['dishes'].length :functionalBloc.fullDayMenu[count]['dishes'].length,
                 itemBuilder: (context, index) {
                   var currentDish = lunch ? functionalBloc.lunchMenu[count]['dishes'] : functionalBloc.fullDayMenu[count]['dishes'];
-                  return Card(
+                  return currentDish[index]['active'] ? Card(
                     child: ListTile(
                       leading: Text('${currentDish[index]['food_id']}', style: currentDish[index]['spicy'] ? _spicyItem : TextStyle(),),
                       title: functionalBloc.selectedValue == 'english'
@@ -57,7 +57,7 @@ class MenuItems extends StatelessWidget {
                           );
                         }, ),
                     ),
-                  );
+                  ) : Container();
                 }),
           ),
         ],

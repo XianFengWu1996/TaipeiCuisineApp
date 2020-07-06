@@ -155,7 +155,7 @@ class CartBloc with ChangeNotifier {
     action == 'add' ? _subtotal += ((price * count)) : _subtotal -= (price * count);
     _calcSubtotal = (_subtotal - (_rewardPoint != 0 ? (_rewardPoint/100) : 0.00) - _lunchDiscount);
     _tax = (_calcSubtotal * 0.07);
-    _tip = !_isCustomTip ? ((_calcSubtotal + _tax) * _tipPercent) : _customTip;
+    _tip = !_isCustomTip ? ((_subtotal + _tax) * _tipPercent) : _customTip;
     _total = ((_calcSubtotal + _tax + _tip + (_isDelivery ? deliveryFee : 0.00)));
   }
 
@@ -182,8 +182,8 @@ class CartBloc with ChangeNotifier {
     notifyListeners();
   }
 
-  void calculateLunchDiscount(){
-    if(TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >= 660 && TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <= 990){
+  void calculateLunchDiscount(int start, int end){
+    if(TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >= start && TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <= end){
       if(_lunchCount < 3){
         _lunchDiscount = 0;
       }
@@ -245,6 +245,7 @@ class CartBloc with ChangeNotifier {
 
       if (querySnapshot.documents.length > 0) {
         querySnapshot.documents.forEach((f) {
+
           _street = f.data['street'];
           _city = f.data['city'];
           _zipCode = f.data['zipcode'];
@@ -337,9 +338,6 @@ class CartBloc with ChangeNotifier {
       streetName =data['address_components'][1]['long_name'];
       cityName = data['address_components'][2]['long_name'];
       zipCode = data['address_components'].last['long_name'];
-
-      print(streetNumber);
-      print(streetName);
 
       return [lat, long, streetNumber, streetName, cityName, zipCode];
     } catch(e){

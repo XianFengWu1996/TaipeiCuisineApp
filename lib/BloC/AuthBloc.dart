@@ -31,6 +31,8 @@ class AuthBloc with ChangeNotifier {
         password: password,
       )).user;
 
+      print(user);
+
       var admin = await Firestore.instance.collection('admin').document('details').get();
 
       if(_loggedInUser.uid == '${admin.data['uid']}'){
@@ -38,13 +40,14 @@ class AuthBloc with ChangeNotifier {
         await storeBloc.saveLocalUser(_loggedInUser);
         Get.offAll(Orders(status: 'Placed',));
       } else if (_loggedInUser.isEmailVerified) {
-        functionalBloc.toggleLoading('reset');
         await functionalBloc.saveLocalUser(_loggedInUser);
         await paymentBloc.saveLocalUser(_loggedInUser);
         await cartBloc.saveLocalUser(_loggedInUser);
         await functionalBloc.retrieveFullDayMenu();
         await functionalBloc.retrieveLunchMenu();
         await functionalBloc.getLanguageChoice();
+        await functionalBloc.retrieveStoreHours();
+        functionalBloc.toggleLoading('reset');
 
         Get.offAll(Home());
       } else {
@@ -66,6 +69,7 @@ class AuthBloc with ChangeNotifier {
     }
     return;
   }
+  
 
   resetPasswordWithEmail(String email) async {
     try {
@@ -113,6 +117,8 @@ class AuthBloc with ChangeNotifier {
             await functionalBloc.getLanguageChoice();
             await functionalBloc.retrieveFullDayMenu();
             await functionalBloc.retrieveLunchMenu();
+            await functionalBloc.retrieveStoreHours();
+
             Get.offAll(Home());
           }
         } catch (error) {
@@ -148,6 +154,8 @@ class AuthBloc with ChangeNotifier {
         await functionalBloc.getLanguageChoice(_loggedInUser.uid);
         await functionalBloc.retrieveFullDayMenu();
         await functionalBloc.retrieveLunchMenu();
+        await functionalBloc.retrieveStoreHours();
+
         Get.offAll(Home());
       }
     } catch(error){

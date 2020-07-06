@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
 import 'package:TaipeiCuisine/BloC/CartBloc.dart';
 import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
-import 'package:TaipeiCuisine/screens/Auth/Login/Login.dart';
+import 'package:TaipeiCuisine/screens/Auth/Login.dart';
 import 'package:get/get.dart';
 
 class FunctionalBloc with ChangeNotifier{
@@ -60,6 +60,30 @@ class FunctionalBloc with ChangeNotifier{
     } catch(e){
       Get.snackbar('Error', 'Failed to retrieve lunch menu', backgroundColor: Colors.red, colorText: Colors.white);
     }
+  }
+
+  int _storeOpen;
+  int _storeClose;
+  int _lunchStart;
+  int _lunchEnd;
+
+  int get storeOpen => _storeOpen;
+  int get storeClose => _storeClose;
+  int get lunchStart => _lunchStart;
+  int get lunchEnd => _lunchEnd;
+
+  retrieveStoreHours()async{
+    try{
+      await Firestore.instance.collection('hours').document('hours').get().then((value){
+        _storeOpen = value.data['storeOpen'];
+        _storeClose = value.data['storeClose'];
+        _lunchStart = value.data['lunchStart'];
+        _lunchEnd = value.data['lunchEnd'];
+      });
+    } catch(e){
+      Get.snackbar('Error', 'Failed to retrieve store hours', backgroundColor: Colors.red, colorText: Colors.white);
+    }
+    notifyListeners();
   }
 
   // Address
@@ -213,6 +237,10 @@ class FunctionalBloc with ChangeNotifier{
     _menuChoice = 'fullday';
     _fullDayMenu = [];
     _lunchMenu = [];
+    _storeOpen = 0;
+    _storeClose = 0;
+    _lunchStart = 0;
+    _lunchEnd = 0;
     notifyListeners();
   }
 

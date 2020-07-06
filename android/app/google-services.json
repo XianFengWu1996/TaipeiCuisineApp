@@ -30,6 +30,13 @@
             {
               "client_id": "369761240989-qk8nb2723njc5hjbeobpcs0m2fsdevk0.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "369761240989-bu7pcrsum1tl2h838qa3eml6e3jqduhu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "xianwu.TaipeiCuisine"
+              }
             }
           ]
         }

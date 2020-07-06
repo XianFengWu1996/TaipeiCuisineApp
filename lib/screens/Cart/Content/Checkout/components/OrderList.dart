@@ -27,7 +27,7 @@ class OrderList extends StatelessWidget {
                       : item.product.foodChineseName
                   }'),
               subtitle:
-              Text('\$${item.product.price}    x ${item.count}'),
+              Text('\$${item.product.price.toStringAsFixed(2)}    x ${item.count}'),
               trailing: Text(
                   '\$${(item.product.price * item.count).toStringAsFixed(2)}'),
             ),

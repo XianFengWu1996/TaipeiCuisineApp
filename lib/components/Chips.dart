@@ -151,7 +151,7 @@ class CheckoutChip extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20),
       child: ChoiceChip(
-        labelPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+        labelPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         label: Text('$title'),
         labelStyle: TextStyle(
           color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600,),
@@ -174,22 +174,25 @@ class SelectionChip extends StatelessWidget {
     @required this.title,
     this.icon,
     @required this.selected,
-    @required this.onSelected
+    @required this.onSelected,
+    this.rewardPercent = '',
   });
 
   final String title;
   final IconData icon;
   final bool selected;
   final Function onSelected;
+  final String rewardPercent;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(15.0),
+      padding: EdgeInsets.only(bottom: 10, left: 10, right: 10),
       child: ChoiceChip(
         label: ListTile(
           title: Text(title),
           leading: Icon(icon),
+          trailing: Text(rewardPercent),
         ),
         shape: BeveledRectangleBorder(),
         selectedColor: Colors.redAccent[100],

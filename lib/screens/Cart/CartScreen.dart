@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
-import 'package:TaipeiCuisine/screens/Cart/Content/components/CartContent.dart';
+import 'package:TaipeiCuisine/screens/Cart/Content/CartContent.dart';
 import 'package:TaipeiCuisine/screens/Home.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';

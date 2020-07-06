@@ -47,8 +47,8 @@ class _RewardInputState extends State<RewardInput> {
                         int point = int.parse(_pointController.text);
                         if (point <= paymentBloc.rewardPoint) {
 
-                          if(point >= cartBloc.total * 100){
-                            cartBloc.useRewardPoint((cartBloc.total * 100).toInt());
+                          if(point > cartBloc.subtotal * 100){
+                            cartBloc.useRewardPoint((cartBloc.subtotal * 100).toInt());
                           } else {
                             cartBloc.useRewardPoint(point);
                           }

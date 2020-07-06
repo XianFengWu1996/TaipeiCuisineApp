@@ -70,6 +70,9 @@ class MenuContent extends StatelessWidget {
                   Text('Lunch Special serve daily from 11am - 4pm') :
                   Text('特价午餐 每天上午11点到下午4点'),
                   functionalBloc.selectedValue == 'english' ?
+                  Text('Served with rice and soup') :
+                  Text('每份午餐跟一份米饭和汤'),
+                  functionalBloc.selectedValue == 'english' ?
                   Text('Discount are calculated during checkout') :
                   Text('折扣将会在结算界面计算'),
                   functionalBloc.selectedValue == 'english' ?

@@ -47,18 +47,24 @@ class CheckoutTip extends StatelessWidget {
 
 class CheckoutSummaryItems extends StatelessWidget {
 
-  CheckoutSummaryItems({this.title, this.details});
+  CheckoutSummaryItems({this.title, this.details, this.size});
 
   final String title;
   final String details;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     return  Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Text('$title:'),
-        Text('$details')
+        Text('$title:', style: TextStyle(
+          fontSize: size,
+          fontWeight: FontWeight.w700
+  ),),
+        Text('$details', style: TextStyle(
+          fontSize: size
+        )),
       ],
     );
   }

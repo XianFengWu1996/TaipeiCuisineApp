@@ -395,7 +395,7 @@ class PaymentBloc with ChangeNotifier {
          sendOrderToDb(
              orderId: _orderNumber,
              items: bloc.items,
-             deliveryAddress: bloc.isDelivery ? '$_street, $_city, MA, $_zip' : '',
+             deliveryAddress: bloc.isDelivery ? '${bloc.street}, ${bloc.city}, MA, ${bloc.zipCode}' : '',
              delivery: bloc.isDelivery,
              subtotal: bloc.subtotal,
              calcSubtotal: bloc.calcSubtotal,
@@ -463,7 +463,7 @@ class PaymentBloc with ChangeNotifier {
         sendOrderToDb(
             orderId: data['payment']['order_id'],
             items: bloc.items,
-            deliveryAddress: bloc.isDelivery ? '$_street, $_city, MA, $_zip' : '',
+            deliveryAddress: bloc.isDelivery ? '${bloc.street}, ${bloc.city}, MA, ${bloc.zipCode}' : '',
             delivery: bloc.isDelivery,
             subtotal: bloc.subtotal,
             calcSubtotal: bloc.calcSubtotal,
@@ -503,7 +503,7 @@ class PaymentBloc with ChangeNotifier {
       sendOrderToDb(
         orderId: _orderNumber,
         items: bloc.items,
-        deliveryAddress: bloc.isDelivery ? '$_street, $_city, MA, $_zip' : '',
+        deliveryAddress: bloc.isDelivery ? '${bloc.street}, ${bloc.city}, MA, ${bloc.zipCode}' : '',
         delivery: bloc.isDelivery,
         subtotal: bloc.subtotal,
         calcSubtotal: bloc.calcSubtotal,
@@ -578,7 +578,7 @@ class PaymentBloc with ChangeNotifier {
   void calculateRewardPoint({String action, int percentage, double total, String method, orderId, ptUsed}) async {
     //action can either be add or subtract
     //depending on the action, we can decide to subtract the point or add the point
-    _pointEarned = (total * percentage).toInt().round();
+    _pointEarned = (total * percentage).ceilToDouble().toInt();
 
     action == 'add' ? _rewardPoint +=_pointEarned : _rewardPoint -= ptUsed;
 
@@ -652,9 +652,13 @@ class PaymentBloc with ChangeNotifier {
       "pointUsed": pointUsed,
     }, merge: true);
 
+
+
     await Firestore.instance
         .collection('order')
-        .document('$orderId')
+        .document('${DateTime.now().year}')
+        .collection('${DateTime.now().month}')
+         .document('$orderId')
         .setData({
       "orderId": orderId,
       "items": listOfItems,
@@ -674,14 +678,14 @@ class PaymentBloc with ChangeNotifier {
       "status": 'Placed',
       "totalCount": count,
       "createdAt": DateTime.now().millisecondsSinceEpoch,
+      "month": DateTime.now().month + 1,
+      "year": DateTime.now().year,
       "idempodency_key": idKey,
       "pointEarned": pointEarned,
       "pointUsed": pointUsed,
       'paymentId': paymentId,
       'userId': _user.uid,
     }, merge: true);
-
-
   }
 
   void clearErrorMessage(){
@@ -699,7 +703,6 @@ class PaymentBloc with ChangeNotifier {
     _sameAsDelivery = false;
     _saveCard = false;
     _pointEarned = 0;
-    _rewardPoint = 0;
     _pointDetail = [];
   }
 

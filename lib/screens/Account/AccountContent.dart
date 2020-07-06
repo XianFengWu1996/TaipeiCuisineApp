@@ -1,12 +1,11 @@
+import 'package:TaipeiCuisine/screens/Account/Screen/Reward/Rewards.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:TaipeiCuisine/BloC/CartBloc.dart';
 import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:TaipeiCuisine/screens/Account/AccountItem.dart';
-import 'package:TaipeiCuisine/screens/Account/Reward/Rewards.dart';
 import 'package:TaipeiCuisine/screens/Account/Screen/Address.dart';
 import 'package:TaipeiCuisine/screens/Account/Screen/Setting.dart';
-import 'package:TaipeiCuisine/screens/Account/Screen/User.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -23,13 +22,6 @@ class AccountContent extends StatelessWidget {
         crossAxisSpacing: 20,
         mainAxisSpacing: 20,
         children: <Widget>[
-          AccountItem(
-            icon: FontAwesome.user,
-            title: functionalBloc.selectedValue == 'english' ? 'User' : '用户信息',
-            onTap: () {
-              Get.to(User());
-            },
-          ),
           AccountItem(
             icon: FontAwesome.home,
             title: functionalBloc.selectedValue == 'english' ? 'Address' : '送餐地址',

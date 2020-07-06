@@ -5,7 +5,7 @@ import 'package:TaipeiCuisine/BloC/CartBloc.dart';
 import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
 import 'package:TaipeiCuisine/BloC/StoreBloc.dart';
-import 'package:TaipeiCuisine/screens/Auth/Login/Login.dart';
+import 'package:TaipeiCuisine/screens/Auth/Login.dart';
 import 'package:TaipeiCuisine/screens/Auth/Signup.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
