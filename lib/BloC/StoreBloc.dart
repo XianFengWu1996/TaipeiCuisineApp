@@ -91,6 +91,15 @@ class StoreBloc extends ChangeNotifier{
     await FirebaseAuth.instance.signOut();
 
     _user = null;
+    _reportSubtotal = 0;
+    _reportDiscount = 0;
+    _reportTax = 0;
+    _reportTip = 0;
+    _reportTotal = 0;
+    _monthDropdown = '${DateTime.now().month - 1}';
+    _yearDropdown = '${DateTime.now().year}';
+    _summary = 'summary';
+    _details = 'details';
     notifyListeners();
   }
 
