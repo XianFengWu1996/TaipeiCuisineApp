@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:TaipeiCuisine/components/Button.dart';
-import 'package:TaipeiCuisine/components/InputField.dart';
-import 'package:TaipeiCuisine/components/Validation.dart';
+import 'package:TaipeiCuisine/components/Buttons/Button.dart';
+import 'package:TaipeiCuisine/components/FormComponents/InputField.dart';
+import 'package:TaipeiCuisine/components/Helper/Validation.dart';
 import 'package:get/get.dart';
 
 class BottomSheetContent extends StatelessWidget {

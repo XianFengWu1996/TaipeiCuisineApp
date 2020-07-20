@@ -1,3 +1,4 @@
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
@@ -8,6 +9,7 @@ class OrderStream extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AuthBloc authBloc = Provider.of<AuthBloc>(context);
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
     return StreamBuilder(
       stream: Firestore.instance
             .collection('users/${authBloc.user.uid}/order')
@@ -36,10 +38,10 @@ class OrderStream extends StatelessWidget {
               ),
             );
           } else {
-            return Text('No past order');
+            return Center(child: Text('${functionalBloc.selectedLanguage == 'english' ? 'Try order something first' : '请先下单再来查看'}'));
           }
         } else {
-          return Text('No past order');
+          return Center(child: Text(''));
         }
       },
     );

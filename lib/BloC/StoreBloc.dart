@@ -67,7 +67,7 @@ class StoreBloc extends ChangeNotifier{
     notifyListeners();
   }
 
-  changeValue(type , value){
+  setValue(type , value){
     switch(type){
       case 'month':
         _monthDropdown = value;

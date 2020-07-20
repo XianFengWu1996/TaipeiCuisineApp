@@ -1,4 +1,5 @@
 import 'package:TaipeiCuisine/BloC/StoreBloc.dart';
+import 'package:TaipeiCuisine/screens/Auth/EmailResend.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,49 +14,45 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthBloc with ChangeNotifier {
   bool _obscureText = false;
-  List<String> _errorMessage = [];
-  List<String> _noticeMessage = [];
+  List<dynamic> _errorMessage = [];
+  List<dynamic> _noticeMessage = [];
   FirebaseUser _loggedInUser;
+  bool _showDialogContent = true;
 
   FirebaseUser get user => _loggedInUser;
   bool get obscureText => _obscureText;
-  List<String> get errorMessage => _errorMessage;
-  List<String> get noticeMessage => _noticeMessage;
+  List<dynamic> get errorMessage => _errorMessage;
+  List<dynamic> get noticeMessage => _noticeMessage;
+  bool get showDialogContent => _showDialogContent;
 
   // Methods for Signing in
 
-  loginWithEmailAndPassword(String email, String password, StoreBloc storeBloc, FunctionalBloc functionalBloc, paymentBloc, cartBloc) async {
+  loginWithEmailAndPassword(String email, String password, StoreBloc storeBloc, FunctionalBloc functionalBloc, PaymentBloc paymentBloc, CartBloc cartBloc) async {
     try {
       _loggedInUser = (await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       )).user;
 
-      print(user);
-
       var admin = await Firestore.instance.collection('admin').document('details').get();
 
       if(_loggedInUser.uid == '${admin.data['uid']}'){
-        functionalBloc.toggleLoading('reset');
+        functionalBloc.setValue('loading','reset');
         await storeBloc.saveLocalUser(_loggedInUser);
         Get.offAll(Orders(status: 'Placed',));
       } else if (_loggedInUser.isEmailVerified) {
-        await functionalBloc.saveLocalUser(_loggedInUser);
-        await paymentBloc.saveLocalUser(_loggedInUser);
-        await cartBloc.saveLocalUser(_loggedInUser);
-        await functionalBloc.retrieveFullDayMenu();
-        await functionalBloc.retrieveLunchMenu();
-        await functionalBloc.getLanguageChoice();
-        await functionalBloc.retrieveStoreHours();
-        functionalBloc.toggleLoading('reset');
+        await retrieveAndDistributeInfo(functionalBloc, cartBloc, paymentBloc);
 
         Get.offAll(Home());
+
+        functionalBloc.setValue('loading','reset');
       } else {
-        _errorMessage.add(
-            'Please verify your email. If you have recently requested a verification email, check your inbox or spam.');
+        functionalBloc.setValue('loading','reset');
+        _errorMessage.add('Please verify your email. If you have recently requested a verification email, check your inbox or spam.');
+        Get.dialog(Resend());
       }
     } catch (error) {
-      print(error);
+      functionalBloc.setValue('loading','reset');
       switch (error.code) {
         case 'ERROR_WRONG_PASSWORD':
           _errorMessage.add('Incorrect password, try again with a different password.');
@@ -69,7 +66,94 @@ class AuthBloc with ChangeNotifier {
     }
     return;
   }
-  
+
+  loginWithFacebook(FunctionalBloc functionalBloc, PaymentBloc paymentBloc, CartBloc cartBloc) async {
+    final result = await FacebookLogin().logIn(['email']);
+
+    switch (result.status) {
+      case FacebookLoginStatus.loggedIn:
+        try {
+          final token = result.accessToken.token;
+          AuthCredential credential = FacebookAuthProvider.getCredential(accessToken: token);
+
+          _loggedInUser = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
+
+          if (_loggedInUser != null) {
+            await retrieveAndDistributeInfo(functionalBloc, cartBloc, paymentBloc);
+
+            Get.offAll(Home());
+
+            functionalBloc.setValue('loading','reset');
+          }
+        } catch (error) {
+          functionalBloc.setValue('loading','reset');
+          _errorMessage.add('An error has occur. Try again later or use a different login method.');
+        }
+        break;
+      case FacebookLoginStatus.cancelledByUser:
+        functionalBloc.setValue('loading','reset');
+        _errorMessage.add('You have cancelled Facebook login.');
+        break;
+      case FacebookLoginStatus.error:
+        functionalBloc.setValue('loading','reset');
+        _errorMessage.add('An Error has occur with Facebook Login, try again later.');
+        break;
+    }
+  }
+
+  loginWithGoogle(FunctionalBloc functionalBloc, PaymentBloc paymentBloc, CartBloc cartBloc) async {
+    try{
+      final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.getCredential(
+          idToken: googleAuth.idToken,
+          accessToken: googleAuth.accessToken);
+
+      _loggedInUser = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
+
+      if(_loggedInUser != null){
+        await retrieveAndDistributeInfo(functionalBloc, cartBloc, paymentBloc);
+
+        Get.offAll(Home());
+
+        functionalBloc.setValue('loading','reset');
+      }
+    } catch(error){
+      _errorMessage.add('An error has occur during Google login, please try again later or use a different login method.');
+      functionalBloc.setValue('loading','reset');
+    }
+  }
+
+  retrieveAndDistributeInfo(FunctionalBloc functionalBloc, CartBloc cartBloc, PaymentBloc paymentBloc) async {
+    await functionalBloc.setValue('saveUser',_loggedInUser);
+    await paymentBloc.setValue('saveUser',_loggedInUser);
+    await cartBloc.setValue('saveUser',_loggedInUser);
+
+    // Retrieve menu information
+    await functionalBloc.retrieveFullDayMenu();
+    await functionalBloc.retrieveLunchMenu();
+
+
+    // Pass keys to necessary bloc after it's retrieved
+    await functionalBloc.retrieveStoreInfo();
+    await Firestore.instance.collection('users/${_loggedInUser.uid}/customer_information').document('details').get().then((value) async {
+      value.data == null ? await functionalBloc.initUserInfo() : await functionalBloc.retrieveCustomerInformation();
+    });
+    await cartBloc.setValue('getKey', {
+      'ios_key': functionalBloc.iosKey,
+      'android_key': functionalBloc.androidKey
+    });
+    await paymentBloc.setValue('getKey', {
+      'token': functionalBloc.squareToken,
+      'appId': functionalBloc.squareAppId,
+      'locationId': functionalBloc.squareLocationId,
+    });
+
+
+  }
 
   resetPasswordWithEmail(String email) async {
     try {
@@ -99,102 +183,27 @@ class AuthBloc with ChangeNotifier {
     return;
   }
 
-  loginWithFacebook(FunctionalBloc functionalBloc, PaymentBloc paymentBloc, CartBloc cartBloc) async {
-    final result = await FacebookLogin().logIn(['email']);
 
-    switch (result.status) {
-      case FacebookLoginStatus.loggedIn:
-        try {
-          final token = result.accessToken.token;
-          AuthCredential credential = FacebookAuthProvider.getCredential(accessToken: token);
-
-          _loggedInUser = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
-
-          if (_loggedInUser != null) {
-            await functionalBloc.saveLocalUser(_loggedInUser);
-            await paymentBloc.saveLocalUser(_loggedInUser);
-            await cartBloc.saveLocalUser(_loggedInUser);
-            await functionalBloc.getLanguageChoice();
-            await functionalBloc.retrieveFullDayMenu();
-            await functionalBloc.retrieveLunchMenu();
-            await functionalBloc.retrieveStoreHours();
-
-            Get.offAll(Home());
-          }
-        } catch (error) {
-          _errorMessage.add('An error has occur. Try again later or use a different login method.');
-        }
+  setValue(String type, value){
+    switch(type){
+      case 'errMsg':
+        _errorMessage = value;
         break;
-      case FacebookLoginStatus.cancelledByUser:
-        _errorMessage.add('You have cancelled Facebook login.');
+      case 'ntcMsg':
+        _noticeMessage = value;
         break;
-      case FacebookLoginStatus.error:
-        _errorMessage.add('An Error has occur with Facebook Login, try again later.');
+      case 'showPass':
+        _obscureText = value;
         break;
+      case 'enableDialog':
+        _showDialogContent = value;
+        break;
+      default:
+        return;
     }
-  }
-
-  loginWithGoogle(functionalBloc, paymentBloc, cartBloc) async {
-    try{
-      final GoogleSignIn _googleSignIn = GoogleSignIn();
-
-      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      final AuthCredential credential = GoogleAuthProvider.getCredential(
-          idToken: googleAuth.idToken,
-          accessToken: googleAuth.accessToken);
-
-      _loggedInUser = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
-
-      if(_loggedInUser != null){
-        await functionalBloc.saveLocalUser(_loggedInUser);
-        await paymentBloc.saveLocalUser(_loggedInUser);
-        await cartBloc.saveLocalUser(_loggedInUser);
-        await functionalBloc.getLanguageChoice(_loggedInUser.uid);
-        await functionalBloc.retrieveFullDayMenu();
-        await functionalBloc.retrieveLunchMenu();
-        await functionalBloc.retrieveStoreHours();
-
-        Get.offAll(Home());
-      }
-    } catch(error){
-      _errorMessage.add('An error has occur during Google login, please try again later or use a different login method.');
-    }
-  }
-
-  resetErrorMessage() {
-    _errorMessage = [];
     notifyListeners();
   }
 
-  resetNoticeMessage() {
-    _noticeMessage = [];
-    notifyListeners();
-  }
-
-  void showPassword(value) {
-    _obscureText = value;
-    notifyListeners();
-  }
-
-  void saveUser(user) {
-    _loggedInUser = user;
-    return;
-  }
-
-  void removeUser() {
-    _loggedInUser = null;
-    return;
-  }
-
-  bool _showDialogContent = true;
-  bool get showDialogContent => _showDialogContent;
-
-  enableDialog(bool show) {
-    _showDialogContent = show;
-    notifyListeners();
-  }
 
   void initializeReward() async {
     try{
@@ -210,7 +219,7 @@ class AuthBloc with ChangeNotifier {
     }
   }
 
-  void clearAllValueUponLogout(){
+  clearAllValueUponLogout(){
     _obscureText = false;
     _errorMessage = [];
     _noticeMessage = [];

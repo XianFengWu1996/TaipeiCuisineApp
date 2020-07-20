@@ -40,7 +40,7 @@ class MenuItems extends StatelessWidget {
                   return currentDish[index]['active'] ? Card(
                     child: ListTile(
                       leading: Text('${currentDish[index]['food_id']}', style: currentDish[index]['spicy'] ? _spicyItem : TextStyle(),),
-                      title: functionalBloc.selectedValue == 'english'
+                      title: functionalBloc.selectedLanguage == 'english'
                           ? Text('${currentDish[index]['food_name']}',style: currentDish[index]['spicy'] ? _spicyItem : TextStyle(),)
                           : Text('${currentDish[index]['food_name_chinese']}', style: currentDish[index]['spicy'] ? _spicyItem : TextStyle(),),
                       subtitle: Text('\$${(currentDish[index]['price']).toStringAsFixed(2)}'),

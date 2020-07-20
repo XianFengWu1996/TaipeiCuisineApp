@@ -18,7 +18,7 @@ class CartCard extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: Text('${item.foodId}.'),
-        title: Text('${functionalBloc.selectedValue == 'english' ? item.foodName : item.foodChineseName}'),
+        title: Text('${functionalBloc.selectedLanguage == 'english' ? item.foodName : item.foodChineseName}'),
         subtitle: Text('\$${item.price.toStringAsFixed(2)}'),
         trailing: Container(
           padding: EdgeInsets.all(5.0),

@@ -30,10 +30,10 @@ class RewardCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               action == 'add' ?
-              Text('${functionalBloc.selectedValue == 'english' ? 'Method' : '付款方式'} $method') :
+              Text('${functionalBloc.selectedLanguage == 'english' ? 'Method' : '付款方式'} $method') :
               Container(),
 
-              Text('${functionalBloc.selectedValue == 'english' ? 'Order #' : '订单号'}: $orderId'),
+              Text('${functionalBloc.selectedLanguage == 'english' ? 'Order #' : '订单号'}: $orderId'),
             ],
           ),
         ),

@@ -14,6 +14,8 @@ class Input extends StatelessWidget {
     this.icon,
     this.autoFocus = false,
     this.textCap  = TextCapitalization.words,
+    this.onChanged,
+    this.suffix,
   });
 
   final String initialValue;
@@ -27,6 +29,8 @@ class Input extends StatelessWidget {
   final Widget icon;
   final bool autoFocus;
   final TextCapitalization textCap;
+  final Function onChanged;
+  final Widget suffix;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +45,7 @@ class Input extends StatelessWidget {
         enableSuggestions: false,
         decoration: InputDecoration(
           suffixIcon: icon,
+          suffix: suffix,
           labelText: label,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15.0),
@@ -51,6 +56,7 @@ class Input extends StatelessWidget {
         inputFormatters: inputFormatter,
         keyboardType: useNumKeyboard ? TextInputType.number : TextInputType.text,
         obscureText: obscureText,
+        onChanged: onChanged,
       ),
     );
   }

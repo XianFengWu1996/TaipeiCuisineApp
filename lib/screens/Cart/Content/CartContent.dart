@@ -48,53 +48,61 @@ class CartContent extends StatelessWidget {
                   })
               : Center(
                   child: Text(
-                      '${functionalBloc.selectedValue == 'english' ? 'Empty Cart' : '您的购物车还是空的'}')),
+                      '${functionalBloc.selectedLanguage == 'english' ? 'Empty Cart' : '您的购物车还是空的'}')),
         ),
         Row(
           children: [
             Expanded(
-              child: FlatButton(
+                child: FlatButton(
               color: Colors.red[400],
-               child: Text('${functionalBloc.selectedValue == 'english' ? 'Checkout' : '结账'}   \$${cartBloc.subtotal.toStringAsFixed(2)}',
-                 style: TextStyle(
-                   color: Colors.white,
-                   fontSize: 18
-                 ),),
-                padding: MediaQuery.of(context).size.height > 812 ? EdgeInsets.all(20) : EdgeInsets.all(15),
-                onPressed: () async {
-                  if(TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >= functionalBloc.storeOpen && TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <= functionalBloc.storeClose){
-                    if (cartBloc.items.isNotEmpty) {
-                      if (cartBloc.subtotal < 15) {
-                        cartBloc.checkChoice('pickup');
-                      }
-
-                      if(paymentBloc.appId == ''){
-                        await paymentBloc.retrieveBillingInfo();
-                        await paymentBloc.retrieveCustomerInfo();
-                        await paymentBloc.retrieveRewardPoints();
-                        await cartBloc.retrieveKeys();
-                        await paymentBloc.retrieveKey();
-                      }
-                      cartBloc.calculateLunchDiscount(functionalBloc.lunchStart, functionalBloc.lunchEnd);
-
-                      Get.to(CheckoutScreen());
-                    } else {
-                      Get.snackbar('${functionalBloc.selectedValue == 'english' ?
-                      'Add dishes to cart before checkout' :
-                      '结账前请添加你想购买的菜品'}', '', snackPosition: SnackPosition.BOTTOM,
-                          colorText: Colors.white, backgroundColor: Colors.red);
+              child: Text(
+                '${functionalBloc.selectedLanguage == 'english' ? 'Checkout' : '结账'}   \$${cartBloc.subtotal.toStringAsFixed(2)}',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+              padding: MediaQuery.of(context).size.height > 812
+                  ? EdgeInsets.all(19.5)
+                  : EdgeInsets.all(15),
+              onPressed: () async {
+                if (TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >=
+                        functionalBloc.storeOpen &&
+                    TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <=
+                        functionalBloc.storeClose) {
+                  if (cartBloc.items.isNotEmpty) {
+                    if (cartBloc.subtotal < 15) {
+                      cartBloc.setValue('checkChoice', 'pickup');
                     }
+                    await paymentBloc.retrieveRewardPoints();
+
+                    await cartBloc.calculateLunchDiscount(
+                        functionalBloc.lunchStart, functionalBloc.lunchEnds);
+
+                    Get.to(CheckoutScreen());
                   } else {
-                    Get.snackbar('Sorry we are closed', 'The operating hours are from 11am - 9:50pm', backgroundColor: Colors.orange, colorText: Colors.white);
+                    Get.snackbar(
+                        '${functionalBloc.selectedLanguage == 'english' ? 'Add dishes to cart before checkout' : '结账前请添加你想购买的菜品'}',
+                        '',
+                        snackPosition: SnackPosition.BOTTOM,
+                        colorText: Colors.white,
+                        backgroundColor: Colors.red);
                   }
-                },
+                } else {
+                  Get.snackbar('Sorry we are closed',
+                      'The operating hours are from 11:00 - ${(functionalBloc.storeClose ~/ 60)}: ${(functionalBloc.storeClose % 60)}',
+                      backgroundColor: Colors.orange, colorText: Colors.white);
+                }
+              },
             )),
             VerticalDivider(
               width: 3,
             ),
             FlatButton(
-              child: Icon(FontAwesome.trash,color: Colors.white,),
-              padding: MediaQuery.of(context).size.height > 812 ? EdgeInsets.all(20) : EdgeInsets.all(15),
+              child: Icon(
+                FontAwesome.trash,
+                color: Colors.white,
+              ),
+              padding: MediaQuery.of(context).size.height > 812
+                  ? EdgeInsets.all(18)
+                  : EdgeInsets.all(15),
               color: Colors.red[400],
               onPressed: () {
                 cartBloc.clearCart();

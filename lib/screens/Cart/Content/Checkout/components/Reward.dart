@@ -26,14 +26,14 @@ class _RewardInputState extends State<RewardInput> {
 
     return Column(
       children: <Widget>[
-        Text('${functionalBloc.selectedValue == 'english' ? 'Point Available' : '可使用的积分'}: ${paymentBloc.rewardPoint}'),
+        Text('${functionalBloc.selectedLanguage == 'english' ? 'Point Available' : '可使用的积分'}: ${paymentBloc.rewardPoint}'),
         Container(
           width: 250,
           child: TextFormField(
             controller: _pointController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-                hintText: functionalBloc.selectedValue == 'english'
+                hintText: functionalBloc.selectedLanguage == 'english'
                     ? '100 pts = \$1'
                     : '每100分可抵消\$1',
                 contentPadding: EdgeInsets.all(5.0),
@@ -48,14 +48,13 @@ class _RewardInputState extends State<RewardInput> {
                         if (point <= paymentBloc.rewardPoint) {
 
                           if(point > cartBloc.subtotal * 100){
-                            cartBloc.useRewardPoint((cartBloc.subtotal * 100).toInt());
+                            cartBloc.setValue('useReward',(cartBloc.subtotal * 100).toInt());
                           } else {
-                            cartBloc.useRewardPoint(point);
+                            cartBloc.setValue('useReward', point);
                           }
                         }
 
                       }
-                      FocusScope.of(context).requestFocus(FocusNode());
                     }),
                 border: OutlineInputBorder(
                     borderSide: BorderSide(
@@ -64,7 +63,7 @@ class _RewardInputState extends State<RewardInput> {
           ),
         ),
         cartBloc.rewardPoint > 0 ?
-        Text('${functionalBloc.selectedValue == 'english' ? 'Point Remaining' : '剩余积分'}: '
+        Text('${functionalBloc.selectedLanguage == 'english' ? 'Point Remaining' : '剩余积分'}: '
             '${paymentBloc.rewardPoint - cartBloc.rewardPoint}') : Container(),
       ],
     );

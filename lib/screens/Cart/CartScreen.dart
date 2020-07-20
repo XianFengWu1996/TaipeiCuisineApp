@@ -13,7 +13,7 @@ class CartScreen extends StatelessWidget {
     FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
     return Scaffold(
       appBar: AppBar(
-        title: functionalBloc.selectedValue == 'english' ? Text('Cart') : Text('购物车'),
+        title: functionalBloc.selectedLanguage == 'english' ? Text('Cart') : Text('购物车'),
         actions: <Widget>[
           IconButton(icon: Icon(Icons.home), onPressed: (){
             Get.offAll(Home());

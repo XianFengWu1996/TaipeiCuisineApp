@@ -34,7 +34,7 @@ class Home extends StatelessWidget {
     FunctionalBloc funcBloc = Provider.of<FunctionalBloc>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('${funcBloc.selectedValue == 'english' ?
+        title: Text('${funcBloc.selectedLanguage == 'english' ?
             _title[funcBloc.homePageIndex] :
             _titleChinese[funcBloc.homePageIndex]
             }'),
@@ -46,22 +46,24 @@ class Home extends StatelessWidget {
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.redAccent[200],
         currentIndex: funcBloc.homePageIndex,
-        onTap: funcBloc.changeTab,
+        onTap: (value){
+          funcBloc.setValue('changeTab', value);
+        },
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-              title: Text('${funcBloc.selectedValue == 'english' ? 'Menu': '菜单'}'),
+              title: Text('${funcBloc.selectedLanguage == 'english' ? 'Menu': '菜单'}'),
               icon: Icon(Icons.fastfood),
           ),
           BottomNavigationBarItem(
-            title: Text('${funcBloc.selectedValue == 'english' ? 'Cart': '购物车'}'),
+            title: Text('${funcBloc.selectedLanguage == 'english' ? 'Cart': '购物车'}'),
             icon:Icon(Icons.shopping_cart),
           ),
           BottomNavigationBarItem(
-            title: Text('${funcBloc.selectedValue == 'english' ? 'Order': '订单'}'),
+            title: Text('${funcBloc.selectedLanguage == 'english' ? 'Order': '订单'}'),
             icon: Icon(Icons.receipt),
           ),
           BottomNavigationBarItem(
-            title: Text('${funcBloc.selectedValue == 'english' ? 'Account': '账号'}'),
+            title: Text('${funcBloc.selectedLanguage == 'english' ? 'Account': '账号'}'),
             icon: Icon(Icons.person)
           ),
         ],

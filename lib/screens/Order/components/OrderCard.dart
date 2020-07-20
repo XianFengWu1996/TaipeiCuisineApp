@@ -27,11 +27,11 @@ class OrderCard extends StatelessWidget {
               crossAxisAlignment:
               CrossAxisAlignment.start,
               children: <Widget>[
-                Text('${functionalBloc.selectedValue == 'english' ? 'Order #' : '订单号'}:$orderId'),
+                Text('${functionalBloc.selectedLanguage == 'english' ? 'Order #' : '订单号'}:$orderId'),
                 Text('${data['delivery'] ?
-                '${functionalBloc.selectedValue == 'english' ? 'Delivery' : '送餐'}':
-                '${functionalBloc.selectedValue == 'english' ? 'Pickup' : '自取'}'}'),
-                Text('$itemCount ${functionalBloc.selectedValue == 'english' ? 'items' : '道菜'}'),
+                '${functionalBloc.selectedLanguage == 'english' ? 'Delivery' : '送餐'}':
+                '${functionalBloc.selectedLanguage == 'english' ? 'Pickup' : '自取'}'}'),
+                Text('$itemCount ${functionalBloc.selectedLanguage == 'english' ? 'items' : '道菜'}'),
                 Text('\$${(itemTotal / 100).toStringAsFixed(2)}'),
               ],
             ),
@@ -48,7 +48,7 @@ class OrderCard extends StatelessWidget {
                           );
                         });
                   },
-                  child: Text('${functionalBloc.selectedValue == 'english' ? 'Details' : '查看'}')),
+                  child: Text('${functionalBloc.selectedLanguage == 'english' ? 'Details' : '查看'}')),
             ],
           ),
         ],

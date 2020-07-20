@@ -1,10 +1,11 @@
+import 'package:TaipeiCuisine/components/Buttons/Button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
 import 'package:TaipeiCuisine/BloC/CartBloc.dart';
 import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
-import 'package:TaipeiCuisine/components/Divider.dart';
+import 'package:TaipeiCuisine/components/Divider/Divider.dart';
 import 'package:TaipeiCuisine/screens/Auth/Login.dart';
 import 'package:get/get.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -29,23 +30,24 @@ class _SettingState extends State<Setting> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${functionalBloc.selectedValue == 'english' ? 'Setting' : '设置'}'),
+        title: Text('${functionalBloc.selectedLanguage == 'english' ? 'Setting' : '设置'}'),
       ),
       body: Column(
         children: <Widget>[
           SettingItem(
-            title: functionalBloc.selectedValue == 'english' ? 'Change Language' : '更改语言',
+            title: functionalBloc.selectedLanguage == 'english' ? 'Change Language' : '更改语言',
             icon: FontAwesome.language,
             onPressed: () {
+              print(functionalBloc.languageChoiceValue);
               Get.to(ChangeLanguage());
             },
           ),
           SettingItem(
-            title: functionalBloc.selectedValue == 'english' ? 'Change Password' : '更改密码',
+            title: functionalBloc.selectedLanguage == 'english' ? 'Change Password' : '更改密码',
             icon: Icons.lock,
             onPressed: (){
               Get.defaultDialog(
-                title: '${functionalBloc.selectedValue == 'english' ? 'Change Password' : '更改密码'}',
+                title: '${functionalBloc.selectedLanguage == 'english' ? 'Change Password' : '更改密码'}',
                 content: Container(
                   height: 130,
                   child: Column(
@@ -53,13 +55,13 @@ class _SettingState extends State<Setting> {
                       TextFormField(
                         controller: _password,
                         decoration: InputDecoration(
-                          labelText: '${functionalBloc.selectedValue == 'english' ? 'New Password' : '新密码'}'
+                          labelText: '${functionalBloc.selectedLanguage == 'english' ? 'New Password' : '新密码'}'
                         ),
                       ),
                       TextFormField(
                         controller: _confirmPassword,
                         decoration: InputDecoration(
-                            labelText: '${functionalBloc.selectedValue == 'english' ? 'Confirm New Password' : '确认新密码'}',
+                            labelText: '${functionalBloc.selectedLanguage == 'english' ? 'Confirm New Password' : '确认新密码'}',
                         ),
                       ),
                     ],
@@ -76,30 +78,35 @@ class _SettingState extends State<Setting> {
                   } else {
                     Get.snackbar('Error', 'The password does not match', colorText: Colors.white, backgroundColor: Colors.orangeAccent[400]);
                   }
-                }, child: Text('${functionalBloc.selectedValue == 'english' ? 'Change' : '更改'}'),color: Colors.red[400],textColor: Colors.white,),
+                }, child: Text('${functionalBloc.selectedLanguage == 'english' ? 'Change' : '更改'}'),color: Colors.red[400],textColor: Colors.white,),
                 cancel: FlatButton(onPressed: (){
                   _password.clear();
                   _confirmPassword.clear();
                   Get.back();
-                }, child: Text('${functionalBloc.selectedValue == 'english' ? 'Cancel' : '取消'}'), textColor: Colors.black,),
+                }, child: Text('${functionalBloc.selectedLanguage == 'english' ? 'Cancel' : '取消'}'), textColor: Colors.black,),
               );
             },
           ),
           SettingItem(
-            title: functionalBloc.selectedValue == 'english' ? 'Logout' : '退出账号',
+            title: functionalBloc.selectedLanguage == 'english' ? 'Logout' : '退出账号',
             icon: FontAwesome.sign_out,
             onPressed: (){
               Get.defaultDialog(
-                title: functionalBloc.selectedValue == 'english' ? 'Logout' : '退出账号',
-                content: Text('${functionalBloc.selectedValue == 'english' ? 'Do you want to log out?' : '确认退出账号'}'),
-                confirm: RaisedButton(onPressed: (){
+                title: functionalBloc.selectedLanguage == 'english' ? 'Logout' : '退出账号',
+                content: Text('${functionalBloc.selectedLanguage == 'english' ? 'Do you want to log out?' : '确认退出账号'}'),
+                confirm: RaisedButton(onPressed: ()async{
+                    await functionalBloc.logout(
+                    authLogout: authBloc.clearAllValueUponLogout(),
+                    paymentLogout: paymentBloc.clearAllValueUponLogout(),
+                    cartLogout: cartBloc.clearValueUponLogout(),
+                  );
                   Get.offAll(Login());
-                  functionalBloc.logout(authBloc: authBloc, paymentBloc: paymentBloc,cartBloc: cartBloc);
-                }, child: Text('${functionalBloc.selectedValue == 'english' ? 'Yes' : '确认'}'), color: Colors.red[400]),
+
+                }, child: Text('${functionalBloc.selectedLanguage == 'english' ? 'Yes' : '确认'}'), color: Colors.red[400]),
 
                 cancel: FlatButton(onPressed: (){
                   Get.back();
-                }, child: Text('${functionalBloc.selectedValue == 'english' ? 'Cancel' : '取消'}')
+                }, child: Text('${functionalBloc.selectedLanguage == 'english' ? 'Cancel' : '取消'}')
               ));
             },
           ),
@@ -140,7 +147,7 @@ class ChangeLanguage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${functionalBloc.selectedValue == 'english' ? 'Change Language' : '更改语言'}'),
+        title: Text('${functionalBloc.selectedLanguage == 'english' ? 'Change Language' : '更改语言'}'),
       ),
       body: ModalProgressHUD(
         inAsyncCall: functionalBloc.loading,
@@ -148,27 +155,29 @@ class ChangeLanguage extends StatelessWidget {
           children: <Widget>[
             RadioListTile(
               value: 'english',
-              groupValue: functionalBloc.selectedValue,
+              groupValue: functionalBloc.languageChoiceValue,
               title: Text('English'),
               onChanged: (value) {
-                functionalBloc.changeSelectedValue(value);
+                functionalBloc.setValue('language', value);
               },
             ),
             RadioListTile(
               value: 'chinese',
-              groupValue: functionalBloc.selectedValue,
+              groupValue: functionalBloc.languageChoiceValue,
               title: Text('简体中文'),
               onChanged: (value) {
-                functionalBloc.changeSelectedValue(value);
+                functionalBloc.setValue('language',value);
               },
             ),
 
-            RaisedButton(onPressed: () async{
-              functionalBloc.toggleLoading('start');
-              await functionalBloc.updateChoiceInDB();
-
+            Button(onPressed: () async{
+              if(functionalBloc.languageChoiceValue != functionalBloc.selectedLanguage){
+                functionalBloc.setValue('loading','start');
+                await functionalBloc.updateChoiceInDB();
+              }
             },
-            child: Text('${functionalBloc.selectedValue == 'english' ? 'Switch' : '更改'}'), color: Colors.red[400],textColor: Colors.white,),
+            title: '${functionalBloc.selectedLanguage == 'english' ? 'Switch' : '更改'}',
+              color: Colors.red[400], textSize: 18,),
           ],
         ),
       ),

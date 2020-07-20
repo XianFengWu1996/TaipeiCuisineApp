@@ -46,7 +46,7 @@ class Report extends StatelessWidget {
             DropdownButton(
               value: storeBloc.monthDropdown,
               onChanged: (value) {
-                storeBloc.changeValue('month', value);
+                storeBloc.setValue('month', value);
               },
               items: <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
                   .map<DropdownMenuItem<String>>((int value) {
@@ -59,7 +59,7 @@ class Report extends StatelessWidget {
             DropdownButton(
               value: storeBloc.yearDropdown,
               onChanged: (value) {
-                storeBloc.changeValue('year', value);
+                storeBloc.setValue('year', value);
               },
               items: <String>['2020', '2021', '2022', '2023']
                   .map<DropdownMenuItem<String>>((String value) {
@@ -87,7 +87,7 @@ class Report extends StatelessWidget {
                 child: CheckboxListTile(
                   value: storeBloc.summary == 'summary',
                   onChanged: (value) {
-                    storeBloc.changeValue('summary', value ? 'summary' : '');
+                    storeBloc.setValue('summary', value ? 'summary' : '');
                   },
                   title: Text('Summary'),
                 ),
@@ -99,7 +99,7 @@ class Report extends StatelessWidget {
                 child: CheckboxListTile(
                   value: storeBloc.details == 'details',
                   onChanged: (value) {
-                    storeBloc.changeValue('details', value ? 'details' : '');
+                    storeBloc.setValue('details', value ? 'details' : '');
                   },
                   title: Text('Details'),
                 ),

@@ -23,11 +23,9 @@ class SocialMediaLogin extends StatelessWidget {
           iconName: FontAwesome.facebook_f,
           iconColor: Color(0xff3b5998),
           onPressed: () async {
-            functionalBloc.toggleLoading('start');
+            functionalBloc.setValue('loading','start');
 
             await authBloc.loginWithFacebook(functionalBloc, paymentBloc,cartBloc);
-
-            functionalBloc.toggleLoading('reset');
 
             if(authBloc.errorMessage.isNotEmpty){
               Get.snackbar('Warning',
@@ -35,7 +33,7 @@ class SocialMediaLogin extends StatelessWidget {
                 backgroundColor: Colors.red[400],
                 colorText: Colors.white,
               );
-              Future.delayed(Duration(seconds: 1), authBloc.resetErrorMessage());
+              Future.delayed(Duration(seconds: 1), authBloc.setValue('errMsg', []));
             }
           },
         ),
@@ -43,9 +41,8 @@ class SocialMediaLogin extends StatelessWidget {
           iconName: FontAwesome.google,
           iconColor: Color(0xffEA4335),
           onPressed: () async {
-            functionalBloc.toggleLoading('start');
+            functionalBloc.setValue('loading','start');
             await authBloc.loginWithGoogle(functionalBloc, paymentBloc, cartBloc);
-            functionalBloc.toggleLoading('reset');
 
             if(authBloc.errorMessage.isNotEmpty){
               Get.snackbar('Warning',
@@ -53,7 +50,7 @@ class SocialMediaLogin extends StatelessWidget {
                 backgroundColor: Colors.red[400],
                 colorText: Colors.white,
               );
-              Future.delayed(Duration(seconds: 2), authBloc.resetErrorMessage());
+              Future.delayed(Duration(seconds: 2), authBloc.setValue('errMsg', []));
             }
           },
         ),

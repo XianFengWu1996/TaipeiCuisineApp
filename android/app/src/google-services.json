@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "369761240989",
+    "firebase_url": "https://foodorder-43af7.firebaseio.com",
+    "project_id": "foodorder-43af7",
+    "storage_bucket": "foodorder-43af7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369761240989:android:177844d4ffc3157c6fd174",
+        "android_client_info": {
+          "package_name": "com.xianwu.taipeicuisine"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "369761240989-qk8nb2723njc5hjbeobpcs0m2fsdevk0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJoxRncDLGHe1YC7FH3XQJhRDUhLCn9wk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "369761240989-qk8nb2723njc5hjbeobpcs0m2fsdevk0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "369761240989-bu7pcrsum1tl2h838qa3eml6e3jqduhu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "xianwu.TaipeiCuisine"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

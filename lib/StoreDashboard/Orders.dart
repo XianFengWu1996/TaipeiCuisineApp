@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:TaipeiCuisine/BloC/StoreBloc.dart';
 import 'package:TaipeiCuisine/StoreDashboard/Menubar.dart';
-import 'package:TaipeiCuisine/components/Divider.dart';
+import 'package:TaipeiCuisine/components/Divider/Divider.dart';
 import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/CheckoutComponents.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:get/get.dart';

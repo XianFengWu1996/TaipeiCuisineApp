@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -7,34 +8,23 @@ import 'package:TaipeiCuisine/Model/CartItem.dart';
 import 'package:TaipeiCuisine/Model/Product.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'dart:io' show Platform;
 
 class CartBloc with ChangeNotifier {
-
-  //Get user information from firebase once logged in
   FirebaseUser _user;
-
-  saveLocalUser(FirebaseUser user){
-    _user = user;
-    notifyListeners();
-  }
-
   List<CartItem> _items = [];
-
   int _cartItemTotal = 0;
-
   int _lunchCount = 0;
 
   int get cartItemTotal => _cartItemTotal;
-
   UnmodifiableListView<CartItem> get items => UnmodifiableListView(_items);
 
   // ----------------------------------------------------------------
   //Cart Functionality
   // ----------------------------------------------------------------
 
-  void addToCart(Product product,[int count = 1]) {
-
-    if(product.lunch != null && product.lunch){
+  void addToCart(Product product, [int count = 1]) {
+    if (product.lunch != null && product.lunch) {
       _lunchCount++;
     }
 
@@ -67,7 +57,7 @@ class CartBloc with ChangeNotifier {
     for (CartItem item in _items) {
       if (item.product.foodId == foodId) {
         if (action == 'add') {
-          if(item.product.lunch != null && item.product.lunch){
+          if (item.product.lunch != null && item.product.lunch) {
             _lunchCount++;
           }
           item.count += 1;
@@ -76,9 +66,8 @@ class CartBloc with ChangeNotifier {
         }
 
         if (action == 'remove') {
-          if(item.product.lunch != null && item.product.lunch){
+          if (item.product.lunch != null && item.product.lunch) {
             _lunchCount--;
-
           }
           if (item.count > 1) {
             item.count -= 1;
@@ -98,6 +87,8 @@ class CartBloc with ChangeNotifier {
     _items = [];
     _cartItemTotal = 0;
     _subtotal = 0;
+    _lunchDiscount = 0;
+    _lunchCount = 0;
     _tax = 0;
     _tip = 0;
     _total = 0;
@@ -120,75 +111,46 @@ class CartBloc with ChangeNotifier {
   double _lunchDiscount = 0.00;
   double _calcSubtotal = 0.00;
 
-
-
   double get subtotal => _subtotal > 0 ? _subtotal : 0;
-
   double get calcSubtotal => _calcSubtotal;
-
   double get tax => _tax > 0 ? _tax : 0;
-
   double get tip => _tip;
-
   double get total => _total > 0 ? _total : 0;
-
   double get tipPercent => _tipPercent;
-
   double get customTip => _customTip;
-
   double get deliveryFee => _deliveryFee;
-
   int get rewardPoint => _rewardPoint;
-
   double get lunchDiscount => _lunchDiscount;
 
-
-  void isCustomTip(bool isCustom, String tip) {
+  void isCustomTip(bool isCustom, double tip) {
     _isCustomTip = isCustom;
-    _customTip = double.parse(tip);
+    _customTip = tip;
     calculateTotal('add', 0);
 
     notifyListeners();
   }
 
   void calculateTotal(action, price, [count = 1]) {
-    action == 'add' ? _subtotal += ((price * count)) : _subtotal -= (price * count);
-    _calcSubtotal = (_subtotal - (_rewardPoint != 0 ? (_rewardPoint/100) : 0.00) - _lunchDiscount);
+    action == 'add'
+        ? _subtotal += ((price * count))
+        : _subtotal -= (price * count);
+    _calcSubtotal = (_subtotal -
+        (_rewardPoint != 0 ? (_rewardPoint / 100) : 0.00) -
+        _lunchDiscount);
     _tax = (_calcSubtotal * 0.07);
     _tip = !_isCustomTip ? ((_subtotal + _tax) * _tipPercent) : _customTip;
-    _total = ((_calcSubtotal + _tax + _tip + (_isDelivery ? deliveryFee : 0.00)));
+    _total =
+        ((_calcSubtotal + _tax + _tip + (_isDelivery ? deliveryFee : 0.00)));
   }
 
-  void resetTipPercent() {
-    _tipPercent = 0.0;
-    _customTip = 0.0;
-    _isCustomTip = false;
-
-    calculateTotal('add', 0);
-    notifyListeners();
-  }
-
-  void getTipPercent(double percent) {
-    _tipPercent = percent;
-    calculateTotal('add', 0);
-
-    notifyListeners();
-  }
-
-  void useRewardPoint(int point){
-    _rewardPoint = point;
-    calculateTotal('add', 0);
-
-    notifyListeners();
-  }
-
-  void calculateLunchDiscount(int start, int end){
-    if(TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >= start && TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <= end){
-      if(_lunchCount < 3){
+  calculateLunchDiscount(int start, int end) {
+    if (TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >= start &&
+        TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <= end) {
+      if (_lunchCount < 3) {
         _lunchDiscount = 0;
       }
 
-      if(_lunchCount % 3 == 0){
+      if (_lunchCount % 3 == 0) {
         _lunchDiscount = (_lunchCount / 3) * 3.9;
         calculateTotal('add', 0);
       }
@@ -210,63 +172,21 @@ class CartBloc with ChangeNotifier {
   String get choice => _choice;
   bool get isDelivery => _isDelivery;
 
-  void checkChoice(choice){
-    choice == 'delivery' ? _isDelivery = true : _isDelivery = false;
-    calculateTotal('add', 0);
-    notifyListeners();
-  }
-
-
   // ----------------------------------------------------------------
   // Address and Delivery Functionality
   // ----------------------------------------------------------------
 
-  String _address = '';
-  String _street = '';
-  String _city = '';
-  String _zipCode = '';
-  String _apt = '';
-  String _businessName = '';
   int _distance = 0;
 
-  String get address => _address;
-  String get street => _street;
-  String get city => _city;
-  String get zipCode => _zipCode;
-  String get apt => _apt;
-  String get businessName => _businessName;
   int get distance => _distance;
 
-
-  getAddress() async {
-    try{
-      QuerySnapshot querySnapshot = await Firestore.instance.collection(
-          'users/${_user.uid}/address').getDocuments();
-
-      if (querySnapshot.documents.length > 0) {
-        querySnapshot.documents.forEach((f) {
-
-          _street = f.data['street'];
-          _city = f.data['city'];
-          _zipCode = f.data['zipcode'];
-          _apt = f.data['apt'];
-          _businessName = f.data['business'];
-          _deliveryFee = f.data['deliveryFee'];
-          _address = '$_street, \n$_city, $zipCode ${apt != '' ? 'Apt ': ''}$apt';
-        });
-      } else {
-        _address = '';
-      }
-    } catch(e){
-      Get.snackbar('Error', 'Unable to retrieve address...', backgroundColor: Colors.red, colorText: Colors.white);
-    }
-
-    notifyListeners();
-  }
-
-  saveAddress(changeStreet, changeCity, changeZipCode, changeApt, changeBusiness) async {
-    if (_street != changeStreet || _city != changeCity || _zipCode != changeZipCode|| _apt!= changeApt || _businessName != changeBusiness) {
-
+  saveAddress(changeStreet, changeCity, changeZipCode, changeApt,
+      changeBusiness, FunctionalBloc functionalBloc) async {
+    if (functionalBloc.deliveryStreet != changeStreet ||
+        functionalBloc.deliveryCity != changeCity ||
+        functionalBloc.deliveryZipCode != changeZipCode ||
+        functionalBloc.deliveryApt != changeApt ||
+        functionalBloc.deliveryBusiness != changeBusiness) {
       // it will return the value of lat and long
       // geolocation[0] = lat,
       // geolocation[1] = long
@@ -274,46 +194,67 @@ class CartBloc with ChangeNotifier {
       // geolocation[3] = street name
       // geolocation[4] = city
       // geolocation[5] = zipcode
-      var geolocation = await geoCoding(changeStreet, changeCity, );
+      try {
+        var geolocation = await geoCoding(changeStreet, changeCity);
 
-      var calcDistance = await calculateDistance(geolocation[0], geolocation[1]);
+        var calcDistance = await calculateDistance(geolocation[0], geolocation[1]);
 
-      await calculateDeliveryFee(calcDistance);
+        await calculateDeliveryFee(calcDistance);
+        print(await calculateDeliveryFee(calcDistance));
+        print(_deliveryFee);
 
-      if(_deliveryFee != 0.0){
-
-
-        try{
-          await Firestore.instance.collection('users/${_user.uid}/address').document(
-              'details').setData(
+        if (_deliveryFee != 0.0) {
+          await Firestore.instance
+              .collection('users/${_user.uid}/customer_information')
+              .document('details')
+              .setData(
             {
-              'street': '${geolocation[2]} ' + '${geolocation[3]}' ,
-              'city': geolocation[4],
-              'zipcode':geolocation[5],
-              'apt': changeApt,
-              'business': changeBusiness,
-              'deliveryFee': _deliveryFee,
+              'address': {
+                'street': '${geolocation[2]} ' + '${geolocation[3]}',
+                'city': geolocation[4],
+                'zipcode': geolocation[5],
+                'apt': changeApt,
+                'business': changeBusiness,
+                'fee': _deliveryFee,
+              }
             },
             merge: true,
           );
-        } catch(e){
-          Get.snackbar('Error', 'Unable to save address...', backgroundColor: Colors.red, colorText: Colors.white);
+          await functionalBloc.setValue('getAddress', {
+            'street': '${geolocation[2]} ' + '${geolocation[3]}',
+            'city': geolocation[4],
+            'zipcode': geolocation[5],
+            'apt': changeApt,
+            'business': changeBusiness,
+            'deliveryFee': _deliveryFee.toInt(),
+            'address': '${geolocation[2]} ' +
+                '${geolocation[3]} \n${geolocation[4]} ${geolocation[5]} '
+                    '${changeApt != '' ? 'Apt: ${changeApt['apt']}' : ''}'
+          });
         }
-      }
-      getAddress();
-    }
 
+      } catch (e) {
+        Get.snackbar('Error', 'Unable to save address...',
+            backgroundColor: Colors.red, colorText: Colors.white);
+        functionalBloc.setValue('loading', 'reset');
+
+      }
+    }
+    notifyListeners();
   }
 
-  calculateDeliveryFee(int dis){
+  calculateDeliveryFee(int dis) {
     double mile = (dis / 1609.34);
-    if(mile < 2.1){
+    if (mile < 2.1) {
       _deliveryFee = 2.0;
-    } else if(mile >= 2.1 && mile <= 6.0){
+    } else if (mile >= 2.1 && mile <= 6.0) {
       _deliveryFee = mile.ceilToDouble();
     } else {
       _deliveryFee = 0.0;
-      Get.snackbar('Unable to deliver to this address', 'Please double check address, we are only able to deliver within 6 miles', backgroundColor: Colors.orange[300], colorText: Colors.white);
+      Get.snackbar('Unable to deliver to this address',
+          'Please double check address, we are only able to deliver within 6 miles',
+          backgroundColor: Colors.orange[300], colorText: Colors.white);
+
     }
     calculateTotal('add', 0);
     notifyListeners();
@@ -321,91 +262,77 @@ class CartBloc with ChangeNotifier {
 
   Future<dynamic> geoCoding(street, city) async {
     String url = 'https://maps.googleapis.com/maps/api/geocode/json?'
-        'address=$street,+$city,+MA&key=$_googleIos';
-    try{
+        'address=$street,+$city,+MA&key=${Platform.isIOS ? _googleIos : _googleAndroid}';
+    try {
       var result = await http.get(url);
       var data = jsonDecode(result.body)['results'][0];
 
       var lat, long, streetNumber, streetName, cityName, zipCode;
 
-      if(data['address_components'].last['types'][0] == 'postal_code_suffix'){
+      if (data['address_components'].last['types'][0] == 'postal_code_suffix') {
         data['address_components'].removeLast();
       }
 
       lat = data['geometry']['location']['lat'];
       long = data['geometry']['location']['lng'];
-      streetNumber =data['address_components'][0]['long_name'];
-      streetName =data['address_components'][1]['long_name'];
+      streetNumber = data['address_components'][0]['long_name'];
+      streetName = data['address_components'][1]['long_name'];
       cityName = data['address_components'][2]['long_name'];
       zipCode = data['address_components'].last['long_name'];
 
       return [lat, long, streetNumber, streetName, cityName, zipCode];
-    } catch(e){
-      Get.snackbar('Error', 'An unexpected error has occurred, try again later..', backgroundColor: Colors.red, colorText: Colors.white);
+    } catch (e) {
+      Get.snackbar(
+          'Error', 'An unexpected error has occurred, try again later..',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
-
-
   }
 
   Future<dynamic> calculateDistance(lat, long) async {
-    String url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial'
+    String url =
+        'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial'
         '&origins=42.274220,-71.024369'
         '&destinations=$lat, $long'
-        '&key=$_googleIos';
+        '&key=${Platform.isIOS ? _googleIos : _googleAndroid}';
 
-    try{
+    try {
       var result = await http.get(url);
       var data = jsonDecode(result.body);
 
       return data['rows'][0]['elements'][0]['distance']['value'];
-    }catch(e){
-      Get.snackbar('Error', 'An unexpected error has occurred, try again later..', backgroundColor: Colors.red, colorText: Colors.white);
+    } catch (e) {
+      Get.snackbar(
+          'Error', 'An unexpected error has occurred, try again later..',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
   String _googleIos = '';
   String _googleAndroid = '';
 
-  String get googleIos => _googleIos;
-  String get googleAndroid => _googleAndroid;
-
-  // retrieve keys
-  retrieveKeys()async{
-    try{
-      var result = await Firestore.instance.collection('apikey').document('details').get();
-      _googleIos = result.data['google_ios_key'];
-      _googleAndroid = result.data['google_android_key'];
-    } catch(e){
-      Get.snackbar('Error', 'An unexpected error has occurred, please try again later.');
-    }
-  }
-
   // clear all the values in this provider
-  void clearValueUponCheckout(){
+  void clearValueUponCheckout() {
     _items = [];
     _cartItemTotal = 0;
     _subtotal = 0;
+    _calcSubtotal = 0.00;
     _tax = 0;
     _tip = 0;
     _total = 0;
     _tipPercent = 0;
     _lunchCount = 0;
+    _lunchDiscount = 0.00;
     _isCustomTip = false;
     _customTip = 0;
     _isDelivery = false;
     _choice = '';
     _rewardPoint = 0;
+    _deliveryFee = 0;
     notifyListeners();
   }
 
-  void clearValueUponLogout(){
+  clearValueUponLogout() {
     _user = null;
-    _address = '';
-    _street = '';
-    _city = '';
-    _zipCode = '';
-    _apt = '';
-    _businessName = '';
     _distance = 0;
     _isDelivery = false;
     _subtotal = 0;
@@ -425,6 +352,44 @@ class CartBloc with ChangeNotifier {
     _items = [];
     _choice = '';
     _rewardPoint = 0;
+    notifyListeners();
+  }
+
+  setValue(String type, dynamic value) {
+    switch (type) {
+      case 'saveUser':
+        _user = value;
+        break;
+      case 'useReward':
+        _rewardPoint = value;
+        calculateTotal('add', 0);
+        break;
+      case 'checkChoice':
+        value == 'delivery' ? _isDelivery = true : _isDelivery = false;
+        calculateTotal('add', 0);
+        break;
+      case 'getTipPercent':
+        _tipPercent = value;
+        calculateTotal('add', 0);
+        break;
+      case 'resetTipPercent':
+        _tipPercent = 0.0;
+        _customTip = 0.0;
+        _isCustomTip = value;
+        calculateTotal('add', 0);
+        break;
+      case 'customTipValue':
+        _customTip = double.parse(value);
+        calculateTotal('add', 0);
+        break;
+      case 'getKey':
+        _googleIos = value['ios_key'];
+        _googleAndroid = value['android_key'];
+        break;
+
+      default:
+        return;
+    }
     notifyListeners();
   }
 }

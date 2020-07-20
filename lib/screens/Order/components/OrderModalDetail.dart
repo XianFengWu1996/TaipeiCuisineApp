@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/CheckoutComponents.dart';
-import 'package:TaipeiCuisine/components/Divider.dart';
+import 'package:TaipeiCuisine/components/Divider/Divider.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -34,17 +34,17 @@ class OrderModalDetail extends StatelessWidget {
           child: Container(
             child: Column(
               children: <Widget>[
-                Text('${functionalBloc.selectedValue == 'english' ? 'Date' : '日期'}: ${DateFormat("yyyy-MM-dd HH:mm").format(DateTime.fromMillisecondsSinceEpoch(data['createdAt']))}'),
-                Text('${functionalBloc.selectedValue == 'english' ? 'Order #' : '订单号'}: ${data['orderId']}'),
+                Text('${functionalBloc.selectedLanguage == 'english' ? 'Date' : '日期'}: ${DateFormat("yyyy-MM-dd HH:mm").format(DateTime.fromMillisecondsSinceEpoch(data['createdAt']))}'),
+                Text('${functionalBloc.selectedLanguage == 'english' ? 'Order #' : '订单号'}: ${data['orderId']}'),
                 LineDivider(),
-                Text('${functionalBloc.selectedValue == 'english' ? 'Customer Name' : '姓名'}: ${data['customerName']}'),
-                Text('${functionalBloc.selectedValue == 'english' ? 'Phone Number' : '电话'}: ${data['customerPhone']}'),
+                Text('${functionalBloc.selectedLanguage == 'english' ? 'Customer Name' : '姓名'}: ${data['customerName']}'),
+                Text('${functionalBloc.selectedLanguage == 'english' ? 'Phone Number' : '电话'}: ${data['customerPhone']}'),
                 LineDivider(),
-                Text('${functionalBloc.selectedValue == 'english' ? 'Method' : '取餐方式'}: ${data['delivery'] ? '${functionalBloc.selectedValue == 'english' ? 'Delivery' : '送餐'}' : '${functionalBloc.selectedValue == 'english' ? 'Pickup' : '自取'}'}'),
+                Text('${functionalBloc.selectedLanguage == 'english' ? 'Method' : '取餐方式'}: ${data['delivery'] ? '${functionalBloc.selectedLanguage == 'english' ? 'Delivery' : '送餐'}' : '${functionalBloc.selectedLanguage == 'english' ? 'Pickup' : '自取'}'}'),
                 data['delivery'] ? Text('${data['deliveryAddress']}') : Container(),
-                Text('${functionalBloc.selectedValue == 'english' ? 'Payment Method' : '付款方式'}: ${data['method']}'),
-                Text('${functionalBloc.selectedValue == 'english' ? 'Number of Items' : '数量'}: ${data['totalCount']}'),
-                Text('${functionalBloc.selectedValue == 'english' ? 'Reward Point Earned' : '获得积分'}: ${data['pointEarned']}'),
+                Text('${functionalBloc.selectedLanguage == 'english' ? 'Payment Method' : '付款方式'}: ${data['method']}'),
+                Text('${functionalBloc.selectedLanguage == 'english' ? 'Number of Items' : '数量'}: ${data['totalCount']}'),
+                Text('${functionalBloc.selectedLanguage == 'english' ? 'Reward Point Earned' : '获得积分'}: ${data['pointEarned']}'),
                 LineDivider(),
 
                 ListView.builder(
@@ -55,7 +55,7 @@ class OrderModalDetail extends StatelessWidget {
                       children: <Widget>[
                         Text('${data['items'][index]['foodId']}. ',),
                         Expanded(
-                          child: Text('${functionalBloc.selectedValue == 'english' ? data['items'][index]['foodName'] :data['items'][index]['foodChineseName'] } ',
+                          child: Text('${functionalBloc.selectedLanguage == 'english' ? data['items'][index]['foodName'] :data['items'][index]['foodChineseName'] } ',
                           ),
                         ),
                         Text('     '),
@@ -67,20 +67,20 @@ class OrderModalDetail extends StatelessWidget {
                   },
                 ),
                 LineDivider(),
-                data['customerComments'] != '' ? Text('${functionalBloc.selectedValue == 'english' ? 'Customer Comments' : '特殊要求'}: ${data['customerComments']}') : Container(),
+                data['customerComments'] != '' ? Text('${functionalBloc.selectedLanguage == 'english' ? 'Customer Comments' : '特殊要求'}: ${data['customerComments']}') : Container(),
                 data['customerComments'] != '' ? LineDivider() : Container(),
                 CheckoutSummaryItems(
-                  title: '${functionalBloc.selectedValue == 'english' ? 'Subtotal' : '税前总额'}',
+                  title: '${functionalBloc.selectedLanguage == 'english' ? 'Subtotal' : '税前总额'}',
                   details: '\$${data['subtotal'].toStringAsFixed(2)}',),
-                CheckoutSummaryItems(title: '${functionalBloc.selectedValue == 'english' ? 'Reward Point' : '兑换积分'}', details: '(\$${(data['pointUsed']/100).toStringAsFixed(2)})'),
-                CheckoutSummaryItems(title: '${functionalBloc.selectedValue == 'english' ? 'Lunch Discount' : '午餐折扣'}', details: '(\$${(data['lunchDiscount']).toStringAsFixed(2)})'),
+                CheckoutSummaryItems(title: '${functionalBloc.selectedLanguage == 'english' ? 'Reward Point' : '兑换积分'}', details: '(\$${(data['pointUsed']/100).toStringAsFixed(2)})'),
+                CheckoutSummaryItems(title: '${functionalBloc.selectedLanguage == 'english' ? 'Lunch Discount' : '午餐折扣'}', details: '(\$${(data['lunchDiscount']).toStringAsFixed(2)})'),
                 LineDivider(),
                 CheckoutSummaryItems(
-                  title: '${functionalBloc.selectedValue == 'english' ? 'Subtotal(After)' : '税前总额(折扣后)'}',
+                  title: '${functionalBloc.selectedLanguage == 'english' ? 'Subtotal(After)' : '税前总额(折扣后)'}',
                   details: '\$${data['calcSubtotal'].toStringAsFixed(2)}',),
-                CheckoutSummaryItems(title: '${functionalBloc.selectedValue == 'english' ? 'Tax' : '税'}', details: '\$${data['tax'].toStringAsFixed(2)}',),
-                CheckoutSummaryItems(title: '${functionalBloc.selectedValue == 'english' ? 'Tip' : '小费'}', details: '\$${data['tip'].toStringAsFixed(2)}',),
-                CheckoutSummaryItems(title: '${functionalBloc.selectedValue == 'english' ? 'Total' : '总额'}', details: '\$${(data['total']/100).toStringAsFixed(2)}',),
+                CheckoutSummaryItems(title: '${functionalBloc.selectedLanguage == 'english' ? 'Tax' : '税'}', details: '\$${data['tax'].toStringAsFixed(2)}',),
+                CheckoutSummaryItems(title: '${functionalBloc.selectedLanguage == 'english' ? 'Tip' : '小费'}', details: '\$${data['tip'].toStringAsFixed(2)}',),
+                CheckoutSummaryItems(title: '${functionalBloc.selectedLanguage == 'english' ? 'Total' : '总额'}', details: '\$${(data['total']/100).toStringAsFixed(2)}',),
               ],
             ),
           ),

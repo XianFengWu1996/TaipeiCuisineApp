@@ -22,7 +22,7 @@ class OrderList extends StatelessWidget {
             child: ListTile(
               title: Text(
                   '${item.product.foodId}. '
-                    '${functionalBloc.selectedValue == 'english'
+                    '${functionalBloc.selectedLanguage == 'english'
                       ? item.product.foodName
                       : item.product.foodChineseName
                   }'),

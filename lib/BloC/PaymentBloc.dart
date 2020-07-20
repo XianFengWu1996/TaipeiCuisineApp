@@ -18,21 +18,15 @@ import 'package:uuid/uuid.dart';
 // ----------------------------------------------------------------
 
 class PaymentBloc with ChangeNotifier {
-
   //Get user information from firebase once logged in
   FirebaseUser _user;
-
-  saveLocalUser(FirebaseUser user){
-    _user = user;
-    notifyListeners();
-  }
 
   //options and general variables
   String _paymentMethod = '';
   String _idempotencyKey = Uuid().v4();
   String _orderNumber = '';
   int _total = 0;
-  bool _sameAsDelivery = false;
+  bool _sameAsDelivery = true;
   bool _saveCard = false;
   List<Order> _currentOrder = [];
   String _comments = '';
@@ -49,147 +43,31 @@ class PaymentBloc with ChangeNotifier {
   String get errorMessage => _errorMessage;
 
   // =======================================
-  //Billing details
-  // =======================================
-  String _firstName = '';
-  String _lastName = '';
-  String _email = '';
-  String _phoneNumber;
-  String _street = '';
-  String _city = '';
-  String _zip;
-  String _cofId = '';
-  String _customerId = '';
-  String _brand = '';
-  String _lastFourDigit = '';
-
-  String get firstName => _firstName;
-  String get lastName => _lastName;
-  String get email => _email;
-  String get phoneNumber => _phoneNumber;
-  String get street => _street;
-  String get city => _city;
-  String get zip => _zip;
-  String get cofId => _cofId;
-  String get customerId => _customerId;
-  String get lastFourDigit => _lastFourDigit;
-
-  void saveBillingInfo({first, last, email, phone, street, city, zip}) async {
-    _firstName = first;
-    _lastName = last;
-    _email = email;
-    _phoneNumber = phone;
-    _street = street;
-    _city = city;
-    _zip = zip;
-
-    notifyListeners();
-  }
-
-  // retrieve billing info from database
-  retrieveBillingInfo() async {
-    try{
-      await Firestore.instance
-          .collection('users/${_user.uid}/billings')
-          .document('details')
-          .get()
-          .then((value) {
-        var v = value.data;
-        if (value.data != null) {
-          _firstName = v['firstName'] == null ? '' : v['firstName'];
-          _lastName = v['lastName'] == null ? '' : v['lastName'];
-          _email = v['email'] == null ? '' : v['email'];
-          _phoneNumber = v['phone'] == null ? '' : v['phone'];
-          _street = v['street'] == null ? '' : v['street'];
-          _city = v['city'] == null ? '' : v['city'];
-          _zip = v['zip'] == null ? '' : v['zip'];
-          _brand = v['brand'] == null ? '' : v['brand'];
-          _lastFourDigit = v['lastFourDigit'] == null ? '' : v['lastFourDigit'];
-          _customerId = v['customerId'] == null ? '' : v['customerId'];
-          _cofId = v['cofId'] == null ? '' : v['cofId'];
-        }
-      });
-    } catch(e){
-      Get.snackbar('Error', 'An unexpected error has occured, try restarting the app.', colorText: Colors.white, backgroundColor: Colors.red);
-    }
-  }
-
-
-  // =======================================
   // Checkout Page Related Methods
   // =======================================
 
-  String _customerFirstName = '';
-  String _customerLastName = '';
-  String _customerPhoneNumber = '';
-
-  String get customerFirstName => _customerFirstName;
-  String get customerLastName => _customerLastName;
-  String get customerPhoneNumber => _customerPhoneNumber;
-
-  saveCustomerInfo({firstName, lastName, phone}) async {
+  saveCustomerInfo({firstName, lastName, phone, FunctionalBloc functionalBloc}) async {
     try{
-      await Firestore.instance.collection('users/${_user.uid}/customer').document('details').setData({
+      functionalBloc.setValue('customerInfo', {
         'firstName': firstName,
         'lastName': lastName,
-        'phone': phone
+        'phone': phone,
+        'verifiedNumbers': phone
       });
-      _customerFirstName = firstName;
-      _customerLastName = lastName;
-      _customerPhoneNumber = phone;
+
+      await Firestore.instance.collection('users/${_user.uid}/customer_information').document('details').setData({
+        'customer': {
+          'firstName': firstName,
+          'lastName': lastName,
+          'phone': phone,
+          'verifiedNumbers': functionalBloc.verifiedNumbers
+        }
+      }, merge: true);
       notifyListeners();
     } catch(e){
-      Get.snackbar('Error', 'An unexpected error has occured, try restarting the app.', colorText: Colors.white, backgroundColor: Colors.red);
+      Get.snackbar('Error', 'An unexpected error has occurred, try restarting the app.', colorText: Colors.white, backgroundColor: Colors.red);
     }
   }
-
-  retrieveCustomerInfo() async {
-
-    try{
-      await Firestore.instance.collection('users/${_user.uid}/customer').document('details').get().then((value){
-        if(value.data != null){
-          _customerFirstName = value.data['firstName'] == null ? '': value.data['firstName'];
-          _customerLastName = value.data['lastName'] == null ? '' : value.data['lastName'];
-          _customerPhoneNumber = value.data['phone'] == null ? '' : value.data['phone'];
-        }
-      });
-    } catch(e){
-      Get.snackbar('Error', 'An unexpected error has occured, try restarting the app.', colorText: Colors.white, backgroundColor: Colors.red);
-    }
-
-  }
-
-  void getPaymentMethod(String type) {
-    _paymentMethod = type;
-    notifyListeners();
-  }
-
-  void showAddressInput(bool value) {
-    _sameAsDelivery = value;
-    notifyListeners();
-  }
-
-  void checkSaveCard(bool value) {
-    _saveCard = value;
-    notifyListeners();
-  }
-
-  void resetPaymentMethod() {
-    _sameAsDelivery = false;
-    _paymentMethod = '';
-    notifyListeners();
-  }
-
-  //   get the total and format it to cents for square
-  void getTotal(double total) {
-    _total = (total * 100).toInt();
-  }
-
-  void getComments(String comment){
-    _comments = comment;
-    notifyListeners();
-  }
-
 
   // ===========================================
   //  Square Payment Methods
@@ -202,17 +80,6 @@ class PaymentBloc with ChangeNotifier {
   String _appId = '';
   String _locationId = '';
 
-  String get appId => _appId;
-
-  retrieveKey() async{
-    await Firestore.instance.collection('apikey').document('details').get().then((value) {
-      _token = value.data['square_access_token'];
-      _appId = value.data['square_application_id'];
-      _locationId = value.data['square_location_id'];
-    });
-    notifyListeners();
-  }
-
   String customerEndPoint = 'https://connect.squareupsandbox.com/v2/customers';
   String paymentEndPoint = 'https://connect.squareupsandbox.com/v2/payments';
 
@@ -220,14 +87,14 @@ class PaymentBloc with ChangeNotifier {
     int amount = (total / 100).toInt();
 
     var contact = Contact((b) => b
-      ..givenName = "$_firstName"
-      ..familyName = "$_lastName"
-      ..addressLines = ListBuilder(['$_street'])
-      ..city = "$_city"
+      ..givenName = "${functionalBloc.billingFirstName}"
+      ..familyName = "${functionalBloc.billingLastName}"
+      ..addressLines = ListBuilder(['${functionalBloc.billingStreet}'])
+      ..city = "${functionalBloc.billingCity}"
       ..countryCode = "USA"
-      ..email = "$_email"
-      ..phone = "$_phoneNumber"
-      ..postalCode = "$_zip");
+      ..email = "${_user.email != null ? _user.email : _user.providerData[0].email}"
+      ..phone = "${functionalBloc.billingPhone}"
+      ..postalCode = "${functionalBloc.billingZip}");
 
     await InAppPayments.setSquareApplicationId(
         '$_appId');
@@ -235,9 +102,9 @@ class PaymentBloc with ChangeNotifier {
     await InAppPayments.startCardEntryFlowWithBuyerVerification(
         onBuyerVerificationSuccess: (BuyerVerificationDetails result) async {
           Get.close(2);
-          functionalBloc.toggleLoading('start');
+          functionalBloc.setValue('loading','start');
           await chargeCard(result, cartBloc, functionalBloc);
-          functionalBloc.toggleLoading('reset');
+          functionalBloc.setValue('loading','reset');
 
           Get.off(Confirmation());
         },
@@ -255,7 +122,7 @@ class PaymentBloc with ChangeNotifier {
   }
 
   // create a customer with square, this will generate an customer id
-  Future<dynamic> createCustomer() async {
+  Future<dynamic> createCustomer(FunctionalBloc functionalBloc) async {
     try {
       var response = await http.post(customerEndPoint,
           headers: {
@@ -266,21 +133,21 @@ class PaymentBloc with ChangeNotifier {
           },
           body: jsonEncode({
             "idempotency_key": '$_idempotencyKey',
-            "given_name": _firstName,
-            "family_name": _lastName,
-            "email_address": _email,
-            "phone_number": _phoneNumber,
+            "given_name": functionalBloc.billingFirstName,
+            "family_name": functionalBloc.billingLastName,
+            "email_address": '${_user.email != null ? _user.email : _user.providerData[0].email}',
+            "phone_number": functionalBloc.billingPhone,
             "address": {
-              "address_line_1": '$_street',
+              "address_line_1": '${functionalBloc.billingStreet}',
               "address_line_2": '',
-              'locality': '$_city',
-              'postal_code': '$_zip',
+              'locality': '${functionalBloc.billingCity}',
+              'postal_code': '${functionalBloc.billingZip}',
               'country': 'US'
             }
           }));
-      _customerId = jsonDecode(response.body)['customer']['id'];
       // returns the customer id required for saving card
-      return _customerId;
+      functionalBloc.setValue('customerId', jsonDecode(response.body)['customer']['id']);
+      return jsonDecode(response.body)['customer']['id'];
     } catch (error) {
       Get.snackbar(error.code, error.message);
     }
@@ -288,7 +155,7 @@ class PaymentBloc with ChangeNotifier {
 
   // save the card to the customer file
   Future<dynamic> saveCardOnFile(BuyerVerificationDetails result, FunctionalBloc functionalBloc) async {
-    String customerId = _customerId == '' ? await createCustomer() : _customerId;
+    String customerId = functionalBloc.billingCustomerId == '' ? await createCustomer(functionalBloc) : functionalBloc.billingCustomerId;
 
     // make a request to the endpoint to save the card to Square Api
     String url =
@@ -304,7 +171,7 @@ class PaymentBloc with ChangeNotifier {
             },
             body: jsonEncode({
               'card_nonce': '${result.nonce}',
-              'cardholder_name': '$firstName $lastName',
+              'cardholder_name': '${functionalBloc.billingFirstName} ${functionalBloc.billingLastName}',
               'billing_address': {
                 'postal_code': '${result.card.postalCode}',
                 'country': 'US'
@@ -317,9 +184,11 @@ class PaymentBloc with ChangeNotifier {
           _errorMessage = data['errors'][0]['category'];
         } else {
           //save the data to the variable
-          _cofId = data['card']['id'];
-          _brand = data['card']['card_brand'];
-          _lastFourDigit = data['card']['last_4'];
+          functionalBloc.setValue('card_info', {
+            'cofId': data['card']['id'],
+            'brand' : data['card']['card_brand'],
+            'lastFourDigit' : data['card']['last_4'],
+          });
 
           return data['card']['id'];
         }
@@ -331,10 +200,7 @@ class PaymentBloc with ChangeNotifier {
 
 //   Charge the card for the  first time, if the user decide not to save card,
 //   nonce will be use to make an one time charge to the user
-  chargeCard(
-      BuyerVerificationDetails result,
-      CartBloc bloc,
-      FunctionalBloc functionalBloc) async {
+  chargeCard(BuyerVerificationDetails result, CartBloc cartBloc, FunctionalBloc functionalBloc) async {
     String id = saveCard ? await saveCardOnFile(result, functionalBloc) : result.nonce;
 
    try{
@@ -353,7 +219,7 @@ class PaymentBloc with ChangeNotifier {
            "amount": _total,
            "currency": "USD",
          },
-         "customer_id": _customerId,
+         "customer_id": functionalBloc.billingCustomerId,
          "source_id": id,
        }),
      );
@@ -365,51 +231,48 @@ class PaymentBloc with ChangeNotifier {
        // savedCard allow the customer to save the card information for express checkout in the future
        if (saveCard && status == 'COMPLETED') {
          await Firestore.instance
-             .collection('users/${_user.uid}/billings')
-             .document('details')
-             .setData({
-           "firstName": _firstName,
-           "lastName": _lastName,
-           "email": _email,
-           "phone": _phoneNumber,
-           "street": _street,
-           "city": _city,
-           "zip": _zip,
-           "customerId": _customerId,
-           "cofId": _cofId,
-           "brand": _brand,
-           "lastFourDigit": _lastFourDigit,
-         }, merge: true);
-       }
+             .collection('users/${_user.uid}/customer_information').document('details').setData({
+          'billing': {
+            "firstName": functionalBloc.billingFirstName,
+            "lastName": functionalBloc.billingLastName,
+            "phone": functionalBloc.billingPhone,
+            "street": functionalBloc.billingStreet,
+            "city": functionalBloc.billingCity,
+            "zip": functionalBloc.billingZip,
+            "customerId": functionalBloc.billingCustomerId,
+            "cofId": functionalBloc.billingCofId,
+            "brand": functionalBloc.billingBrand,
+            "lastFourDigit": functionalBloc.billingLastFourDigit,
+          }}, merge: true);}
 
        // handles the reward point and order
        if (status == 'COMPLETED') {
          manageRewardPoint(
-             point: bloc.rewardPoint,
-             total: bloc.total,
+             point: cartBloc.rewardPoint,
+             total: cartBloc.total,
              orderNumber: jsonDecode(response.body)['payment']['order_id'],
-             percentage: 5,
+             percentage: functionalBloc.cardReward,
              method: 'Card'
          );
 
          sendOrderToDb(
              orderId: _orderNumber,
-             items: bloc.items,
-             deliveryAddress: bloc.isDelivery ? '${bloc.street}, ${bloc.city}, MA, ${bloc.zipCode}' : '',
-             delivery: bloc.isDelivery,
-             subtotal: bloc.subtotal,
-             calcSubtotal: bloc.calcSubtotal,
-             lunchDiscount: bloc.lunchDiscount,
-             tax: bloc.tax,
-             deliveryFee: bloc.deliveryFee,
-             tip: bloc.tip,
+             items: cartBloc.items,
+             deliveryAddress: cartBloc.isDelivery ? '${functionalBloc.deliveryStreet}, ${functionalBloc.deliveryCity}, MA, ${functionalBloc.deliveryZipCode}' : '',
+             delivery: cartBloc.isDelivery,
+             subtotal: cartBloc.subtotal,
+             calcSubtotal: cartBloc.calcSubtotal,
+             lunchDiscount: cartBloc.lunchDiscount,
+             tax: cartBloc.tax,
+             deliveryFee: functionalBloc.deliveryFee,
+             tip: cartBloc.tip,
              total: _total,
-             count: bloc.cartItemTotal,
+             count: cartBloc.cartItemTotal,
              idKey: _idempotencyKey,
              pointEarned: _pointEarned,
-             pointUsed: bloc.rewardPoint,
-             customerName: _customerFirstName + ' ' + _customerLastName,
-             customerPhone: _customerPhoneNumber,
+             pointUsed: cartBloc.rewardPoint,
+             customerName: functionalBloc.customerFirstName + ' ' + functionalBloc.customerLastName,
+             customerPhone: functionalBloc.customerPhoneNumber,
              customerComment: _comments,
              paymentId: jsonDecode(response.body)['payment']['id'],
              method: 'Card');
@@ -424,7 +287,7 @@ class PaymentBloc with ChangeNotifier {
   }
 
   //charge the card on file with square
-  chargeCardOnFile(CartBloc bloc) async {
+  chargeCardOnFile(CartBloc cartBloc, FunctionalBloc functionalBloc) async {
     try{
       // make http request to Square payment for Card on file
       var response = await http.post(
@@ -442,8 +305,8 @@ class PaymentBloc with ChangeNotifier {
             "amount": _total,
             "currency": "USD",
           },
-          "customer_id": _customerId,
-          "source_id": _cofId,
+          "customer_id": functionalBloc.billingCustomerId,
+          "source_id": functionalBloc.billingCofId,
         }),
       );
       var data = jsonDecode(response.body);
@@ -451,10 +314,10 @@ class PaymentBloc with ChangeNotifier {
 
       if(data['errors'] == null){
         manageRewardPoint(
-            point: bloc.rewardPoint,
-            total: bloc.total,
+            point: cartBloc.rewardPoint,
+            total: cartBloc.total,
             orderNumber: jsonDecode(response.body)['payment']['order_id'],
-            percentage: 5,
+            percentage: functionalBloc.cardReward,
             method: 'Card'
         );
 
@@ -462,22 +325,22 @@ class PaymentBloc with ChangeNotifier {
         // make an order and place it to the database
         sendOrderToDb(
             orderId: data['payment']['order_id'],
-            items: bloc.items,
-            deliveryAddress: bloc.isDelivery ? '${bloc.street}, ${bloc.city}, MA, ${bloc.zipCode}' : '',
-            delivery: bloc.isDelivery,
-            subtotal: bloc.subtotal,
-            calcSubtotal: bloc.calcSubtotal,
-            lunchDiscount: bloc.lunchDiscount,
-            tax: bloc.tax,
-            deliveryFee: bloc.deliveryFee,
-            tip: bloc.tip,
+            items: cartBloc.items,
+            deliveryAddress: cartBloc.isDelivery ? '${functionalBloc.deliveryStreet}, ${functionalBloc.deliveryCity}, MA, ${functionalBloc.deliveryZipCode}' : '',
+            delivery: cartBloc.isDelivery,
+            subtotal: cartBloc.subtotal,
+            calcSubtotal: cartBloc.calcSubtotal,
+            lunchDiscount: cartBloc.lunchDiscount,
+            tax: cartBloc.tax,
+            deliveryFee: functionalBloc.deliveryFee,
+            tip: cartBloc.tip,
             total: _total,
-            count: bloc.cartItemTotal,
+            count: cartBloc.cartItemTotal,
             idKey: _idempotencyKey,
             pointEarned: _pointEarned,
-            pointUsed: bloc.rewardPoint,
-            customerName: _customerFirstName + ' ' + _customerLastName,
-            customerPhone: _customerPhoneNumber,
+            pointUsed: cartBloc.rewardPoint,
+            customerName:  functionalBloc.customerFirstName + ' ' + functionalBloc.customerLastName,
+            customerPhone: functionalBloc.customerPhoneNumber,
             customerComment: _comments,
             paymentId: data['payment']['id'],
             method: 'Card');
@@ -489,35 +352,35 @@ class PaymentBloc with ChangeNotifier {
       _errorMessage = 'Failed to charge card on file. Try again later';}
   }
 
-  chargeCash(CartBloc bloc) {
+  chargeCash({CartBloc cartBloc, FunctionalBloc functionalBloc}) {
     _orderNumber = Uuid().v4();
     manageRewardPoint(
-      point: bloc.rewardPoint,
-      total: bloc.total,
+      point: cartBloc.rewardPoint,
+      total: cartBloc.total,
       orderNumber: _orderNumber,
-      percentage: 10,
+      percentage: functionalBloc.cashReward,
       method: 'Cash'
     );
 
     try{
       sendOrderToDb(
         orderId: _orderNumber,
-        items: bloc.items,
-        deliveryAddress: bloc.isDelivery ? '${bloc.street}, ${bloc.city}, MA, ${bloc.zipCode}' : '',
-        delivery: bloc.isDelivery,
-        subtotal: bloc.subtotal,
-        calcSubtotal: bloc.calcSubtotal,
-        lunchDiscount: bloc.lunchDiscount,
-        tax: bloc.tax,
-        deliveryFee: bloc.deliveryFee,
-        tip: bloc.tip,
+        items: cartBloc.items,
+        deliveryAddress: cartBloc.isDelivery ? '${functionalBloc.deliveryStreet}, ${functionalBloc.deliveryCity}, MA, ${functionalBloc.deliveryZipCode}' : '',
+        delivery: cartBloc.isDelivery,
+        subtotal: cartBloc.subtotal,
+        calcSubtotal: cartBloc.calcSubtotal,
+        lunchDiscount: cartBloc.lunchDiscount,
+        tax: cartBloc.tax,
+        deliveryFee: functionalBloc.deliveryFee,
+        tip: cartBloc.tip,
         total: _total,
-        count: bloc.cartItemTotal,
+        count: cartBloc.cartItemTotal,
         method: 'Cash',
         pointEarned: _pointEarned,
-        pointUsed: bloc.rewardPoint,
-        customerName: _customerFirstName + ' ' + _customerLastName,
-        customerPhone: _customerPhoneNumber,
+        pointUsed: cartBloc.rewardPoint,
+        customerName: functionalBloc.customerFirstName + ' ' + functionalBloc.customerLastName,
+        customerPhone: functionalBloc.customerPhoneNumber,
         customerComment: _comments,
         paymentId: ''
       );
@@ -529,6 +392,14 @@ class PaymentBloc with ChangeNotifier {
   // ===========================================
   //  Reward Point Related
   // ===========================================
+
+  int _rewardPoint = 0;
+  int _pointEarned = 0;
+  var _pointDetail = [];
+
+  int get rewardPoint => _rewardPoint;
+  int get pointEarned => _pointEarned;
+
   void manageRewardPoint({int point, double total, String orderNumber, int percentage, method}){
     if(point > 0){
       calculateRewardPoint(
@@ -548,14 +419,6 @@ class PaymentBloc with ChangeNotifier {
       orderId: orderNumber,
     );
   }
-
-  int _rewardPoint = 0;
-  int _pointEarned = 0;
-  var _pointDetail = [];
-
-  int get rewardPoint => _rewardPoint;
-  int get pointEarned => _pointEarned;
-
 
   retrieveRewardPoints() async {
     try{
@@ -688,11 +551,6 @@ class PaymentBloc with ChangeNotifier {
     }, merge: true);
   }
 
-  void clearErrorMessage(){
-    _errorMessage = '';
-    notifyListeners();
-  }
-
   //clear value after checkout
   void clearAfterCheckout() {
     _paymentMethod = '';
@@ -706,7 +564,7 @@ class PaymentBloc with ChangeNotifier {
     _pointDetail = [];
   }
 
-  void clearAllValueUponLogout(){
+  clearAllValueUponLogout(){
     _user = null;
     _paymentMethod = '';
     _idempotencyKey = Uuid().v4();
@@ -717,26 +575,51 @@ class PaymentBloc with ChangeNotifier {
     _currentOrder = [];
     _comments = '';
     _errorMessage = '';
-    _firstName = '';
-    _lastName = '';
-    _email = '';
-    _phoneNumber = '';
-    _street = '';
-    _city = '';
-    _zip = '';
-    _cofId = '';
-    _customerId = '';
-    _brand = '';
-    _lastFourDigit = '';
-    _customerFirstName = '';
-    _customerLastName = '';
-    _customerPhoneNumber = '';
     _rewardPoint = 0;
     _pointEarned = 0;
     _pointDetail = [];
     _appId = '';
     _token = '';
     _locationId = '';
+    notifyListeners();
+  }
+
+  setValue(String type, dynamic value){
+    switch(type){
+      case 'saveUser':
+        _user = value;
+        break;
+      case 'getPaymentMethod':
+        _paymentMethod = value;
+        break;
+      case 'resetPaymentMethod':
+        _sameAsDelivery = value;
+        _paymentMethod = '';
+        break;
+      case 'sameAsDelivery':
+        _sameAsDelivery = value;
+        break;
+      case 'saveCard':
+        _saveCard = value;
+        break;
+      case 'getTotal':
+        // get the total and format it to cents for square
+        _total = (value * 100).toInt();
+        break;
+      case 'getComments':
+        _comments = value;
+        break;
+      case 'resetErrMsg':
+        _errorMessage = value;
+        break;
+      case 'getKey':
+        _token = value['token'];
+        _appId = value['appId'];
+        _locationId = value['locationId'];
+        break;
+      default:
+        return;
+    }
     notifyListeners();
   }
 }

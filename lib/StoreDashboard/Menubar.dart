@@ -2,7 +2,7 @@ import 'package:TaipeiCuisine/StoreDashboard/Report.dart';
 import 'package:flutter/material.dart';
 import 'package:TaipeiCuisine/BloC/StoreBloc.dart';
 import 'package:TaipeiCuisine/StoreDashboard/Orders.dart';
-import 'package:TaipeiCuisine/components/Divider.dart';
+import 'package:TaipeiCuisine/components/Divider/Divider.dart';
 import 'package:TaipeiCuisine/screens/Auth/Login.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';

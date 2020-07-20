@@ -377,6 +377,8 @@ PODS:
   - nanopb/decode (1.30905.0)
   - nanopb/encode (1.30905.0)
   - PromisesObjC (1.2.9)
+  - sms (0.0.1):
+    - Flutter
   - square_in_app_payments (1.3.0):
     - Flutter
     - SquareBuyerVerificationSDK (= 1.3.0)
@@ -386,12 +388,15 @@ PODS:
 
 DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
+  - Firebase/Auth
+  - Firebase/Firestore
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
   - flutter_facebook_login (from `.symlinks/plugins/flutter_facebook_login/ios`)
   - flutter_ringtone_player (from `.symlinks/plugins/flutter_ringtone_player/ios`)
   - google_sign_in (from `.symlinks/plugins/google_sign_in/ios`)
+  - sms (from `.symlinks/plugins/sms/ios`)
   - square_in_app_payments (from `.symlinks/plugins/square_in_app_payments/ios`)
 
 SPEC REPOS:
@@ -438,6 +443,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_ringtone_player/ios"
   google_sign_in:
     :path: ".symlinks/plugins/google_sign_in/ios"
+  sms:
+    :path: ".symlinks/plugins/sms/ios"
   square_in_app_payments:
     :path: ".symlinks/plugins/square_in_app_payments/ios"
 
@@ -473,10 +480,11 @@ SPEC CHECKSUMS:
   leveldb-library: 55d93ee664b4007aac644a782d11da33fba316f7
   nanopb: c43f40fadfe79e8b8db116583945847910cbabc9
   PromisesObjC: b48e0338dbbac2207e611750777895f7a5811b75
+  sms: 1e6c3082da09f2a4961d61bc254cc86865993ffd
   square_in_app_payments: 7dbbc686b925573005257c7a3a22642269b2c04d
   SquareBuyerVerificationSDK: 6a73cc3b073d8e613cb1fe8643600ff9ac4d6373
   SquareInAppPaymentsSDK: 0cc9fd96e99710a3158362dabb2577416cf8e379
 
-PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+PODFILE CHECKSUM: 82882df9ced36cfeb19c3b8015f4c3d5513d1325
 
 COCOAPODS: 1.9.3

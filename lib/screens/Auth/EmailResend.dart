@@ -4,46 +4,51 @@ import 'package:flutter/material.dart';
 import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
 import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 class Resend extends StatelessWidget {
-  final AuthBloc authBloc;
-  final FunctionalBloc functionalBloc;
-
-  Resend({this.authBloc, this.functionalBloc});
 
   @override
   Widget build(BuildContext context) {
+    AuthBloc authBloc = Provider.of<AuthBloc>(context);
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
     return AlertDialog(
       title: Text('Resend Verification Email'),
       content: Text('Do you want to receive a new verification email?'),
       actions: <Widget>[
         FlatButton(
             onPressed: () async {
-              await authBloc.user.sendEmailVerification();
 
-              Navigator.pop(context);
+              try{
+                await authBloc.user.sendEmailVerification();
 
-              functionalBloc.toggleLoading('start');
+                Get.close(1);
 
-              Get.snackbar('Check your email',
-                'Please check your email for further instructioon on email verification.',
-                backgroundColor: Colors.green[400],
-                colorText: Colors.white,
-              );
+                functionalBloc.setValue('loading','start');
 
-              authBloc.enableDialog(false);
+                Get.snackbar('Check your email',
+                  'Please check your email for further instruction on email verification.',
+                  backgroundColor: Colors.green[400],
+                  colorText: Colors.white,
+                );
 
-              functionalBloc.toggleLoading('reset');
+                functionalBloc.setValue('loading','reset');
 
+              } catch(e){
+                Get.snackbar('Request can only be made once every 30 minutes', '', colorText: Colors.white, backgroundColor: Colors.red[400]);
+                authBloc.setValue('enableDialog',false);
+                Timer(Duration(minutes: 30), (){
+                  authBloc.setValue('enableDialog',true);
+                });
+                functionalBloc.setValue('loading','reset');
+              }
 
-              Timer(Duration(minutes: 30), (){
-                authBloc.enableDialog(true);
-              });
             },
             child: Text('Yes')),
         FlatButton(
             onPressed: () {
               Navigator.pop(context);
+              functionalBloc.setValue('loading','reset');
             },
             child: Text('Cancel'))
       ],

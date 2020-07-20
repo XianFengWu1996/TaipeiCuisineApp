@@ -1,8 +1,8 @@
+import 'package:TaipeiCuisine/components/Chips/CheckOutChip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:TaipeiCuisine/BloC/CartBloc.dart';
 import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
-import 'package:TaipeiCuisine/components/Chips.dart';
 import 'package:provider/provider.dart';
 
 class CheckoutChoice extends StatelessWidget {
@@ -15,28 +15,25 @@ class CheckoutChoice extends StatelessWidget {
       alignment: WrapAlignment.spaceBetween,
       children: <Widget>[
         CheckoutChip(
-          title: functionalBloc.selectedValue == 'english' ? 'Pickup' : '自取',
+          title: functionalBloc.selectedLanguage == 'english' ? 'Pickup' : '自取',
           icon: FontAwesome.shopping_bag,
           choice: !cartBloc.isDelivery,
           onSelected: (value) {
             if (value) {
-              cartBloc.checkChoice('pickup');
+              cartBloc.setValue('checkChoice','pickup');
             }
           },
         ),
         CheckoutChip(
-            title: functionalBloc.selectedValue == 'english' ? 'Delivery' : '送餐',
+            title: functionalBloc.selectedLanguage == 'english' ? 'Delivery' : '送餐',
             icon: FontAwesome.car,
             choice: cartBloc.isDelivery,
             onSelected: (value) async {
               if (cartBloc.subtotal >= 15) {
-                if (cartBloc.address == '') {
-                  await cartBloc.getAddress();
-                }
                 if (value) {
-                  cartBloc.checkChoice('delivery');
+                  cartBloc.setValue('checkChoice','delivery');
                 } else {
-                  cartBloc.checkChoice('pickup');
+                  cartBloc.setValue('checkChoice','pickup');
                 }
               } else {
                 Scaffold.of(context).showSnackBar(
