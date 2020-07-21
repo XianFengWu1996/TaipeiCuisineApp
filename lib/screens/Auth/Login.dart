@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:TaipeiCuisine/components/Buttons/Rectangular.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:TaipeiCuisine/BloC/CartBloc.dart';
@@ -76,12 +77,12 @@ class _LoginState extends State<Login> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
                           Input(
-                            label: 'Enter Email',
+                            label: '${functionalBloc.loginLanguage == 'english' ? 'Enter Email': '输入邮箱'}',
                             controller: _emailController,
                             validate: Validation.emailValidation,
                           ),
                           Input(
-                            label: 'Enter Password',
+                            label: '${functionalBloc.loginLanguage == 'english' ? 'Enter Password': '输入密码'}',
                             controller: _passwordController,
                             obscureText: !authBloc.obscureText,
                             validate: Validation.passwordValidation,
@@ -94,8 +95,20 @@ class _LoginState extends State<Login> {
                                   authBloc.setValue('showPass',!authBloc.obscureText);
                                 }),
                           ),
-
-                          ResetPass(resetEmailController: _resetEmailController, authBloc: authBloc,),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Checkbox(value: functionalBloc.loginLanguage == 'chinese', onChanged: (value){
+                                    functionalBloc.setValue('loginLanguage', value ? 'chinese' : 'english');
+                                  }),
+                                  Text('中文')
+                                ],
+                              ),
+                              ResetPass(resetEmailController: _resetEmailController, authBloc: authBloc,),
+                            ],
+                          ),
                           // Login with Email and Password
                           RoundRectangularButton(
                             onPressed: () async {
@@ -113,7 +126,7 @@ class _LoginState extends State<Login> {
 
                                 if (authBloc.errorMessage.isNotEmpty) {
                                   Get.snackbar(
-                                    'Error',
+                                    '${functionalBloc.loginLanguage == 'english' ? 'Error' : '错误'}',
                                     authBloc.errorMessage[0],
                                     backgroundColor: Colors.red[400],
                                     colorText: Colors.white,
@@ -125,7 +138,7 @@ class _LoginState extends State<Login> {
                                 }
                               }
                             },
-                            title: 'Login',
+                            title: '${functionalBloc.loginLanguage == 'english' ? 'Login': '登陆'}',
                             color: Colors.red[400],
                           ),
                         ],
@@ -137,8 +150,8 @@ class _LoginState extends State<Login> {
                     DividerWithText(),
                     SocialMediaLogin(),
                     TextWithLink(
-                      textTitle: 'Don\'t have an account?',
-                      linkTitle: 'Sign up here',
+                      textTitle: '${functionalBloc.loginLanguage == 'english' ? 'Don\'t have an account?': '如果您没有账号？'}',
+                      linkTitle: '${functionalBloc.loginLanguage == 'english' ? 'Sign up here': '点击注册'}',
                       onPressed: () {
                         Get.to(Signup());
                       },

@@ -69,12 +69,12 @@ class _SignupState extends State<Signup> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
                           Input(
-                            label: 'Enter Email',
+                            label: '${functionalBloc.loginLanguage == 'english' ? 'Enter Email' : '输入邮箱'}',
                             controller: _emailController,
                             validate: Validation.emailValidation,
                           ),
                           Input(
-                            label: 'Enter Password',
+                            label: '${functionalBloc.loginLanguage == 'english' ? 'Enter Password' : '输入密码'}',
                             controller: _passwordController,
                             obscureText: !authBloc.obscureText,
                             validate: Validation.passwordValidation,
@@ -88,7 +88,7 @@ class _SignupState extends State<Signup> {
                                 }),
                           ),
                           Input(
-                            label: 'Confirm Password',
+                            label: '${functionalBloc.loginLanguage == 'english' ? 'Confirm Password' : '重新输入密码'}',
                             controller: _confirmController,
                             obscureText: !authBloc.obscureText,
                             validate: Validation.passwordValidation,
@@ -109,34 +109,39 @@ class _SignupState extends State<Signup> {
                                 if(_passwordController.text == _confirmController.text){
                                   // loading here will be true
                                   functionalBloc.setValue('loading','start');
-                                  await authBloc.signUpWithEmailAndPassword(_emailController.text, _passwordController.text);
-                                }
+                                  await authBloc.signUpWithEmailAndPassword(_emailController.text, _passwordController.text, functionalBloc);
 
-                                if(authBloc.errorMessage.isNotEmpty){
-                                  Get.snackbar('Warning',
-                                    authBloc.errorMessage[0],
-                                    backgroundColor: Colors.red[400],
-                                    colorText: Colors.white,
-                                  );
-                                  Future.delayed(Duration(seconds: 1), () {
-                                    authBloc.setValue('errMsg', []);
-                                    // when the error shows we stop the loading
+                                  if(authBloc.errorMessage.isNotEmpty){
+                                    Get.snackbar('${functionalBloc.loginLanguage == 'english' ? 'Error' : '错误'}',
+                                      authBloc.errorMessage[0],
+                                      backgroundColor: Colors.red[400],
+                                      colorText: Colors.white,
+                                    );
+                                    Future.delayed(Duration(seconds: 1), () {
+                                      authBloc.setValue('errMsg', []);
+                                      // when the error shows we stop the loading
+                                      functionalBloc.setValue('loading','reset');
+                                    });
+                                  } else {
+                                    // when the sign up is successful, we stop loading
                                     functionalBloc.setValue('loading','reset');
-                                  });
-                                } else {
-                                  // when the sign up is successful, we stop loading
-                                  functionalBloc.setValue('loading','reset');
-                                  Get.to(Login());
+                                    Get.to(Login());
 
-                                  Get.snackbar('Notice',
+                                    Get.snackbar('${functionalBloc.loginLanguage == 'english' ? 'Notice' : '请注意'}',
                                       authBloc.noticeMessage[0],
-                                    backgroundColor: Colors.green[400],
-                                    colorText: Colors.white,
-                                  );
+                                      backgroundColor: Colors.green[400],
+                                      colorText: Colors.white,
+                                    );
+                                  }
+                                } else {
+                                  Get.snackbar('${functionalBloc.loginLanguage == 'english' ? 'Error' : '错误'}',
+                                      '${functionalBloc.loginLanguage == 'english' ? 'Password doesn\'t match' : '密码不匹配'}', backgroundColor: Colors.red, colorText: Colors.white);
                                 }
+
+
                               }
                             },
-                            title: 'Sign Up',
+                            title: '${functionalBloc.loginLanguage == 'english' ? 'Sign Up' : '注册'}',
                             color: Colors.red[400],
                           ),
                         ],
@@ -148,8 +153,8 @@ class _SignupState extends State<Signup> {
                     DividerWithText(),
                     SocialMediaLogin(),
                     TextWithLink(
-                      textTitle: 'Already have an account? ',
-                      linkTitle: 'Sign in here',
+                      textTitle: '${functionalBloc.loginLanguage == 'english' ? 'Already have an account？' : '已经有账号？'} ',
+                      linkTitle: '${functionalBloc.loginLanguage == 'english' ? 'Sign in here' : '前往登陆'}',
                       onPressed: () {
                         Navigator.pushNamed(context, Login.id);
                       },

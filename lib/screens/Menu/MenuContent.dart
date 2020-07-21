@@ -57,7 +57,6 @@ class MenuContent extends StatelessWidget {
                                 ['chineseName'],
                       lunch: functionalBloc.menuChoice == 'lunch',
                     ));
-                    print(index);
                   },
                 );
               }),

@@ -1,6 +1,4 @@
 import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
-import 'package:TaipeiCuisine/components/FormComponents/InputField.dart';
-import 'package:TaipeiCuisine/screens/Account/Screen/Address.dart';
 import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/CheckoutComponents.dart';
 import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/components/ContactForm.dart';
 import 'package:flutter/material.dart';
@@ -20,11 +18,11 @@ class PersonInfo extends StatelessWidget {
       }',
       subtitle:
       '${functionalBloc.selectedLanguage == 'english' ? 'Phone' : '电话'}: '
-          '${functionalBloc.customerPhoneNumber == '' ? 'Not Provided' : functionalBloc.customerPhoneNumber}' ,
+          '${functionalBloc.customerPhoneNumber == '' ? '${functionalBloc.selectedLanguage == 'english' ? 'Not Provider': '未填写'}' : functionalBloc.customerPhoneNumber}' ,
       icon: Icons.contact_phone,
       action: RaisedButton(onPressed: (){
         Get.to(ContactForm());
-      }, child: Text('Edit'),),
+      }, child: Text('${functionalBloc.selectedLanguage == 'english'?'Edit': '更改'}'),),
     );
   }
 }

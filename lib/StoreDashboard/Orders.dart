@@ -218,7 +218,7 @@ class OrderCard extends StatelessWidget {
                               title: '午餐折扣',
                               size: 27,
                               details:
-                              '\$(${(ds[index]['lunchDiscount'] / 100).toStringAsFixed(2)})',
+                              '\$(${(ds[index]['lunchDiscount']).toStringAsFixed(2)})',
                             ),
                             LineDivider(),
                             CheckoutSummaryItems(

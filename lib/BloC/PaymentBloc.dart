@@ -8,10 +8,10 @@ import 'package:TaipeiCuisine/Model/Order.dart';
 import 'package:TaipeiCuisine/screens/Cart/Content/Checkout/Payment/ConfirmationPage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:random_string/random_string.dart';
 import 'package:square_in_app_payments/in_app_payments.dart';
 import 'package:square_in_app_payments/models.dart';
 import 'dart:convert';
-import 'package:uuid/uuid.dart';
 
 // ----------------------------------------------------------------
 // Payment Functionality
@@ -23,7 +23,7 @@ class PaymentBloc with ChangeNotifier {
 
   //options and general variables
   String _paymentMethod = '';
-  String _idempotencyKey = Uuid().v4();
+  String _idempotencyKey = randomAlphaNumeric(18);
   String _orderNumber = '';
   int _total = 0;
   bool _sameAsDelivery = true;
@@ -353,7 +353,7 @@ class PaymentBloc with ChangeNotifier {
   }
 
   chargeCash({CartBloc cartBloc, FunctionalBloc functionalBloc}) {
-    _orderNumber = Uuid().v4();
+    _orderNumber = randomAlphaNumeric(18);
     manageRewardPoint(
       point: cartBloc.rewardPoint,
       total: cartBloc.total,
@@ -555,7 +555,7 @@ class PaymentBloc with ChangeNotifier {
   void clearAfterCheckout() {
     _paymentMethod = '';
     _comments = '';
-    _idempotencyKey = Uuid().v4();
+    _idempotencyKey = randomAlphaNumeric(18);
     _orderNumber = '';
     _total = 0;
     _sameAsDelivery = false;
@@ -567,7 +567,7 @@ class PaymentBloc with ChangeNotifier {
   clearAllValueUponLogout(){
     _user = null;
     _paymentMethod = '';
-    _idempotencyKey = Uuid().v4();
+    _idempotencyKey = randomAlphaNumeric(18);
     _orderNumber = '';
     _total = 0;
     _sameAsDelivery = false;

@@ -35,33 +35,54 @@ class AuthBloc with ChangeNotifier {
       )).user;
 
       var admin = await Firestore.instance.collection('admin').document('details').get();
+      var _maintenance = admin.data['maintenance']['ongoing'];
+      var _userAllowed = admin.data['maintenance']['userAllowed'];
+
 
       if(_loggedInUser.uid == '${admin.data['uid']}'){
         functionalBloc.setValue('loading','reset');
         await storeBloc.saveLocalUser(_loggedInUser);
         Get.offAll(Orders(status: 'Placed',));
       } else if (_loggedInUser.isEmailVerified) {
-        await retrieveAndDistributeInfo(functionalBloc, cartBloc, paymentBloc);
+        if(_maintenance){
+          if(_userAllowed.contains(_loggedInUser.uid)){
+            await retrieveAndDistributeInfo(functionalBloc, cartBloc, paymentBloc);
 
-        Get.offAll(Home());
+            Get.offAll(Home());
 
-        functionalBloc.setValue('loading','reset');
+            functionalBloc.setValue('loading','reset');
+          } else {
+            functionalBloc.setValue('loading', 'reset');
+            _loggedInUser = null;
+            Get.snackbar('${functionalBloc.loginLanguage == 'english' ? 'Maintenance' : '系统维修中'}',
+                '${functionalBloc.loginLanguage == 'english' ? 'The app is under maintenance, please try again later.': '我们正在进行维修，请稍后再试'}');
+          }
+
+        } else {
+          await retrieveAndDistributeInfo(functionalBloc, cartBloc, paymentBloc);
+
+          Get.offAll(Home());
+
+          functionalBloc.setValue('loading','reset');
+        }
       } else {
         functionalBloc.setValue('loading','reset');
-        _errorMessage.add('Please verify your email. If you have recently requested a verification email, check your inbox or spam.');
+        _errorMessage.add('${functionalBloc.loginLanguage == 'english'
+            ? 'Please verify your email. If you have recently requested a verification email, check your inbox or spam.'
+            : '请查阅您的邮箱。如果您最近有申请发送验证邮件，请查看邮箱跟垃圾箱里的邮件。'}');
         Get.dialog(Resend());
       }
     } catch (error) {
       functionalBloc.setValue('loading','reset');
       switch (error.code) {
         case 'ERROR_WRONG_PASSWORD':
-          _errorMessage.add('Incorrect password, try again with a different password.');
+          _errorMessage.add('${functionalBloc.loginLanguage == 'english' ? 'Incorrect password, try again with a different password.': '密码错误。请重新输入密码。'}');
           break;
         case 'ERROR_USER_NOT_FOUND':
-          _errorMessage.add('User with the email is not found.');
+          _errorMessage.add('${functionalBloc.loginLanguage == 'english' ? 'User with the email is not found.': '用戶不存在'}');
           break;
         default:
-          _errorMessage.add('Some error has occurred, try again later.');
+          _errorMessage.add('${functionalBloc.loginLanguage == 'english' ? 'Some error has occurred, try again later.': '出现错误，请稍后再试。'}');
       }
     }
     return;
@@ -78,25 +99,35 @@ class AuthBloc with ChangeNotifier {
 
           _loggedInUser = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
 
-          if (_loggedInUser != null) {
-            await retrieveAndDistributeInfo(functionalBloc, cartBloc, paymentBloc);
+          var admin = await Firestore.instance.collection('admin').document('details').get();
+          var _maintenance = admin.data['maintenance']['ongoing'];
 
-            Get.offAll(Home());
+          if(!_maintenance){
+            if (_loggedInUser != null) {
+              await retrieveAndDistributeInfo(functionalBloc, cartBloc, paymentBloc);
 
-            functionalBloc.setValue('loading','reset');
-          }
+              Get.offAll(Home());
+
+              functionalBloc.setValue('loading','reset');
+            }
+          } else {
+            functionalBloc.setValue('loading', 'reset');
+            _loggedInUser = null;
+            Get.snackbar('${functionalBloc.loginLanguage == 'english' ? 'Maintenance' : '系统维修中'}',
+                '${functionalBloc.loginLanguage == 'english' ? 'The app is under maintenance, please try again later.': '我们正在进行维修，请稍后再试'}');          }
+
         } catch (error) {
           functionalBloc.setValue('loading','reset');
-          _errorMessage.add('An error has occur. Try again later or use a different login method.');
+          _errorMessage.add('${functionalBloc.loginLanguage == 'english' ? 'An error has occur. Try again later.': '出现错误，请稍后再试。'}');
         }
         break;
       case FacebookLoginStatus.cancelledByUser:
         functionalBloc.setValue('loading','reset');
-        _errorMessage.add('You have cancelled Facebook login.');
+        _errorMessage.add('${functionalBloc.loginLanguage == 'english' ? 'You have cancelled Facebook login.': '您取消了Facebook登陆。'}');
         break;
       case FacebookLoginStatus.error:
         functionalBloc.setValue('loading','reset');
-        _errorMessage.add('An Error has occur with Facebook Login, try again later.');
+        _errorMessage.add('${functionalBloc.loginLanguage == 'english' ? 'An Error has occur with Facebook Login, try again later.': 'Facebook登陆出现异常。请稍后再试。'}');
         break;
     }
   }
@@ -114,15 +145,26 @@ class AuthBloc with ChangeNotifier {
 
       _loggedInUser = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
 
-      if(_loggedInUser != null){
-        await retrieveAndDistributeInfo(functionalBloc, cartBloc, paymentBloc);
+      var admin = await Firestore.instance.collection('admin').document('details').get();
+      var _maintenance = admin.data['maintenance']['ongoing'];
 
-        Get.offAll(Home());
+      if(!_maintenance){
+        if(_loggedInUser != null){
+          await retrieveAndDistributeInfo(functionalBloc, cartBloc, paymentBloc);
 
-        functionalBloc.setValue('loading','reset');
-      }
+          Get.offAll(Home());
+
+          functionalBloc.setValue('loading','reset');
+        }
+      } else {
+        functionalBloc.setValue('loading', 'reset');
+        _loggedInUser = null;
+        Get.snackbar('${functionalBloc.loginLanguage == 'english' ? 'Maintenance' : '系统维修中'}',
+            '${functionalBloc.loginLanguage == 'english' ? 'The app is under maintenance, please try again later.': '我们正在进行维修，请稍后再试'}');      }
+
+
     } catch(error){
-      _errorMessage.add('An error has occur during Google login, please try again later or use a different login method.');
+      _errorMessage.add('${functionalBloc.loginLanguage == 'english' ? 'An error has occur during Google login, please try again later or use a different login method.': 'Google登陆出现异常。请稍后再试。'}');
       functionalBloc.setValue('loading','reset');
     }
   }
@@ -155,29 +197,31 @@ class AuthBloc with ChangeNotifier {
 
   }
 
-  resetPasswordWithEmail(String email) async {
+  resetPasswordWithEmail(String email, FunctionalBloc functionalBloc) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-        _noticeMessage.add('Please check your email for further instructioon on password reset.');
+        _noticeMessage.add('${functionalBloc.loginLanguage == 'english'
+            ? 'Please check your email for further instructioon on password reset.'
+            : '查看邮箱里的密码重置邮件。'}');
     } catch (error) {
       if (error.code == 'ERROR_USER_NOT_FOUND') {
-        _errorMessage.add('User not found, check your email and try again');
+        _errorMessage.add('${functionalBloc.loginLanguage == 'english' ?'User not found, check your email and try again' :'用户不存在。'}');
       }
     }
     return;
   }
 
-  signUpWithEmailAndPassword(String email, String password) async {
+  signUpWithEmailAndPassword(String email, String password, FunctionalBloc functionalBloc) async {
     try {
       (await FirebaseAuth.instance
               .createUserWithEmailAndPassword(email: email, password: password))
           .user
           .sendEmailVerification();
-      _noticeMessage.add('Please check your inbox or spam for a verification email. Follow step in the email to be verified');
+      _noticeMessage.add('${functionalBloc.loginLanguage == 'english' ? 'Please check your inbox or spam for a verification email. Follow step in the email to be verified' : '请查看邮箱里的验证邮件来验证你的账号。'}');
 
     } catch (error) {
       if (error.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
-        _errorMessage.add('Email is already registered.');
+        _errorMessage.add('${functionalBloc.loginLanguage =='english' ? 'Email is already registered.': '邮件已被注册。'}');
       }
     }
     return;
@@ -202,21 +246,6 @@ class AuthBloc with ChangeNotifier {
         return;
     }
     notifyListeners();
-  }
-
-
-  void initializeReward() async {
-    try{
-      await Firestore.instance
-          .collection('users/${_loggedInUser.uid}/rewards')
-          .document('points')
-          .setData({
-        'point': 0,
-        'pointDetails': [],
-      }, merge: true);
-    } catch(e){
-      Get.snackbar('Error', 'An unexpected error has occurred, try again later.', backgroundColor: Colors.red, colorText: Colors.white);
-    }
   }
 
   clearAllValueUponLogout(){

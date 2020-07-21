@@ -160,7 +160,7 @@ class _ContactFormState extends State<ContactForm> {
                               await paymentBloc.saveCustomerInfo(
                                   firstName: _firstName,
                                   lastName: _lastName,
-                                  phone: _phoneNumber,
+                                  phone: _phoneNumber == null ? functionalBloc.customerPhoneNumber : _phoneNumber,
                                   functionalBloc: functionalBloc);
                               _formKey.currentState.reset();
                               functionalBloc.setValue('loading', 'reset');

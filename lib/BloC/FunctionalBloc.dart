@@ -20,6 +20,10 @@ class FunctionalBloc with ChangeNotifier {
   int _homePageIndex = 0;
   int get homePageIndex => _homePageIndex;
 
+  // login and signup page language
+  String _loginLanguage = 'english';
+  String get loginLanguage => _loginLanguage;
+
   // =============================
   //            Menu
   // =============================
@@ -43,18 +47,23 @@ class FunctionalBloc with ChangeNotifier {
       });
     } catch (e) {
       setValue('loading', 'reset');
-      Get.snackbar('Error', 'Failed to retrieve full day menu..', backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar('Error', 'Failed to retrieve full day menu..',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
   retrieveLunchMenu() async {
     try {
-      await Firestore.instance.collection('menu/lunch/details').getDocuments().then((v) {
+      await Firestore.instance
+          .collection('menu/lunch/details')
+          .getDocuments()
+          .then((v) {
         _lunchMenu = v.documents;
       });
     } catch (e) {
       setValue('loading', 'reset');
-      Get.snackbar('Error', 'Failed to retrieve lunch menu', backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar('Error', 'Failed to retrieve lunch menu',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
@@ -68,9 +77,9 @@ class FunctionalBloc with ChangeNotifier {
   String _squareLocationId = '';
   String _googleAndroidKey = '';
   String _googleIosKey = '';
-  String _twilio_sid = '';
-  String _twilio_token = '';
-  String _twilio_phone = '';
+  String _twilioSid = '';
+  String _twilioToken = '';
+  String _twilioPhone = '';
 
   // Handle store and lunch hours
   int _storeOpen = 0;
@@ -116,16 +125,17 @@ class FunctionalBloc with ChangeNotifier {
         _squareToken = key['_square_access_token'];
         _squareAppId = key['_square_application_id'];
         _squareLocationId = key['_square_location_id'];
-        _twilio_sid = key['_twilio_sid'];
-        _twilio_token = key['_twilio_token'];
-        _twilio_phone = key['_twilio_number'];
+        _twilioSid = key['_twilio_sid'];
+        _twilioToken = key['_twilio_token'];
+        _twilioPhone = key['_twilio_number'];
         // reward percentage
         _cashReward = reward['cash_reward'];
         _cardReward = reward['card_reward'];
       });
     } catch (e) {
       setValue('loading', 'reset');
-      Get.snackbar('Error', 'Failed to retrieve store information', backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar('Error', 'Failed to retrieve store information',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
     notifyListeners();
   }
@@ -196,14 +206,23 @@ class FunctionalBloc with ChangeNotifier {
           .document('details')
           .get()
           .then((value) async {
-
         var address = value.data['address'];
         var billing = value.data['billing'];
         var customer = value.data['customer'];
         var language = value.data['language'];
 
         // Handle customer selected language
-        _selectedLanguage = language['language'];
+        if (_loginLanguage == 'chinese') {
+          _selectedLanguage = 'chinese';
+          await Firestore.instance
+              .collection('users/${_user.uid}/customer_information')
+              .document('details')
+              .setData({
+            'language': {'language': 'chinese'},
+          }, merge: true);
+        } else {
+          _selectedLanguage = language['language'];
+        }
         _languageChoiceValue = language['language'];
 
         // Handle user address information
@@ -231,9 +250,7 @@ class FunctionalBloc with ChangeNotifier {
         _customerLastName = customer['lastName'];
         _customerPhoneNumber = customer['phone'];
         _verifiedNumbers = customer['verifiedNumbers'];
-        }
-
-      );
+      });
       if (_deliveryStreet == '' &&
           _deliveryCity == '' &&
           _deliveryZipCode == '') {
@@ -242,7 +259,6 @@ class FunctionalBloc with ChangeNotifier {
         _deliveryAddress =
             '$_deliveryStreet \n$_deliveryCity $_deliveryZipCode '
             '${deliveryApt != '' ? 'Apt: $_deliveryApt' : ''}';
-
       }
     } catch (e) {
       setValue('loading', 'reset');
@@ -286,6 +302,13 @@ class FunctionalBloc with ChangeNotifier {
         },
         'language': {'language': 'english'},
       }, merge: true);
+      await Firestore.instance
+          .collection('users/${_user.uid}/rewards')
+          .document('points')
+          .setData({
+        'point': 500,
+        'pointDetails': [],
+      });
       await retrieveCustomerInformation();
     } catch (e) {
       Get.snackbar('Error', 'Failed to initialize user information...',
@@ -309,46 +332,46 @@ class FunctionalBloc with ChangeNotifier {
 
   TwilioFlutter twilioFlutter;
   // SMS Verification
-  initializeVerification(String phone) async{
+  initializeVerification(String phone) async {
     await generateOTP();
     _countFinished = false;
     _showPinField = true;
 
-
-
     twilioFlutter = TwilioFlutter(
-        accountSid : _twilio_sid, // replace *** with Account SID
-        authToken : _twilio_token,  // replace xxx with Auth Token
-        twilioNumber : '+1$_twilio_phone'  // replace .... with Twilio Number
-    );
+        accountSid: _twilioSid, // replace *** with Account SID
+        authToken: _twilioToken, // replace xxx with Auth Token
+        twilioNumber: '+1$_twilioPhone' // replace .... with Twilio Number
+        );
 
     twilioFlutter.sendSMS(
-        toNumber : '+1$phone',
-        messageBody : '${selectedLanguage == 'english' ? 'Your Verification Code is: $_smsCode ' : '您的验证码是： $_smsCode'}');
+        toNumber: '+1$phone',
+        messageBody:
+            '${selectedLanguage == 'english' ? 'Your Verification Code is: $_smsCode ' : '您的验证码是： $_smsCode'}');
 
     notifyListeners();
   }
 
-  generateOTP(){
+  generateOTP() {
     // generate an opt from 0100 - 9999
     int randomNumber = Random().nextInt(9899) + 100;
     _smsCode = randomNumber < 1000 ? '0$randomNumber' : randomNumber.toString();
     print(_smsCode);
   }
 
-  resendCode(phone){
+  resendCode(phone) {
     _countFinished = false;
     _allowResend = false;
-      twilioFlutter = TwilioFlutter(
-        accountSid : _twilio_sid, // replace *** with Account SID
-        authToken : _twilio_token,  // replace xxx with Auth Token
-        twilioNumber : '+1$_twilio_phone'  // replace .... with Twilio Number
-    );
+    twilioFlutter = TwilioFlutter(
+        accountSid: _twilioSid, // replace *** with Account SID
+        authToken: _twilioToken, // replace xxx with Auth Token
+        twilioNumber: '+1$_twilioPhone' // replace .... with Twilio Number
+        );
 
     twilioFlutter.sendSMS(
-        toNumber : '+1$phone',
-        messageBody : '${selectedLanguage == 'english' ? 'Your Verification Code is: $_smsCode ' : '您的验证码是： $_smsCode'}');
-  notifyListeners();
+        toNumber: '+1$phone',
+        messageBody:
+            '${selectedLanguage == 'english' ? 'Your Verification Code is: $_smsCode ' : '您的验证码是： $_smsCode'}');
+    notifyListeners();
   }
 
   // Handle loading
@@ -377,7 +400,8 @@ class FunctionalBloc with ChangeNotifier {
   }
 
   // Handle Changing Password
-  changePassword({password, AuthBloc auth, PaymentBloc payment, CartBloc cart}) async {
+  changePassword(
+      {password, AuthBloc auth, PaymentBloc payment, CartBloc cart}) async {
     try {
       await FirebaseAuth.instance.currentUser().then((value) async {
         await value.updatePassword(password);
@@ -399,10 +423,13 @@ class FunctionalBloc with ChangeNotifier {
     } catch (e) {
       if (e.code == 'ERROR_REQUIRES_RECENT_LOGIN') {
         setValue('loading', 'reset');
-        Get.snackbar('Require recent login', 'Password change require recent login, please logout and sign back in', colorText: Colors.white, backgroundColor: Colors.red[400]);
+        Get.snackbar('Require recent login',
+            'Password change require recent login, please logout and sign back in',
+            colorText: Colors.white, backgroundColor: Colors.red[400]);
       } else {
         setValue('loading', 'reset');
-        Get.snackbar('Error', 'An error has occur please try again later', colorText: Colors.white, backgroundColor: Colors.red[400]);
+        Get.snackbar('Error', 'An error has occur please try again later',
+            colorText: Colors.white, backgroundColor: Colors.red[400]);
       }
     }
   }
@@ -425,11 +452,11 @@ class FunctionalBloc with ChangeNotifier {
     _squareLocationId = '';
     _googleAndroidKey = '';
     _googleIosKey = '';
-    _twilio_phone = '';
-    _twilio_token = '';
-    _twilio_sid = '';
+    _twilioPhone = '';
+    _twilioToken = '';
+    _twilioSid = '';
     _smsCode = '';
-     _requireVerification = false;
+    _requireVerification = false;
     _showPinField = false;
     _countFinished = true;
     _allowResend = false;
@@ -457,6 +484,7 @@ class FunctionalBloc with ChangeNotifier {
     _verifiedNumbers = [];
     _selectedLanguage = '';
     _languageChoiceValue = '';
+    _loginLanguage = 'english';
     notifyListeners();
   }
 
@@ -476,6 +504,9 @@ class FunctionalBloc with ChangeNotifier {
       case 'language':
         _languageChoiceValue = value;
         break;
+      case 'loginLanguage':
+        _loginLanguage = value;
+        break;
       case 'loading':
         value == 'start' ? _loading = true : _loading = false;
         break;
@@ -492,7 +523,7 @@ class FunctionalBloc with ChangeNotifier {
         _customerFirstName = value['firstName'];
         _customerLastName = value['lastName'];
         _customerPhoneNumber = value['phone'];
-        if(!_verifiedNumbers.contains(value['phone'])){
+        if (!_verifiedNumbers.contains(value['phone'])) {
           _verifiedNumbers.add(value['phone']);
         }
         break;
@@ -522,7 +553,7 @@ class FunctionalBloc with ChangeNotifier {
         _deliveryAddress = value['address'];
         break;
       case 'checkPhoneNumber':
-        if(_customerPhoneNumber == value){
+        if (_customerPhoneNumber == value) {
           return true;
         } else {
           return false;
@@ -538,7 +569,7 @@ class FunctionalBloc with ChangeNotifier {
         _countFinished = value;
         break;
       case 'allowResend':
-        _allowResend= value;
+        _allowResend = value;
         break;
       case 'successful':
         _successful = value;

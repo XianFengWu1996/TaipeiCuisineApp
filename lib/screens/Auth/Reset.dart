@@ -1,7 +1,9 @@
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:flutter/material.dart';
 import 'package:TaipeiCuisine/BloC/AuthBloc.dart';
 import 'package:TaipeiCuisine/components/BottomSheet/BottomSheet.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 class ResetPass extends StatelessWidget {
   final TextEditingController resetEmailController;
@@ -11,12 +13,13 @@ class ResetPass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
     return  Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
         FlatButton(
           child: Text(
-            'Reset Password',
+            '${functionalBloc.loginLanguage == 'english' ? 'Reset Password': '忘记密码'}',
             style: TextStyle(
               color: Colors.blue,
             ),
@@ -27,12 +30,14 @@ class ResetPass extends StatelessWidget {
                   context: context,
                   builder: (context) {
                     return BottomSheetContent(
-                      label: 'Reset Password',
-                      buttonText: 'Reset',
+                      label: '${functionalBloc.loginLanguage == 'english' ? 'Reset Password': '忘记密码'}',
+                      buttonText: '${functionalBloc.loginLanguage == 'english' ? 'Reset': '发送邮件'}',
                       controller: resetEmailController,
                       onPressed: () async {
                         await authBloc.resetPasswordWithEmail(
-                            resetEmailController.text);
+                            resetEmailController.text,
+                          functionalBloc
+                        );
 
                         Navigator.pop(context);
 
@@ -40,7 +45,7 @@ class ResetPass extends StatelessWidget {
 
                         if (authBloc.noticeMessage.isNotEmpty) {
                           Get.snackbar(
-                            'Check your Email',
+                            '${functionalBloc.loginLanguage == 'english' ? 'Check Your Email': '请到邮箱里查找密码重置的邮件'}',
                             authBloc.noticeMessage[0],
                             backgroundColor: Colors.green[400],
                             colorText: Colors.white,
@@ -52,7 +57,7 @@ class ResetPass extends StatelessWidget {
 
                         if (authBloc.errorMessage.isNotEmpty) {
                           Get.snackbar(
-                            'Error',
+                            '${functionalBloc.loginLanguage == 'english' ? 'Error': '出现错误'}',
                             authBloc.errorMessage[0],
                             backgroundColor: Colors.red[400],
                             colorText: Colors.white,
@@ -68,12 +73,12 @@ class ResetPass extends StatelessWidget {
                 context: context,
                 builder: (context) {
                   return BottomSheetContent(
-                    label: 'Reset Password',
-                    buttonText: 'Reset',
+                    label: '${functionalBloc.loginLanguage == 'english' ? 'Reset Password': '忘记密码'}',
+                    buttonText: '${functionalBloc.loginLanguage == 'english' ? 'Reset': '发送邮件'}',
                     controller: resetEmailController,
                     onPressed: () async {
                       await authBloc.resetPasswordWithEmail(
-                          resetEmailController.text);
+                          resetEmailController.text, functionalBloc);
 
                       Navigator.pop(context);
 

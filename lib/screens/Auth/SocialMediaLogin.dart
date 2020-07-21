@@ -28,7 +28,7 @@ class SocialMediaLogin extends StatelessWidget {
             await authBloc.loginWithFacebook(functionalBloc, paymentBloc,cartBloc);
 
             if(authBloc.errorMessage.isNotEmpty){
-              Get.snackbar('Warning',
+              Get.snackbar('${functionalBloc.loginLanguage == 'english' ? 'Warning' : '请注意'}',
                 authBloc.errorMessage[0],
                 backgroundColor: Colors.red[400],
                 colorText: Colors.white,
@@ -45,7 +45,7 @@ class SocialMediaLogin extends StatelessWidget {
             await authBloc.loginWithGoogle(functionalBloc, paymentBloc, cartBloc);
 
             if(authBloc.errorMessage.isNotEmpty){
-              Get.snackbar('Warning',
+              Get.snackbar('${functionalBloc.loginLanguage == 'english' ? 'Warning' : '请注意'}',
                 authBloc.errorMessage[0],
                 backgroundColor: Colors.red[400],
                 colorText: Colors.white,

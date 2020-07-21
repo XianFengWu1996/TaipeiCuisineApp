@@ -1,8 +1,10 @@
+import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:flutter/material.dart';
 import 'package:TaipeiCuisine/components/Buttons/Button.dart';
 import 'package:TaipeiCuisine/components/FormComponents/InputField.dart';
 import 'package:TaipeiCuisine/components/Helper/Validation.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 class BottomSheetContent extends StatelessWidget {
   final String label;
@@ -20,6 +22,7 @@ class BottomSheetContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FunctionalBloc functionalBloc = Provider.of<FunctionalBloc>(context);
     return Column(
       children: <Widget>[
         BottomSheetHeader(title: label,
@@ -32,13 +35,13 @@ class BottomSheetContent extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Input(
-                label: 'Enter your Email',
+                label: '${functionalBloc.loginLanguage == 'english' ? 'Enter Your Email': '输入你的邮箱'}',
                 validate: Validation.emailValidation,
                 autoFocus: true,
                 controller: controller,
               ),
               Button(
-                title: 'Reset',
+                title: buttonText,
                 color: Colors.red[400],
                 textColor: Colors.white,
                 textSize: 18,

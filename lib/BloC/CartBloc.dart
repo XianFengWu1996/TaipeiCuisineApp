@@ -200,8 +200,6 @@ class CartBloc with ChangeNotifier {
         var calcDistance = await calculateDistance(geolocation[0], geolocation[1]);
 
         await calculateDeliveryFee(calcDistance);
-        print(await calculateDeliveryFee(calcDistance));
-        print(_deliveryFee);
 
         if (_deliveryFee != 0.0) {
           await Firestore.instance

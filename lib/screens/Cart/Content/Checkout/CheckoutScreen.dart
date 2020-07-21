@@ -87,23 +87,17 @@ class CheckoutScreen extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 40, vertical: 13),
                   textColor: Colors.white,
                   onPressed: () {
+                    paymentBloc.setValue('sameAsDelivery', functionalBloc.deliveryAddress != '' ? true : false);
                     if (TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >=
                             functionalBloc.storeOpen &&
                         TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <=
                             functionalBloc.storeClose) {
                       if (cartBloc.isDelivery) {
                         if (functionalBloc.deliveryAddress != '') {
-                          if (functionalBloc.customerLastName != '' ||
-                              functionalBloc.customerFirstName != '' ||
-                              functionalBloc.customerPhoneNumber != '') {
-                            if (cartBloc.tipPercent != 0.0 ||
-                                cartBloc.tipPercent == .0000000001 ||
-                                cartBloc.tipPercent == 0.0000001) {
+                          if (functionalBloc.customerLastName != '' || functionalBloc.customerFirstName != '' || functionalBloc.customerPhoneNumber != '') {
+                            if (cartBloc.tipPercent != 0.0 || cartBloc.tipPercent == .0000000001 || cartBloc.tipPercent == 0.0000001) {
                               paymentBloc.setValue('getTotal', cartBloc.total);
-                              MediaQuery.of(context).size.height > 812
-                                  ? Get.bottomSheet(PaymentModal(),
-                                      backgroundColor: Colors.white)
-                                  : Get.to(PaymentPage());
+                              MediaQuery.of(context).size.height > 812 ? Get.bottomSheet(PaymentModal(), backgroundColor: Colors.white) : Get.to(PaymentPage());
                             } else {
                               Get.snackbar(
                                   functionalBloc.selectedLanguage == 'english'

@@ -61,7 +61,7 @@ class CartContent extends StatelessWidget {
               ),
               padding: MediaQuery.of(context).size.height > 812
                   ? EdgeInsets.all(19.5)
-                  : EdgeInsets.all(15),
+                  : EdgeInsets.all(16.8),
               onPressed: () async {
                 if (TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >=
                         functionalBloc.storeOpen &&
@@ -102,7 +102,7 @@ class CartContent extends StatelessWidget {
               ),
               padding: MediaQuery.of(context).size.height > 812
                   ? EdgeInsets.all(18)
-                  : EdgeInsets.all(15),
+                  : EdgeInsets.all(16.8),
               color: Colors.red[400],
               onPressed: () {
                 cartBloc.clearCart();
