@@ -63,10 +63,7 @@ class CartContent extends StatelessWidget {
                   ? EdgeInsets.all(19.5)
                   : EdgeInsets.all(16.8),
               onPressed: () async {
-                if (TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >=
-                        functionalBloc.storeOpen &&
-                    TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <=
-                        functionalBloc.storeClose) {
+                if (TimeOfDay.now().hour * 60 + TimeOfDay.now().minute >= functionalBloc.storeOpen && TimeOfDay.now().hour * 60 + TimeOfDay.now().minute <= functionalBloc.storeClose) {
                   if (cartBloc.items.isNotEmpty) {
                     if (cartBloc.subtotal < 15) {
                       cartBloc.setValue('checkChoice', 'pickup');

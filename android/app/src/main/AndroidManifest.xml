@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="xianwu.TaipeiCuisine"
-    ndroid:versionCode="1"
-    android:versionName="1.0">
+    package="xianwu.TaipeiCuisines"
+    android:versionCode="2"
+    android:versionName="1.0.0">
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
@@ -48,4 +48,8 @@
         </activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>076807
+
 </manifest>
