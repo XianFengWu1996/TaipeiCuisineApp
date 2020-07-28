@@ -123,6 +123,7 @@ class Report extends StatelessWidget {
                         DataColumn(label: Text('Discount', style: _fontMedium)),
                         DataColumn(label: Text('Tax', style: _fontMedium)),
                         DataColumn(label: Text('Tip', style: _fontMedium)),
+                        DataColumn(label: Text('Refund', style: _fontMedium)),
                         DataColumn(label: Text('Total', style: _fontMedium)),
                       ],
                       rows: storeBloc.reportSnapshot.map(
@@ -138,6 +139,7 @@ class Report extends StatelessWidget {
                                     DataCell(Text('\$${(e.data['pointUsed'] / 100).toStringAsFixed(2)}', style: _fontMedium)),
                                     DataCell(Text('\$${e.data['tax'].toStringAsFixed(2)}', style: _fontMedium)),
                                     DataCell(Text('\$${e.data['tip'].toStringAsFixed(2)}', style: _fontMedium)),
+                                    DataCell(Text('\$${(e.data['refund_amount'] / 100).toStringAsFixed(2)}', style: _fontMedium)),
                                     DataCell(Text('\$${(e.data['total'] / 100).toStringAsFixed(2)}', style: _fontMedium)),
                                 ]
                                 );
@@ -159,6 +161,7 @@ class Report extends StatelessWidget {
               Text('Discount: (\$${(storeBloc.reportDiscount / 100).toStringAsFixed(2)})', style: _fontLarge),
               Text('Tax: \$${storeBloc.reportTax.toStringAsFixed(2)}', style: _fontLarge),
               Text('Tip: \$ ${storeBloc.reportTip.toStringAsFixed(2)}', style: _fontLarge),
+              Text('Refund: (\$ ${(storeBloc.reportRefund / 100).toStringAsFixed(2)})', style: _fontLarge),
               Text('Total: \$${(storeBloc.reportTotal / 100).toStringAsFixed(2)}', style: _fontLarge),
             ],
           ),

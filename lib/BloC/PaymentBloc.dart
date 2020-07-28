@@ -69,6 +69,20 @@ class PaymentBloc with ChangeNotifier {
     }
   }
 
+  retrieveUnprocessed() async {
+    try{
+      await Firestore.instance.collection('unprocessed').document('${DateTime.now().month}${DateTime.now().day}').get().then((value) async{
+        if(value.data == null){
+          await Firestore.instance.collection('unprocessed').document('${DateTime.now().month}${DateTime.now().day}').setData({
+            'paymentId': [],
+          }, merge: true);
+        }
+      });
+    } catch(e){
+      Get.snackbar('Error', 'An error has occur please try again later',
+          colorText: Colors.white, backgroundColor: Colors.red[400]);    }
+  }
+
   // ===========================================
   //  Square Payment Methods
   // ===========================================
@@ -214,7 +228,7 @@ class PaymentBloc with ChangeNotifier {
        },
        body: jsonEncode({
          "idempotency_key": _idempotencyKey,
-         "autocomplete": true,
+         "autocomplete": false,
          "amount_money": {
            "amount": _total,
            "currency": "USD",
@@ -275,6 +289,7 @@ class PaymentBloc with ChangeNotifier {
              customerPhone: functionalBloc.customerPhoneNumber,
              customerComment: _comments,
              paymentId: jsonDecode(response.body)['payment']['id'],
+             squareOrderId: jsonDecode(response.body)['payment']['order_id'],
              method: 'Card');
        }
      } else {
@@ -300,7 +315,7 @@ class PaymentBloc with ChangeNotifier {
         },
         body: jsonEncode({
           "idempotency_key": _idempotencyKey,
-          "autocomplete": true,
+          "autocomplete": false,
           "amount_money": {
             "amount": _total,
             "currency": "USD",
@@ -310,7 +325,6 @@ class PaymentBloc with ChangeNotifier {
         }),
       );
       var data = jsonDecode(response.body);
-
 
       if(data['errors'] == null){
         manageRewardPoint(
@@ -324,7 +338,7 @@ class PaymentBloc with ChangeNotifier {
         _orderNumber = data['payment']['order_id'];
         // make an order and place it to the database
         sendOrderToDb(
-            orderId: data['payment']['order_id'],
+            orderId: _orderNumber,
             items: cartBloc.items,
             deliveryAddress: cartBloc.isDelivery ? '${functionalBloc.deliveryStreet}, ${functionalBloc.deliveryCity}, MA, ${functionalBloc.deliveryZipCode}' : '',
             delivery: cartBloc.isDelivery,
@@ -343,8 +357,9 @@ class PaymentBloc with ChangeNotifier {
             customerPhone: functionalBloc.customerPhoneNumber,
             customerComment: _comments,
             paymentId: data['payment']['id'],
-            method: 'Card');
-
+            squareOrderId: data['payment']['order_id'],
+            method: 'Card'
+        );
       } else {
         _errorMessage = data['errors'][0]['category'];
       }
@@ -382,7 +397,8 @@ class PaymentBloc with ChangeNotifier {
         customerName: functionalBloc.customerFirstName + ' ' + functionalBloc.customerLastName,
         customerPhone: functionalBloc.customerPhoneNumber,
         customerComment: _comments,
-        paymentId: ''
+        paymentId: '',
+        squareOrderId: '',
       );
     } catch(e){
       _errorMessage = 'Failed to send order to restaurant, try again later';
@@ -450,6 +466,8 @@ class PaymentBloc with ChangeNotifier {
       'amount': action == 'add' ? _pointEarned : ptUsed,
       'method': action == 'add' ? method : '',
       'orderId': orderId,
+      'refund': false,
+      'cancel': false,
       'createdAt': DateTime.now().millisecondsSinceEpoch,
     };
 
@@ -473,7 +491,7 @@ class PaymentBloc with ChangeNotifier {
   void sendOrderToDb({
     orderId, items, deliveryAddress, delivery, subtotal, calcSubtotal, tax, deliveryFee, tip, total,
     method, count, idKey, pointEarned, pointUsed, customerName, customerPhone, customerComment,
-    paymentId, lunchDiscount
+    paymentId, lunchDiscount, squareOrderId
   }) async {
     List<Map> listOfItems = [];
 
@@ -513,6 +531,9 @@ class PaymentBloc with ChangeNotifier {
       "idempodency_key": idKey,
       "pointEarned": pointEarned,
       "pointUsed": pointUsed,
+      'refund_amount': 0,
+      'refund': false,
+      'cancel': false,
     }, merge: true);
 
 
@@ -541,14 +562,28 @@ class PaymentBloc with ChangeNotifier {
       "status": 'Placed',
       "totalCount": count,
       "createdAt": DateTime.now().millisecondsSinceEpoch,
-      "month": DateTime.now().month + 1,
+      "month": DateTime.now().month,
       "year": DateTime.now().year,
       "idempodency_key": idKey,
+      "square_order_id": squareOrderId,
       "pointEarned": pointEarned,
       "pointUsed": pointUsed,
       'paymentId': paymentId,
       'userId': _user.uid,
+      'refund_amount': 0,
+      'refund': false,
+      'cancel': false,
     }, merge: true);
+
+    if(method == 'Card'){
+
+      await Firestore.instance.collection('unprocessed').document('${DateTime.now().month}${DateTime.now().day}').updateData({
+        'paymentId': FieldValue.arrayUnion([{
+          "paymentId": paymentId
+        }]),
+      },);
+    }
+
   }
 
   //clear value after checkout

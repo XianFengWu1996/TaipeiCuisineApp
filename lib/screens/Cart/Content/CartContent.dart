@@ -73,6 +73,7 @@ class CartContent extends StatelessWidget {
                     await cartBloc.calculateLunchDiscount(
                         functionalBloc.lunchStart, functionalBloc.lunchEnds);
 
+
                     Get.to(CheckoutScreen());
                   } else {
                     Get.snackbar(

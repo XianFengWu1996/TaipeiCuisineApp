@@ -76,7 +76,7 @@ class _ContactFormState extends State<ContactForm> {
                         useNumKeyboard: true,
                         validate: Validation.phoneValidation,
                         inputFormatter: [
-                          WhitelistingTextInputFormatter.digitsOnly,
+                          FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(10),
                         ],
                         initialValue: functionalBloc.customerPhoneNumber,

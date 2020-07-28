@@ -106,7 +106,7 @@ class _AddressDetailsState extends State<AddressDetails> {
                     useNumKeyboard: true,
                     inputFormatter: [
                       LengthLimitingTextInputFormatter(5),
-                      WhitelistingTextInputFormatter.digitsOnly
+                      FilteringTextInputFormatter.digitsOnly,
                     ],
                     controller: _zipCode,
                   ),

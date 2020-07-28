@@ -1,7 +1,8 @@
+import 'package:TaipeiCuisine/StoreDashboard/Payment.dart';
 import 'package:TaipeiCuisine/StoreDashboard/Report.dart';
 import 'package:flutter/material.dart';
 import 'package:TaipeiCuisine/BloC/StoreBloc.dart';
-import 'package:TaipeiCuisine/StoreDashboard/Orders.dart';
+import 'package:TaipeiCuisine/StoreDashboard/Orders/Orders.dart';
 import 'package:TaipeiCuisine/components/Divider/Divider.dart';
 import 'package:TaipeiCuisine/screens/Auth/Login.dart';
 import 'package:get/get.dart';
@@ -44,6 +45,14 @@ class MenuBar extends StatelessWidget {
             onTap: () async {
               await storeBloc.getTotalReports();
               Get.off(Report());
+            },
+          ),
+          LineDivider(),
+
+          ListTile(
+            title: Text('Process',style: _menuTitle),
+            onTap: () async {
+              Get.off(ProcessPayment());
             },
           ),
           LineDivider(),

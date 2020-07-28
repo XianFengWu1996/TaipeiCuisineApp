@@ -214,6 +214,7 @@ class FunctionalBloc with ChangeNotifier {
         // Handle customer selected language
         if (_loginLanguage == 'chinese') {
           _selectedLanguage = 'chinese';
+          _languageChoiceValue = 'chinese';
           await Firestore.instance
               .collection('users/${_user.uid}/customer_information')
               .document('details')
@@ -222,6 +223,7 @@ class FunctionalBloc with ChangeNotifier {
           }, merge: true);
         } else {
           _selectedLanguage = language['language'];
+          _languageChoiceValue = language['language'];
         }
         _languageChoiceValue = language['language'];
 

@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 class OrderCard extends StatelessWidget {
   final String orderId;
   final int itemCount;
-  final int itemTotal;
+  final itemTotal;
   final int createdAt;
   final DocumentSnapshot data;
 
@@ -32,7 +32,7 @@ class OrderCard extends StatelessWidget {
                 '${functionalBloc.selectedLanguage == 'english' ? 'Delivery' : '送餐'}':
                 '${functionalBloc.selectedLanguage == 'english' ? 'Pickup' : '自取'}'}'),
                 Text('$itemCount ${functionalBloc.selectedLanguage == 'english' ? 'items' : '道菜'}'),
-                Text('\$${(itemTotal / 100).toStringAsFixed(2)}'),
+                Text('\$${(itemTotal / 100).toStringAsFixed(2)} ${data['cancel'] ? '(Cancelled)' : ''}'),
               ],
             ),
           ),

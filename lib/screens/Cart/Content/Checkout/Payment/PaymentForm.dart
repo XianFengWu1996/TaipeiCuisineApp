@@ -89,7 +89,7 @@ class _PaymentFormState extends State<PaymentForm> {
                         controller: phone,
                         validate: Validation.phoneValidation,
                         inputFormatter: [
-                          WhitelistingTextInputFormatter.digitsOnly,
+                          FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(10),
                         ],
                       ),
@@ -120,7 +120,7 @@ class _PaymentFormState extends State<PaymentForm> {
                             },
                             validate: Validation.zipValidation,
                             inputFormatter: [
-                              WhitelistingTextInputFormatter.digitsOnly,
+                              FilteringTextInputFormatter.digitsOnly,
                               LengthLimitingTextInputFormatter(5),
                             ],
                           ),

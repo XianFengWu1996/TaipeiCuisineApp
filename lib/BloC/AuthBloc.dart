@@ -7,7 +7,7 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:TaipeiCuisine/BloC/CartBloc.dart';
 import 'package:TaipeiCuisine/BloC/FunctionalBloc.dart';
 import 'package:TaipeiCuisine/BloC/PaymentBloc.dart';
-import 'package:TaipeiCuisine/StoreDashboard/Orders.dart';
+import 'package:TaipeiCuisine/StoreDashboard/Orders/Orders.dart';
 import 'package:TaipeiCuisine/screens/Home.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -41,6 +41,7 @@ class AuthBloc with ChangeNotifier {
 
       if(_loggedInUser.uid == '${admin.data['uid']}'){
         functionalBloc.setValue('loading','reset');
+        await retrieveAndDistributeInfo(functionalBloc, cartBloc, paymentBloc);
         await storeBloc.saveLocalUser(_loggedInUser);
         Get.offAll(Orders(status: 'Placed',));
       } else if (_loggedInUser.isEmailVerified) {
@@ -178,7 +179,7 @@ class AuthBloc with ChangeNotifier {
     await functionalBloc.retrieveFullDayMenu();
     await functionalBloc.retrieveLunchMenu();
 
-
+    await paymentBloc.retrieveUnprocessed();
     // Pass keys to necessary bloc after it's retrieved
     await functionalBloc.retrieveStoreInfo();
     await Firestore.instance.collection('users/${_loggedInUser.uid}/customer_information').document('details').get().then((value) async {

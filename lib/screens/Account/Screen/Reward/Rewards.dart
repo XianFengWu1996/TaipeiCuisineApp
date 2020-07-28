@@ -48,6 +48,8 @@ class Reward extends StatelessWidget {
                                     createdAt: data['pointDetails'][index]['createdAt'],
                                     orderId: data['pointDetails'][index]['orderId'],
                                     method: data['pointDetails'][index]['method'],
+                                    refund: data['pointDetails'][index]['refund'],
+                                    cancel: data['pointDetails'][index]['cancel'],
                                   );
                                 }
                             ),
