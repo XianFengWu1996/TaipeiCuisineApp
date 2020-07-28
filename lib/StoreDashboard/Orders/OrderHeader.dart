@@ -19,7 +19,7 @@ class OrderHeader extends StatelessWidget {
           style: heading,
         ),
         subtitle: Text(
-            '${data['method'] == 'Card' ? 'Prepaid with Credit Card' : 'Cash'}', style: heading),
+            '${data['method'] == 'Card' ? 'Prepaid with Credit Card' : 'Cash'}', style: subtitle),
         leading: Icon(FontAwesome.car, size: 40,),
         trailing: IconButton(icon: Icon(Icons.close, size: 40,),
             onPressed: () {

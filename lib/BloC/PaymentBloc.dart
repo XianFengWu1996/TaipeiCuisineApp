@@ -257,13 +257,7 @@ class PaymentBloc with ChangeNotifier {
           }}, merge: true);}
 
        // handles the reward point and order
-         manageRewardPoint(
-             point: cartBloc.rewardPoint,
-             total: cartBloc.total,
-             orderNumber: jsonDecode(response.body)['payment']['order_id'],
-             percentage: functionalBloc.cardReward,
-             method: 'Card'
-         );
+
 
          await sendOrderToDb(
              orderId: _orderNumber,
@@ -287,6 +281,14 @@ class PaymentBloc with ChangeNotifier {
              paymentId: jsonDecode(response.body)['payment']['id'],
              squareOrderId: jsonDecode(response.body)['payment']['order_id'],
              method: 'Card');
+
+             await manageRewardPoint(
+                 point: cartBloc.rewardPoint,
+                 total: cartBloc.total,
+                 orderNumber: _orderNumber,
+                 percentage: functionalBloc.cardReward,
+                 method: 'Card'
+             );
      } else {
        _errorMessage = jsonDecode(response.body)['errors'][0]['category'];
        return _errorMessage;
@@ -322,14 +324,6 @@ class PaymentBloc with ChangeNotifier {
       var data = jsonDecode(response.body);
 
       if(data['errors'] == null){
-        manageRewardPoint(
-            point: cartBloc.rewardPoint,
-            total: cartBloc.total,
-            orderNumber: jsonDecode(response.body)['payment']['order_id'],
-            percentage: functionalBloc.cardReward,
-            method: 'Card'
-        );
-
         // make an order and place it to the database
         await sendOrderToDb(
             orderId: _orderNumber,
@@ -354,6 +348,13 @@ class PaymentBloc with ChangeNotifier {
             squareOrderId: data['payment']['order_id'],
             method: 'Card'
         );
+        await manageRewardPoint(
+            point: cartBloc.rewardPoint,
+            total: cartBloc.total,
+            orderNumber: _orderNumber,
+            percentage: functionalBloc.cardReward,
+            method: 'Card'
+        );
       } else {
         _errorMessage = data['errors'][0]['category'];
       }
@@ -362,14 +363,6 @@ class PaymentBloc with ChangeNotifier {
   }
 
   chargeCash({CartBloc cartBloc, FunctionalBloc functionalBloc}) {
-    manageRewardPoint(
-      point: cartBloc.rewardPoint,
-      total: cartBloc.total,
-      orderNumber: _orderNumber,
-      percentage: functionalBloc.cashReward,
-      method: 'Cash'
-    );
-
     try{
       sendOrderToDb(
         orderId: _orderNumber,
@@ -393,6 +386,13 @@ class PaymentBloc with ChangeNotifier {
         paymentId: '',
         squareOrderId: '',
       );
+      manageRewardPoint(
+          point: cartBloc.rewardPoint,
+          total: cartBloc.total,
+          orderNumber: _orderNumber,
+          percentage: functionalBloc.cashReward,
+          method: 'Cash'
+      );
     } catch(e){
       _errorMessage = 'Failed to send order to restaurant, try again later';
     }
@@ -409,7 +409,7 @@ class PaymentBloc with ChangeNotifier {
   int get rewardPoint => _rewardPoint;
   int get pointEarned => _pointEarned;
 
-  void manageRewardPoint({int point, double total, String orderNumber, int percentage, method}){
+  manageRewardPoint({int point, double total, String orderNumber, int percentage, method}){
     if(point > 0){
       calculateRewardPoint(
         action: 'subtract',

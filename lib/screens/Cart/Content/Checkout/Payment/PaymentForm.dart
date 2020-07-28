@@ -54,7 +54,7 @@ class _PaymentFormState extends State<PaymentForm> {
             },
           ),
         ),
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: true,
         body: GestureDetector(
           onTap: (){
             FocusScope.of(context).unfocus();
@@ -96,6 +96,18 @@ class _PaymentFormState extends State<PaymentForm> {
                       !paymentBloc.sameAsDelivery? Column(
                         children: [
                           Input(
+                            label: '${functionalBloc.selectedLanguage == 'english' ? 'Zip Code' : '邮政编码'}',
+                            useNumKeyboard: true,
+                            onSaved: (value){
+                              zip = value;
+                            },
+                            validate: Validation.zipValidation,
+                            inputFormatter: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(5),
+                            ],
+                          ),
+                          Input(
                             label: '${functionalBloc.selectedLanguage == 'english' ? 'Street' : '街名'}',
                             useNumKeyboard: false,
                             onSaved: (value){
@@ -112,18 +124,7 @@ class _PaymentFormState extends State<PaymentForm> {
                             validate: Validation.cityValidation
 
                           ),
-                          Input(
-                            label: '${functionalBloc.selectedLanguage == 'english' ? 'Zip Code' : '邮政编码'}',
-                            useNumKeyboard: true,
-                            onSaved: (value){
-                              zip = value;
-                            },
-                            validate: Validation.zipValidation,
-                            inputFormatter: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(5),
-                            ],
-                          ),
+
                         ],
                       ) : Container(),
                       functionalBloc.deliveryAddress != '' ? CheckboxListTile(
