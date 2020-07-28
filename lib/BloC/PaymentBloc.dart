@@ -24,7 +24,7 @@ class PaymentBloc with ChangeNotifier {
   //options and general variables
   String _paymentMethod = '';
   String _idempotencyKey = randomAlphaNumeric(18);
-  String _orderNumber = '';
+  String _orderNumber = randomAlphaNumeric(18);
   int _total = 0;
   bool _sameAsDelivery = true;
   bool _saveCard = false;
@@ -96,6 +96,7 @@ class PaymentBloc with ChangeNotifier {
 
   String _customerEndPoint = '';
   String _paymentEndPoint = '';
+  
 
   void payment(CartBloc cartBloc, FunctionalBloc functionalBloc, total) async {
     int amount = (total / 100).toInt();
@@ -237,13 +238,9 @@ class PaymentBloc with ChangeNotifier {
          "source_id": id,
        }),
      );
-     String status = jsonDecode(response.body)['payment']['status'];
-
-     _orderNumber = jsonDecode(response.body)['payment']['order_id'];
-
      if(jsonDecode(response.body)['errors'] == null){
        // savedCard allow the customer to save the card information for express checkout in the future
-       if (saveCard && status == 'COMPLETED') {
+       if (saveCard) {
          await Firestore.instance
              .collection('users/${_user.uid}/customer_information').document('details').setData({
           'billing': {
@@ -260,7 +257,6 @@ class PaymentBloc with ChangeNotifier {
           }}, merge: true);}
 
        // handles the reward point and order
-       if (status == 'COMPLETED') {
          manageRewardPoint(
              point: cartBloc.rewardPoint,
              total: cartBloc.total,
@@ -269,7 +265,7 @@ class PaymentBloc with ChangeNotifier {
              method: 'Card'
          );
 
-         sendOrderToDb(
+         await sendOrderToDb(
              orderId: _orderNumber,
              items: cartBloc.items,
              deliveryAddress: cartBloc.isDelivery ? '${functionalBloc.deliveryStreet}, ${functionalBloc.deliveryCity}, MA, ${functionalBloc.deliveryZipCode}' : '',
@@ -291,7 +287,6 @@ class PaymentBloc with ChangeNotifier {
              paymentId: jsonDecode(response.body)['payment']['id'],
              squareOrderId: jsonDecode(response.body)['payment']['order_id'],
              method: 'Card');
-       }
      } else {
        _errorMessage = jsonDecode(response.body)['errors'][0]['category'];
        return _errorMessage;
@@ -335,9 +330,8 @@ class PaymentBloc with ChangeNotifier {
             method: 'Card'
         );
 
-        _orderNumber = data['payment']['order_id'];
         // make an order and place it to the database
-        sendOrderToDb(
+        await sendOrderToDb(
             orderId: _orderNumber,
             items: cartBloc.items,
             deliveryAddress: cartBloc.isDelivery ? '${functionalBloc.deliveryStreet}, ${functionalBloc.deliveryCity}, MA, ${functionalBloc.deliveryZipCode}' : '',
@@ -368,7 +362,6 @@ class PaymentBloc with ChangeNotifier {
   }
 
   chargeCash({CartBloc cartBloc, FunctionalBloc functionalBloc}) {
-    _orderNumber = randomAlphaNumeric(18);
     manageRewardPoint(
       point: cartBloc.rewardPoint,
       total: cartBloc.total,
@@ -488,7 +481,7 @@ class PaymentBloc with ChangeNotifier {
   //  Other
   // ===========================================
   //send the order to the database
-  void sendOrderToDb({
+  sendOrderToDb({
     orderId, items, deliveryAddress, delivery, subtotal, calcSubtotal, tax, deliveryFee, tip, total,
     method, count, idKey, pointEarned, pointUsed, customerName, customerPhone, customerComment,
     paymentId, lunchDiscount, squareOrderId
@@ -590,7 +583,7 @@ class PaymentBloc with ChangeNotifier {
     _paymentMethod = '';
     _comments = '';
     _idempotencyKey = randomAlphaNumeric(18);
-    _orderNumber = '';
+    _orderNumber = randomAlphaNumeric(18);
     _total = 0;
     _sameAsDelivery = false;
     _saveCard = false;
