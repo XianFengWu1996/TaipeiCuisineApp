@@ -192,6 +192,8 @@ class AuthBloc with ChangeNotifier {
       'token': functionalBloc.squareToken,
       'appId': functionalBloc.squareAppId,
       'locationId': functionalBloc.squareLocationId,
+      'customer_endpoint': functionalBloc.customerEndPoint,
+      'payment_endpoint': functionalBloc.paymentEndPoint,
     });
 
 

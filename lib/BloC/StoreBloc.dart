@@ -118,7 +118,7 @@ class StoreBloc extends ChangeNotifier {
     notifyListeners();
   }
 
-  completePayment({token}) async {
+  completePayment({token, paymentEndpoint}) async {
     await Firestore.instance
         .collection('unprocessed')
         .document('${DateTime.now().month}${DateTime.now().day}')
@@ -126,10 +126,9 @@ class StoreBloc extends ChangeNotifier {
         .then((value) {
       List paymentList = value.data['paymentId'];
       paymentList.forEach((element) async {
-        print(element);
         // make a http request to square to complete the orders
         var response = await http.post(
-          'https://connect.squareupsandbox.com/v2/payments/${element['paymentId']}/complete',
+          '$paymentEndpoint/${element['paymentId']}/complete',
           headers: {
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -142,9 +141,9 @@ class StoreBloc extends ChangeNotifier {
     });
   }
 
-  cancelOrder({paymentId, token, data, reward}) async {
+  cancelOrder({paymentId, token, data, reward, paymentEndpoint}) async {
     var response = await http.post(
-      'https://connect.squareupsandbox.com/v2/payments/$paymentId/cancel',
+      '$paymentEndpoint/$paymentId/cancel',
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
@@ -157,7 +156,7 @@ class StoreBloc extends ChangeNotifier {
             .collection('order/${data['year']}/${data['month']}')
             .document('${data['orderId']}')
             .setData({
-          'refund_amount': data['total'],
+          'cancel_amount': data['total'],
           'cancel': true,
           'total': 0,
         }, merge: true);
@@ -200,7 +199,7 @@ class StoreBloc extends ChangeNotifier {
             .collection('users/${data['userId']}/order')
             .document('${data['orderId']}')
             .setData({
-          'refund_amount': data['total'],
+          'cancel_amount': data['total'],
           'cancel': true,
           'total': 0,
         }, merge: true);
@@ -213,7 +212,7 @@ class StoreBloc extends ChangeNotifier {
           .collection('order/${data['year']}/${data['month']}')
           .document('${data['orderId']}')
           .setData({
-        'refund_amount': data['total'],
+        'cancel_amount': data['total'],
         'cancel': true,
         'total': 0,
       }, merge: true);
@@ -256,7 +255,7 @@ class StoreBloc extends ChangeNotifier {
           .collection('users/${data['userId']}/order')
           .document('${data['orderId']}')
           .setData({
-        'refund_amount': data['total'],
+        'cancel_amount': data['total'],
         'cancel': true,
         'total': 0,
       }, merge: true);
@@ -264,12 +263,12 @@ class StoreBloc extends ChangeNotifier {
 
   }
 
-  requestRefund({data, token, amount, reward}) async {
+  requestRefund({data, token, amount, reward, refundEndpoint}) async {
     try {
       if (data['method'] == 'Card') {
         // make a request to square refund endpoint for the refund amount
         await http.post(
-          'https://connect.squareupsandbox.com/v2/refunds',
+          '$refundEndpoint',
           headers: {
             "Accept": "application/json",
             "Content-Type": "application/json",

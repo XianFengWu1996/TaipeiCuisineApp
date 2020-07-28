@@ -157,12 +157,15 @@ class _OrderCardState extends State<OrderCard> {
                                       ),
                                       confirm: RaisedButton(onPressed: () async {
                                         if(double.parse(amount.text) > 0 && double.parse(amount.text) <= widget.ds[widget.index]['total']){
+                                          Get.close(1);
                                           await storeBloc.requestRefund(
                                             data: widget.ds[widget.index],
                                             token: functionalBloc.squareToken,
                                             amount: (double.parse(amount.text) * 100).toInt(),
-                                            reward: widget.ds[widget.index]['method'] == 'Card' ? functionalBloc.cardReward : functionalBloc.cashReward
+                                            reward: widget.ds[widget.index]['method'] == 'Card' ? functionalBloc.cardReward : functionalBloc.cashReward,
+                                            refundEndpoint: functionalBloc.refundEndPoint
                                           );
+                                          Get.close(1);
                                         }
 
                                       }, child: Text('Refund'),),
@@ -189,7 +192,8 @@ class _OrderCardState extends State<OrderCard> {
                                                 paymentId: widget.ds[widget.index]['paymentId'],
                                                 token: functionalBloc.squareToken,
                                                 data: widget.ds[widget.index],
-                                                reward: widget.ds[widget.index]['method'] == 'Card' ? functionalBloc.cardReward : functionalBloc.cashReward
+                                                reward: widget.ds[widget.index]['method'] == 'Card' ? functionalBloc.cardReward : functionalBloc.cashReward,
+                                              paymentEndpoint: functionalBloc.paymentEndPoint,
                                             );
                                             Get.close(1);
 

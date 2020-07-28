@@ -80,6 +80,9 @@ class FunctionalBloc with ChangeNotifier {
   String _twilioSid = '';
   String _twilioToken = '';
   String _twilioPhone = '';
+  String _customerEndpoint = '';
+  String _paymentEndPoint = '';
+  String _refundEndPoint = '';
 
   // Handle store and lunch hours
   int _storeOpen = 0;
@@ -96,6 +99,9 @@ class FunctionalBloc with ChangeNotifier {
   String get squareLocationId => _squareLocationId;
   String get androidKey => _googleAndroidKey;
   String get iosKey => _googleIosKey;
+  String get customerEndPoint => _customerEndpoint;
+  String get paymentEndPoint => _paymentEndPoint;
+  String get refundEndPoint => _refundEndPoint;
   int get storeOpen => _storeOpen;
   int get storeClose => _storeClose;
   int get lunchStart => _lunchStart;
@@ -125,6 +131,9 @@ class FunctionalBloc with ChangeNotifier {
         _squareToken = key['_square_access_token'];
         _squareAppId = key['_square_application_id'];
         _squareLocationId = key['_square_location_id'];
+        _customerEndpoint = key['square_customer'];
+        _paymentEndPoint = key['square_payment'];
+        _refundEndPoint = key['square_refund'];
         _twilioSid = key['_twilio_sid'];
         _twilioToken = key['_twilio_token'];
         _twilioPhone = key['_twilio_number'];
@@ -487,6 +496,9 @@ class FunctionalBloc with ChangeNotifier {
     _selectedLanguage = '';
     _languageChoiceValue = '';
     _loginLanguage = 'english';
+    _customerEndpoint = '';
+    _paymentEndPoint = '';
+    _refundEndPoint = '';
     notifyListeners();
   }
 

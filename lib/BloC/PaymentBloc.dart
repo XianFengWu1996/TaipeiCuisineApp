@@ -94,8 +94,8 @@ class PaymentBloc with ChangeNotifier {
   String _appId = '';
   String _locationId = '';
 
-  String customerEndPoint = 'https://connect.squareupsandbox.com/v2/customers';
-  String paymentEndPoint = 'https://connect.squareupsandbox.com/v2/payments';
+  String _customerEndPoint = '';
+  String _paymentEndPoint = '';
 
   void payment(CartBloc cartBloc, FunctionalBloc functionalBloc, total) async {
     int amount = (total / 100).toInt();
@@ -138,7 +138,8 @@ class PaymentBloc with ChangeNotifier {
   // create a customer with square, this will generate an customer id
   Future<dynamic> createCustomer(FunctionalBloc functionalBloc) async {
     try {
-      var response = await http.post(customerEndPoint,
+      var response = await http.post(
+          _customerEndPoint,
           headers: {
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -172,11 +173,10 @@ class PaymentBloc with ChangeNotifier {
     String customerId = functionalBloc.billingCustomerId == '' ? await createCustomer(functionalBloc) : functionalBloc.billingCustomerId;
 
     // make a request to the endpoint to save the card to Square Api
-    String url =
-        'https://connect.squareupsandbox.com/v2/customers/$customerId/cards';
 
       try{
-        var response = await http.post(url,
+        var response = await http.post(
+            '$_customerEndPoint/$customerId/cards',
             headers: {
               "Accept": "application/json",
               "Content-Type": "application/json",
@@ -219,7 +219,7 @@ class PaymentBloc with ChangeNotifier {
 
    try{
      var response = await http.post(
-       paymentEndPoint,
+       _paymentEndPoint,
        headers: {
          "Accept": "application/json",
          "Content-Type": "application/json",
@@ -306,7 +306,7 @@ class PaymentBloc with ChangeNotifier {
     try{
       // make http request to Square payment for Card on file
       var response = await http.post(
-        paymentEndPoint,
+        _paymentEndPoint,
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
@@ -576,7 +576,6 @@ class PaymentBloc with ChangeNotifier {
     }, merge: true);
 
     if(method == 'Card'){
-
       await Firestore.instance.collection('unprocessed').document('${DateTime.now().month}${DateTime.now().day}').updateData({
         'paymentId': FieldValue.arrayUnion([{
           "paymentId": paymentId
@@ -651,6 +650,8 @@ class PaymentBloc with ChangeNotifier {
         _token = value['token'];
         _appId = value['appId'];
         _locationId = value['locationId'];
+        _customerEndPoint = value['customer_endpoint'];
+        _paymentEndPoint = value['payment_endpoint'];
         break;
       default:
         return;

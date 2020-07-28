@@ -55,7 +55,7 @@ class OrderSummary extends StatelessWidget {
             size: 27,
             details: '\$${data['tip'].toStringAsFixed(2)}',
       ),
-          data['refund'] ?
+          data['refund']?
           CheckoutSummaryItems(
             title: '退款',
             size: 27,
@@ -67,7 +67,7 @@ class OrderSummary extends StatelessWidget {
             title: '取消订单',
             size: 27,
             details:
-            '(\$${(data['refund_amount'] / 100).toStringAsFixed(2)})',
+            '(\$${(data['cancel_amount'] / 100).toStringAsFixed(2)})',
           ) : Container(),
           CheckoutSummaryItems(
             title: '总额',

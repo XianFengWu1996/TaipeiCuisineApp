@@ -31,7 +31,7 @@ class _ProcessPaymentState extends State<ProcessPayment> {
               // retrieve the unprocessed payment id from database
               _loading = true;
               try{
-                await storeBloc.completePayment(token: functionalBloc.squareToken);
+                await storeBloc.completePayment(token: functionalBloc.squareToken, paymentEndpoint: functionalBloc.paymentEndPoint);
                 _loading = false;
               } catch(e){
                 _loading = false;
