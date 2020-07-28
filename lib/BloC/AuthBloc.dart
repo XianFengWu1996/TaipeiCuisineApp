@@ -179,7 +179,6 @@ class AuthBloc with ChangeNotifier {
     await functionalBloc.retrieveFullDayMenu();
     await functionalBloc.retrieveLunchMenu();
 
-    await paymentBloc.retrieveUnprocessed();
     // Pass keys to necessary bloc after it's retrieved
     await functionalBloc.retrieveStoreInfo();
     await Firestore.instance.collection('users/${_loggedInUser.uid}/customer_information').document('details').get().then((value) async {

@@ -81,6 +81,7 @@ class PaymentModal extends StatelessWidget {
                               if (paymentBloc.paymentMethod == 'saved') {
                                 Get.close(2);
                                 functionalBloc.setValue('loading','start');
+                                await paymentBloc.retrieveUnprocessed();
                                 await paymentBloc.chargeCardOnFile(cartBloc, functionalBloc);
                                 functionalBloc.setValue('loading','reset');
 
@@ -97,6 +98,10 @@ class PaymentModal extends StatelessWidget {
                                 } else {
                                   Get.off(Confirmation());
                                 }
+                              }
+
+                              if(paymentBloc.paymentMethod == 'card'){
+                                await paymentBloc.retrieveUnprocessed();
                               }
 
                               if (paymentBloc.paymentMethod == 'cash') {
